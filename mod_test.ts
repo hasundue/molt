@@ -8,7 +8,7 @@ import {
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
-  collectDependencyUpdates,
+  collectDependencyUpdateAll,
   execDependencyUpdate,
   execDependencyUpdateAll,
   type DependencyUpdate,
@@ -17,7 +17,7 @@ import { log } from "./src/utils.ts";
 
 describe("collectDependencyUpdates()", () => {
   it("https://deno.land/x/deno_graph", async () => {
-    const updates = await collectDependencyUpdates(
+    const updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
     log.debug(updates);
@@ -25,10 +25,10 @@ describe("collectDependencyUpdates()", () => {
   });
 });
 
-describe("execModuleUpdate", () => {
+describe("execDependencyUpdate", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
-    updates = await collectDependencyUpdates(
+    updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
   });
@@ -52,10 +52,10 @@ describe("execModuleUpdate", () => {
   });
 });
 
-describe("execModuleUpdateJsonAll", () => {
+describe("execDependencyUpdateAll", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
-    updates = await collectDependencyUpdates(
+    updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
   });

@@ -8,11 +8,11 @@
  * To update all dependencies in a module and commit the changes to git:
  *
  * ```ts
- * import { collectModuleUpdateJsonAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { collectDependencyUpdates } from "https://deno.land/x/molt@{VERSION}/mod.ts";
  * import { commitAll } from "https://deno.land/x/molt@{VERSION}/lib/git.ts";
  *
- * const updates = await collectModuleUpdateJsonAll("./mod.ts");
- * const results = await execModuleUpdateJsonAll(updates);
+ * const updates = await collectDependencyUpdateAll("./mod.ts");
+ * const results = await execDependencyUpdateAll(updates);
  * console.log(results);
  *
  * // Commit all changes to git
@@ -58,13 +58,13 @@ export interface DependencyUpdate extends _DependencyUpdate {
   referrer: string;
 }
 
-export interface CollectDependencyUpdateJsonOptions {
+export interface CreateDependencyUpdateOptions {
   loadRemote?: boolean;
 }
 
-export async function collectDependencyUpdates(
+export async function collectDependencyUpdateAll(
   rootModule: string,
-  options: CollectDependencyUpdateJsonOptions = {
+  options: CreateDependencyUpdateOptions = {
     loadRemote: false,
   },
 ): Promise<DependencyUpdate[]> {
@@ -88,7 +88,7 @@ export async function collectDependencyUpdates(
 }
 
 function createLoadCallback(
-  options: CollectDependencyUpdateJsonOptions,
+  options: CreateDependencyUpdateOptions,
 ): CreateGraphOptions["load"] {
   // deno-lint-ignore require-await
   return async (specifier) => {
@@ -137,19 +137,23 @@ export async function execDependencyUpdate(
   update: DependencyUpdate,
 ): Promise<ModuleUpdateResult | undefined> {
   if (!update.code) {
+    console.warn(`No code found for ${update.specifier}`);
     return;
   }
   if (update.code.span.start.line !== update.code.span.end.line) {
-    throw new Error(
+    console.warn(
       `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
     );
+    return;
   }
   const line = update.code.span.start.line;
   const content = await Deno.readTextFile(fromFileUrl(update.referrer));
   const lines = content.split("\n");
+
   lines[line] = lines[line].slice(0, update.code.span.start.character) +
     `"${update.specifier.replace(update.version.from, update.version.to)}"` +
     lines[line].slice(update.code.span.end.character);
+
   return {
     ...update,
     content: lines.join("\n"),
