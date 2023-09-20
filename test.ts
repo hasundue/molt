@@ -56,10 +56,10 @@ describe("collectDependencyUpdateJson()", () => {
       "./src/fixtures/mod.ts",
     );
     console.debug(updates);
-    assertEquals(updates.length, 3);
-    assertExists(updates[0].newSpecifier.match(SEMVER_REGEXP));
-    assertExists(updates[1].newSpecifier.match(SEMVER_REGEXP));
-    assertExists(updates[2].newSpecifier.match(SEMVER_REGEXP));
+    assertEquals(updates.length, 4);
+    for (const update of updates) {
+      assertExists(update.newSpecifier.match(SEMVER_REGEXP));
+    }
   });
 });
 
@@ -69,15 +69,6 @@ describe("execModuleUpdateJson", () => {
     updates = await collectModuleUpdateJsonAll(
       "./src/fixtures/mod.ts",
     );
-  });
-  it("https://deno.land/std", async () => {
-    const update = updates.find((update) =>
-      update.specifier.includes("deno.land/std")
-    )!;
-    const result = await execModuleUpdateJson(update);
-    assertExists(result);
-    assertExists(result.content);
-    console.debug(result.content);
   });
   it("https://deno.land/x/deno_graph", async () => {
     const update = updates.find((update) =>
@@ -100,10 +91,24 @@ describe("execModuleUpdateJson", () => {
 });
 
 describe("execModuleUpdateJsonAll", () => {
-  it("src/fixtures/mod.ts", async () => {
-    const results = await execModuleUpdateJsonAll(
-      await collectModuleUpdateJsonAll("./src/fixtures/mod.ts"),
+  let updates: ModuleUpdateJson[];
+  beforeAll(async () => {
+    updates = await collectModuleUpdateJsonAll(
+      "./src/fixtures/mod.ts",
     );
-    assertEquals(results.length, 3);
+  });
+  it("src/fixtures/mod.ts", async () => {
+    const results = await execModuleUpdateJsonAll(updates);
+    assertEquals(results.length, 4);
+  });
+  it("https://deno.land/std", async () => {
+    const results = await execModuleUpdateJsonAll(
+      updates.filter((update) => update.specifier.includes("deno.land/std")),
+    );
+    assertEquals(results.length, 2);
+    for (const result of results) {
+      assertExists(result.content);
+      console.debug(result.content);
+    }
   });
 });
