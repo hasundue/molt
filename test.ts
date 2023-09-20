@@ -33,4 +33,22 @@ describe("createDependencyUpdateJson()", () => {
     assertExists(update.newSpecifier.match(SEMVER_REGEXP));
     console.debug(update.newSpecifier);
   });
+  it("npm:node-emoji", async () => {
+    const update = await createDependencyUpdateJson({
+      specifier: "npm:node-emoji@1.0.0",
+    });
+    assertExists(update);
+    assertExists(update.newSpecifier.match(SEMVER_REGEXP));
+    console.debug(update.newSpecifier);
+  });
 });
+
+// describe("collectDependencyUpdateJson()", () => {
+//   it("https://deno.land/x/deno_graph", async () => {
+//     const updates = await collectDependencyUpdateJson(
+//       "./mod.ts",
+//     );
+//     assert(updates.length > 0);
+//     console.debug(updates);
+//   });
+// });
