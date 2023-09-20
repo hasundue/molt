@@ -1,3 +1,30 @@
+// Copyright 2023 Shun Ueda. All rights reserved. MIT license.
+
+/**
+ * A module to update dependencies in Deno projects using deno_graph.
+ *
+ * ### Example
+ *
+ * To update all dependencies in a module and commit the changes to git:
+ *
+ * ```ts
+ * import { collectModuleUpdateJsonAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { commitAll } from "https://deno.land/x/molt@{VERSION}/lib/git.ts";
+ *
+ * const updates = await collectModuleUpdateJsonAll("./mod.ts");
+ * const results = await execModuleUpdateJsonAll(updates);
+ * console.log(results);
+ *
+ * // Commit all changes to git
+ * await commitAll(results, { groupBy: (it) => it.module });
+ *
+ * const summary = createPullRequestBody(updates);
+ * console.log(summary);
+ * ```
+ *
+ * @module
+ */
+
 import {
   fromFileUrl,
   resolve,
@@ -8,17 +35,12 @@ import {
   CreateGraphOptions,
   init as initDenoGraph,
   load as defaultLoad,
-  ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import {
-  createUrl,
-  type Maybe,
-  parseNpmSpecifier,
-  parseSemVer,
-  removeSemVer,
-  replaceSemVer,
-} from "./src/lib.ts";
-import { parse, SemVer } from "https://deno.land/std@0.202.0/semver/mod.ts";
+  createDependencyUpdate,
+  DependencyUpdate as _DependencyUpdate,
+} from "./src/core.ts";
+import { createUrl } from "./src/utils.ts";
 
 class DenoGraph {
   static #initialized = false;
@@ -32,13 +54,7 @@ class DenoGraph {
   }
 }
 
-type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
-
-export interface DependencyUpdateJson extends DependencyJson {
-  newSpecifier: string;
-}
-
-export interface ModuleUpdateJson extends DependencyUpdateJson {
+export interface DependencyUpdate extends _DependencyUpdate {
   referrer: string;
 }
 
@@ -46,22 +62,22 @@ export interface CollectDependencyUpdateJsonOptions {
   loadRemote?: boolean;
 }
 
-export async function collectModuleUpdateJsonAll(
+export async function collectDependencyUpdates(
   rootModule: string,
   options: CollectDependencyUpdateJsonOptions = {
     loadRemote: false,
   },
-): Promise<ModuleUpdateJson[]> {
+): Promise<DependencyUpdate[]> {
   await DenoGraph.ensureInit();
   const specifier = toFileUrl(resolve(rootModule)).href;
   const graph = await createGraph(specifier, {
     load: createLoadCallback(options),
   });
-  const updates: ModuleUpdateJson[] = [];
+  const updates: DependencyUpdate[] = [];
   await Promise.all(
     graph.modules.flatMap((module) =>
       module.dependencies?.map(async (dependency) => {
-        const update = await createDependencyUpdateJson(dependency);
+        const update = await createDependencyUpdate(dependency);
         return update
           ? updates.push({ ...update, referrer: module.specifier })
           : undefined;
@@ -102,94 +118,23 @@ function createLoadCallback(
   };
 }
 
-export async function createDependencyUpdateJson(
-  dependency: DependencyJson,
-  targetVersion?: SemVer | string,
-): Promise<DependencyUpdateJson | undefined> {
-  const newSemVer = targetVersion
-    ? parse(targetVersion)
-    : await resolveLatestSemVer(dependency.specifier);
-  if (!newSemVer) {
-    return;
-  }
-  return {
-    ...dependency,
-    newSpecifier: replaceSemVer(dependency.specifier, newSemVer),
-  };
-}
-
-async function resolveLatestSemVer(
-  specifier: string,
-): Promise<Maybe<SemVer>> {
-  const url = createUrl(specifier);
-  if (!url) {
-    // The specifier is a relative path
-    return;
-  }
-  switch (url.protocol) {
-    case "npm:": {
-      const { name } = parseNpmSpecifier(specifier);
-      const response = await fetch(`https://registry.npmjs.org/${name}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch npm registry: ${response.statusText}`);
-      }
-      const json = await response.json();
-      if (!json["dist-tags"]?.latest) {
-        throw new Error(`Could not find the latest version of ${name}`);
-      }
-      return parse(json["dist-tags"].latest);
-    }
-    case "node:":
-    case "file:":
-      return;
-    case "http:":
-    case "https:": {
-      const specifierWithoutSemVer = removeSemVer(specifier);
-      if (specifierWithoutSemVer === specifier) {
-        // The original specifier does not contain semver
-        return;
-      }
-      const response = await fetch(specifierWithoutSemVer, {
-        method: "HEAD",
-      });
-      await response.arrayBuffer();
-      if (!response.redirected) {
-        // The host did not redirect to a url with semver
-        return;
-      }
-      const specifierWithLatestSemVer = response.url;
-      if (specifierWithLatestSemVer === specifier) {
-        // The dependency is up to date
-        return;
-      }
-      return parseSemVer(specifierWithLatestSemVer)!;
-    }
-    default:
-      // TODO: throw an error?
-      return;
-  }
-}
-
-export interface ModuleUpdateResult {
-  referrer: string;
-  specifier: string;
-  newSpecifier: string;
+export interface ModuleUpdateResult extends DependencyUpdate {
   content: string;
 }
 
-export async function execModuleUpdateJsonAll(
-  updates: ModuleUpdateJson[],
+export async function execDependencyUpdateAll(
+  updates: DependencyUpdate[],
 ): Promise<ModuleUpdateResult[]> {
   const results: ModuleUpdateResult[] = [];
   await Promise.all(updates.map(async (update) => {
-    const result = await execModuleUpdateJson(update);
+    const result = await execDependencyUpdate(update);
     return result ? results.push(result) : undefined;
   }));
   return results;
 }
 
-export async function execModuleUpdateJson(
-  update: ModuleUpdateJson,
+export async function execDependencyUpdate(
+  update: DependencyUpdate,
 ): Promise<ModuleUpdateResult | undefined> {
   if (!update.code) {
     return;
@@ -203,12 +148,10 @@ export async function execModuleUpdateJson(
   const content = await Deno.readTextFile(fromFileUrl(update.referrer));
   const lines = content.split("\n");
   lines[line] = lines[line].slice(0, update.code.span.start.character) +
-    `"${update.newSpecifier}"` +
+    `"${update.specifier.replace(update.version.from, update.version.to)}"` +
     lines[line].slice(update.code.span.end.character);
   return {
-    referrer: update.referrer,
-    specifier: update.specifier,
-    newSpecifier: update.newSpecifier,
+    ...update,
     content: lines.join("\n"),
   };
 }
