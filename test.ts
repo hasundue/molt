@@ -1,12 +1,19 @@
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
+import {
+  beforeAll,
+  describe,
+  it,
+} from "https://deno.land/std@0.202.0/testing/bdd.ts";
 import {
   assert,
   assertEquals,
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
-  collectModuleUpdateJson,
+  collectModuleUpdateJsonAll,
   createDependencyUpdateJson,
+  execModuleUpdateJson,
+  execModuleUpdateJsonAll,
+  ModuleUpdateJson,
 } from "./mod.ts";
 import { console, SEMVER_REGEXP } from "./src/lib.ts";
 
@@ -45,7 +52,7 @@ describe("createDependencyUpdateJson()", () => {
 
 describe("collectDependencyUpdateJson()", () => {
   it("https://deno.land/x/deno_graph", async () => {
-    const updates = await collectModuleUpdateJson(
+    const updates = await collectModuleUpdateJsonAll(
       "./src/fixtures/mod.ts",
     );
     console.debug(updates);
@@ -53,5 +60,50 @@ describe("collectDependencyUpdateJson()", () => {
     assertExists(updates[0].newSpecifier.match(SEMVER_REGEXP));
     assertExists(updates[1].newSpecifier.match(SEMVER_REGEXP));
     assertExists(updates[2].newSpecifier.match(SEMVER_REGEXP));
+  });
+});
+
+describe("execModuleUpdateJson", () => {
+  let updates: ModuleUpdateJson[];
+  beforeAll(async () => {
+    updates = await collectModuleUpdateJsonAll(
+      "./src/fixtures/mod.ts",
+    );
+  });
+  it("https://deno.land/std", async () => {
+    const update = updates.find((update) =>
+      update.specifier.includes("deno.land/std")
+    )!;
+    const result = await execModuleUpdateJson(update);
+    assertExists(result);
+    assertExists(result.content);
+    console.debug(result.content);
+  });
+  it("https://deno.land/x/deno_graph", async () => {
+    const update = updates.find((update) =>
+      update.specifier.includes("deno.land/x/deno_graph")
+    )!;
+    const result = await execModuleUpdateJson(update);
+    assertExists(result);
+    assertExists(result.content);
+    console.debug(result.content);
+  });
+  it("npm:node-emoji", async () => {
+    const update = updates.find((update) =>
+      update.specifier.includes("node-emoji")
+    )!;
+    const result = await execModuleUpdateJson(update);
+    assertExists(result);
+    assertExists(result.content);
+    console.debug(result.content);
+  });
+});
+
+describe("execModuleUpdateJsonAll", () => {
+  it("src/fixtures/mod.ts", async () => {
+    const results = await execModuleUpdateJsonAll(
+      await collectModuleUpdateJsonAll("./src/fixtures/mod.ts"),
+    );
+    assertEquals(results.length, 3);
   });
 });

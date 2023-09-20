@@ -1,4 +1,8 @@
-import { resolve, toFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
+import {
+  fromFileUrl,
+  resolve,
+  toFileUrl,
+} from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
   CreateGraphOptions,
@@ -30,19 +34,19 @@ class DenoGraph {
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-interface DependencyUpdateJson extends DependencyJson {
+export interface DependencyUpdateJson extends DependencyJson {
   newSpecifier: string;
 }
 
-interface ModuleUpdateJson extends DependencyUpdateJson {
+export interface ModuleUpdateJson extends DependencyUpdateJson {
   referrer: string;
 }
 
-type CollectDependencyUpdateJsonOptions = {
+export interface CollectDependencyUpdateJsonOptions {
   loadRemote?: boolean;
-};
+}
 
-export async function collectModuleUpdateJson(
+export async function collectModuleUpdateJsonAll(
   modulePath: string,
   options: CollectDependencyUpdateJsonOptions = {
     loadRemote: false,
@@ -59,7 +63,9 @@ export async function collectModuleUpdateJson(
       Promise.all(
         module.dependencies?.map(async (dependency) => {
           const update = await createDependencyUpdateJson(dependency);
-          return update ? updates.push({ ...update, referrer: module.specifier }) : undefined;
+          return update
+            ? updates.push({ ...update, referrer: module.specifier })
+            : undefined;
         }) ?? [],
       )
     ),
@@ -148,6 +154,7 @@ async function resolveLatestSemVer(
       const response = await fetch(specifierWithoutSemVer, {
         method: "HEAD",
       });
+      await response.arrayBuffer();
       if (!response.redirected) {
         // The host did not redirect to a url with semver
         return;
@@ -163,4 +170,46 @@ async function resolveLatestSemVer(
       // TODO: throw an error?
       return;
   }
+}
+
+export interface ModuleUpdateResult {
+  referrer: string;
+  specifier: string;
+  newSpecifier: string;
+  content: string;
+}
+
+export async function execModuleUpdateJsonAll(
+  updates: ModuleUpdateJson[],
+): Promise<ModuleUpdateResult[]> {
+  const results: ModuleUpdateResult[] = [];
+  await Promise.all(updates.map(async (update) => {
+    const result = await execModuleUpdateJson(update);
+    return result ? results.push(result) : undefined;
+  }));
+  return results;
+}
+
+export async function execModuleUpdateJson(
+  update: ModuleUpdateJson,
+): Promise<ModuleUpdateResult | undefined> {
+  if (!update.code) {
+    return;
+  }
+  if (update.code.span.start.line !== update.code.span.end.line) {
+    throw new Error(
+      `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
+    );
+  }
+  const line = update.code.span.start.line;
+  const content = await Deno.readTextFile(fromFileUrl(update.referrer));
+  const lines = content.split("\n");
+  lines[line] = lines[line].slice(0, update.code.span.start.character) +
+    `"${update.newSpecifier}"` + lines[line].slice(update.code.span.end.character);
+  return {
+    referrer: update.referrer,
+    specifier: update.specifier,
+    newSpecifier: update.newSpecifier,
+    content: lines.join("\n"),
+  };
 }
