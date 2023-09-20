@@ -1,11 +1,13 @@
 import { resolve, toFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
+  CreateGraphOptions,
   init as initDenoGraph,
+  load as defaultLoad,
   ModuleJson,
-  parseModule,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import {
+  createUrl,
   type Maybe,
   parseNpmSpecifier,
   parseSemVer,
@@ -32,49 +34,91 @@ interface DependencyUpdateJson extends DependencyJson {
   newSpecifier: string;
 }
 
-export async function collectDependencyUpdateJson(
+interface ModuleUpdateJson extends DependencyUpdateJson {
+  referrer: string;
+}
+
+type CollectDependencyUpdateJsonOptions = {
+  loadRemote?: boolean;
+};
+
+export async function collectModuleUpdateJson(
   modulePath: string,
-): Promise<DependencyUpdateJson[]> {
+  options: CollectDependencyUpdateJsonOptions = {
+    loadRemote: false,
+  },
+): Promise<ModuleUpdateJson[]> {
   await DenoGraph.ensureInit();
   const specifier = toFileUrl(resolve(modulePath)).href;
-  const content = Deno.readTextFileSync(modulePath);
-  const { dependencies } = parseModule(specifier, content);
-  if (!dependencies) {
-    return [];
-  }
-  const updates: DependencyUpdateJson[] = [];
-  await Promise.all(dependencies.map(async (dep) => {
-    let url = new URL(dep.specifier);
-    try {
-      url = new URL(dep.specifier);
-    } catch {
-      // The specifier is a relative path
-      return;
+  const graph = await createGraph(specifier, {
+    load: createLoadCallback(options),
+  });
+  const updates: ModuleUpdateJson[] = [];
+  await Promise.all(
+    graph.modules.map((module) =>
+      Promise.all(
+        module.dependencies?.map(async (dependency) => {
+          const update = await createDependencyUpdateJson(dependency);
+          return update ? updates.push({ ...update, referrer: module.specifier }) : undefined;
+        }) ?? [],
+      )
+    ),
+  );
+  return updates;
+}
+
+function createLoadCallback(
+  options: CollectDependencyUpdateJsonOptions,
+): CreateGraphOptions["load"] {
+  // deno-lint-ignore require-await
+  return async (specifier) => {
+    const url = createUrl(specifier);
+    if (!url) {
+      throw new Error(`Invalid specifier: ${specifier}`);
     }
     switch (url.protocol) {
+      case "node:":
+      case "npm:":
+        return {
+          kind: "external",
+          specifier,
+        };
       case "http:":
-      case "https:": {
-        const update = await createDependencyUpdateJson(dep);
-        if (update) {
-          updates.push(update);
+      case "https:":
+        if (options.loadRemote) {
+          return defaultLoad(specifier);
         }
-        return;
-      }
-      case "npm:": {
-        return;
-      }
+        return {
+          kind: "external",
+          specifier,
+        };
+      default:
+        return defaultLoad(specifier);
     }
-  }));
-  return updates;
+  };
+}
+
+export async function createDependencyUpdateJson(
+  dependency: DependencyJson,
+  targetVersion?: SemVer | string,
+): Promise<DependencyUpdateJson | undefined> {
+  const newSemVer = targetVersion
+    ? parse(targetVersion)
+    : await resolveLatestSemVer(dependency.specifier);
+  if (!newSemVer) {
+    return;
+  }
+  return {
+    ...dependency,
+    newSpecifier: replaceSemVer(dependency.specifier, newSemVer),
+  };
 }
 
 async function resolveLatestSemVer(
   specifier: string,
 ): Promise<Maybe<SemVer>> {
-  let url: URL;
-  try {
-    url = new URL(specifier);
-  } catch {
+  const url = createUrl(specifier);
+  if (!url) {
     // The specifier is a relative path
     return;
   }
@@ -119,17 +163,4 @@ async function resolveLatestSemVer(
       // TODO: throw an error?
       return;
   }
-}
-
-export async function createDependencyUpdateJson(
-  dependency: DependencyJson,
-): Promise<Maybe<DependencyUpdateJson>> {
-  const newSemVer = await resolveLatestSemVer(dependency.specifier);
-  if (!newSemVer) {
-    return;
-  }
-  return {
-    ...dependency,
-    newSpecifier: replaceSemVer(dependency.specifier, newSemVer),
-  };
 }

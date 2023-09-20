@@ -5,7 +5,7 @@ import {
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
-  collectDependencyUpdateJson,
+  collectModuleUpdateJson,
   createDependencyUpdateJson,
 } from "./mod.ts";
 import { console, SEMVER_REGEXP } from "./src/lib.ts";
@@ -43,12 +43,15 @@ describe("createDependencyUpdateJson()", () => {
   });
 });
 
-// describe("collectDependencyUpdateJson()", () => {
-//   it("https://deno.land/x/deno_graph", async () => {
-//     const updates = await collectDependencyUpdateJson(
-//       "./mod.ts",
-//     );
-//     assert(updates.length > 0);
-//     console.debug(updates);
-//   });
-// });
+describe("collectDependencyUpdateJson()", () => {
+  it("https://deno.land/x/deno_graph", async () => {
+    const updates = await collectModuleUpdateJson(
+      "./src/fixtures/mod.ts",
+    );
+    console.debug(updates);
+    assertEquals(updates.length, 3);
+    assertExists(updates[0].newSpecifier.match(SEMVER_REGEXP));
+    assertExists(updates[1].newSpecifier.match(SEMVER_REGEXP));
+    assertExists(updates[2].newSpecifier.match(SEMVER_REGEXP));
+  });
+});

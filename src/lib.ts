@@ -9,6 +9,14 @@ export type Specifier = Brand<string, "specifier">;
 
 export type Maybe<T> = T | undefined;
 
+export function createUrl(specifier: string): Maybe<URL> {
+  try {
+    return new URL(specifier);
+  } catch {
+    return;
+  }
+}
+
 // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 export const SEMVER_REGEXP =
   /@v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/g;
