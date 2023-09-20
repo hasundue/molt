@@ -25,10 +25,17 @@ export function removeSemVer(specifier: string | Specifier) {
   return specifier.replaceAll(SEMVER_REGEXP, "") as Specifier;
 }
 
-export function parseSemVer(specifier: string | Specifier): SemVer | undefined {
+export function parseSemVer(specifier: string | Specifier): Maybe<SemVer> {
   const match = specifier.match(SEMVER_REGEXP);
   if (!match) {
-    return undefined;
+    return;
+  }
+  if (match.length > 1) {
+    console.warn(
+      "Multiple semvers in a single specifier is not supported:",
+      specifier,
+    );
+    return;
   }
   return parse(match[0].replace("@", ""));
 }
@@ -59,6 +66,6 @@ export function parseNpmSpecifier(specifier: string): NpmSpecifierJson {
   return { name, version, subpath };
 }
 
-export const console = {
+export const log = {
   debug: Deno.env.get("CI") ? () => {} : globalThis.console.debug,
 };

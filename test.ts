@@ -15,7 +15,7 @@ import {
   execModuleUpdateJsonAll,
   ModuleUpdateJson,
 } from "./mod.ts";
-import { console, SEMVER_REGEXP } from "./src/lib.ts";
+import { log, SEMVER_REGEXP } from "./src/lib.ts";
 
 describe("createDependencyUpdateJson()", () => {
   it("https://deno.land/std", async () => {
@@ -24,7 +24,7 @@ describe("createDependencyUpdateJson()", () => {
     });
     assertExists(update);
     assert(update.newSpecifier.match(SEMVER_REGEXP));
-    console.debug(update.newSpecifier);
+    log.debug(update.newSpecifier);
   });
   it("https://deno.land/std - no semver", async () => {
     const update = await createDependencyUpdateJson({
@@ -38,7 +38,7 @@ describe("createDependencyUpdateJson()", () => {
     });
     assertExists(update);
     assertExists(update.newSpecifier.match(SEMVER_REGEXP));
-    console.debug(update.newSpecifier);
+    log.debug(update.newSpecifier);
   });
   it("npm:node-emoji", async () => {
     const update = await createDependencyUpdateJson({
@@ -46,7 +46,7 @@ describe("createDependencyUpdateJson()", () => {
     });
     assertExists(update);
     assertExists(update.newSpecifier.match(SEMVER_REGEXP));
-    console.debug(update.newSpecifier);
+    log.debug(update.newSpecifier);
   });
 });
 
@@ -55,7 +55,7 @@ describe("collectDependencyUpdateJson()", () => {
     const updates = await collectModuleUpdateJsonAll(
       "./src/fixtures/mod.ts",
     );
-    console.debug(updates);
+    log.debug(updates);
     assertEquals(updates.length, 4);
     for (const update of updates) {
       assertExists(update.newSpecifier.match(SEMVER_REGEXP));
@@ -77,7 +77,7 @@ describe("execModuleUpdateJson", () => {
     const result = await execModuleUpdateJson(update);
     assertExists(result);
     assertExists(result.content);
-    console.debug(result.content);
+    log.debug(result.content);
   });
   it("npm:node-emoji", async () => {
     const update = updates.find((update) =>
@@ -86,7 +86,7 @@ describe("execModuleUpdateJson", () => {
     const result = await execModuleUpdateJson(update);
     assertExists(result);
     assertExists(result.content);
-    console.debug(result.content);
+    log.debug(result.content);
   });
 });
 
@@ -108,7 +108,7 @@ describe("execModuleUpdateJsonAll", () => {
     assertEquals(results.length, 2);
     for (const result of results) {
       assertExists(result.content);
-      console.debug(result.content);
+      log.debug(result.content);
     }
   });
 });
