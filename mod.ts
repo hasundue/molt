@@ -1,20 +1,28 @@
+import { format } from "https://deno.land/std@0.202.0/semver/mod.ts";
+import { resolve, toFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   init,
   ModuleJson,
   parseModule,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import { resolve, toFileUrl } from "https://deno.land/std@0.201.0/path/mod.ts";
-import { removeSemVer } from "./src/lib.ts";
+import {
+  parseSemVer,
+  removeSemVer,
+  replaceSemVer,
+  type Specifier,
+} from "./src/lib.ts";
+
+class DependencyUpdateSpecifierMap extends Map<Specifier, Specifier> {}
 
 export class DependencyUpdator {
-  #specifierMap = new Map<string, string>();
+  #specifierMap = new DependencyUpdateSpecifierMap();
 }
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-type DependencyUpdateJson = DependencyJson & {
+interface DependencyUpdateJson extends DependencyJson {
   newSpecifier: string;
-};
+}
 
 export async function collectDependencyUpdateJson(
   modulePath: string,
@@ -26,9 +34,8 @@ export async function collectDependencyUpdateJson(
     return [];
   }
   const updates: DependencyUpdateJson[] = [];
-  console.log(dependencies);
   await Promise.all(dependencies.map(async (dep) => {
-    let url: URL;
+    let url = new URL(dep.specifier);
     try {
       url = new URL(dep.specifier);
     } catch {
@@ -49,7 +56,6 @@ export async function collectDependencyUpdateJson(
       }
     }
   }));
-  console.log(updates);
   return updates;
 }
 
@@ -57,22 +63,31 @@ export async function createDependencyUpdateJson(
   dependency: DependencyJson,
 ): Promise<DependencyUpdateJson | undefined> {
   const specifierWithoutSemVer = removeSemVer(dependency.specifier);
-  console.log(specifierWithoutSemVer);
   if (specifierWithoutSemVer === dependency.specifier) {
+    // The original specifier does not contain semver
     return undefined;
   }
+  const semver = parseSemVer(dependency.specifier)!;
   const response = await fetch(specifierWithoutSemVer, {
     method: "HEAD",
   });
   if (!response.redirected) {
+    // The host did not redirect to the latest version
     return undefined;
   }
-  const resolvedSpecifier = response.url;
-  if (resolvedSpecifier === dependency.specifier) {
+  const specifierWithNewSemVer = response.url;
+  if (specifierWithNewSemVer === dependency.specifier) {
     // The dependency is up to date
     return undefined;
   }
-  return { ...dependency, newSpecifier: resolvedSpecifier };
+  const newSemVer = parseSemVer(specifierWithNewSemVer)!;
+  return {
+    ...dependency,
+    newSpecifier: dependency.specifier.replace(
+      format(semver),
+      format(newSemVer),
+    ),
+  };
 }
 
 await init();

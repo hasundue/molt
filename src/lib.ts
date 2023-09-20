@@ -1,10 +1,41 @@
+import {
+  format,
+  parse,
+  type SemVer,
+} from "https://deno.land/std@0.202.0/semver/mod.ts";
+
+export type Brand<T, B> = T & { __brand: B };
+export type Specifier = Brand<string, "specifier">;
+
 // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-const SEMVER_REGEXP =
+export const SEMVER_REGEXP =
   /@v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/g;
 
-export function removeSemVer(specifier: string) {
-  return specifier.replaceAll(SEMVER_REGEXP, "");
+export function removeSemVer(specifier: string | Specifier) {
+  return specifier.replaceAll(SEMVER_REGEXP, "") as Specifier;
 }
 
-async function load() {
+export function parseSemVer(specifier: string | Specifier): SemVer | undefined {
+  const match = specifier.match(SEMVER_REGEXP);
+  if (!match) {
+    return undefined;
+  }
+  return parse(match[0].replace("@", ""));
+}
+
+export function replaceSemVer(
+  specifier: string | Specifier,
+  newSemVer: string | SemVer,
+): string {
+  const semver = parseSemVer(specifier);
+  if (!semver) {
+    return specifier;
+  }
+  // Parse as a semver to strip off any leading `v` and normalize it.
+  newSemVer = parse(newSemVer);
+  return specifier.replace(format(semver), format(newSemVer));
+}
+
+export const console = {
+  debug: Deno.env.get("CI") ? () => {} : globalThis.console.debug,
 }
