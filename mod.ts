@@ -47,27 +47,25 @@ export interface CollectDependencyUpdateJsonOptions {
 }
 
 export async function collectModuleUpdateJsonAll(
-  modulePath: string,
+  rootModule: string,
   options: CollectDependencyUpdateJsonOptions = {
     loadRemote: false,
   },
 ): Promise<ModuleUpdateJson[]> {
   await DenoGraph.ensureInit();
-  const specifier = toFileUrl(resolve(modulePath)).href;
+  const specifier = toFileUrl(resolve(rootModule)).href;
   const graph = await createGraph(specifier, {
     load: createLoadCallback(options),
   });
   const updates: ModuleUpdateJson[] = [];
   await Promise.all(
-    graph.modules.map((module) =>
-      Promise.all(
-        module.dependencies?.map(async (dependency) => {
-          const update = await createDependencyUpdateJson(dependency);
-          return update
-            ? updates.push({ ...update, referrer: module.specifier })
-            : undefined;
-        }) ?? [],
-      )
+    graph.modules.flatMap((module) =>
+      module.dependencies?.map(async (dependency) => {
+        const update = await createDependencyUpdateJson(dependency);
+        return update
+          ? updates.push({ ...update, referrer: module.specifier })
+          : undefined;
+      })
     ),
   );
   return updates;
@@ -205,7 +203,8 @@ export async function execModuleUpdateJson(
   const content = await Deno.readTextFile(fromFileUrl(update.referrer));
   const lines = content.split("\n");
   lines[line] = lines[line].slice(0, update.code.span.start.character) +
-    `"${update.newSpecifier}"` + lines[line].slice(update.code.span.end.character);
+    `"${update.newSpecifier}"` +
+    lines[line].slice(update.code.span.end.character);
   return {
     referrer: update.referrer,
     specifier: update.specifier,
