@@ -13,7 +13,7 @@ Molt avoids implementing such custom logic as much as possible by using [deno_gr
 
 Also, Molt is designed to be easier to use in development pipelines:
 
-- **Module-first** - The core logic is provided as versatile functions in a Deno module, which enables users to write best scripts for their use cases.
+- **Module-first** - The core logic is provided as versatile functions in a Deno module, which enables you to write the best scripts for your use cases.
 - **Git-friendly** - The operations can be easily divided into logical groups for subsequent git commits. A submodule and CLI for git operations are also provided.
 
 
@@ -25,7 +25,36 @@ Also, Molt is designed to be easier to use in development pipelines:
 
 ### CLI
 
-#### Check updates of dependencies
+Although it is recommended to write your own scripts with the module, a pre-built CLI is also provided as `cli.ts` for convenience, which is supposed to cover most of the use cases.
+
+#### Installation (optional)
+
+The molt CLI can be installed globally with the following command:
+
+```sh
+deno install --name=molt\
+--allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
+https://deno.land/x/molt/cli.ts
+```
+
+However, it is recommended to run the remote script directly through `deno task` for more precise control on permissions:
+
+deno.json
+```sh
+{
+  "tasks": {
+    "update": "deno run --allow-env --allow-read --allow-net --allow-write=. https://deno.land/x/molt/cli.ts update",
+    "update:check": "deno run --allow-env --allow-read --allow-net https://deno.land/x/molt/cli.ts check",
+    "update:commit": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
+  },
+}
+```
+
+Of course, you may also use `--allow-all` on your own risk.
+
+#### Update dependencies interactively
+
+The most interactive interface is provided as `check` sub-command of `cli.ts`.
 
 ```sh
 deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
@@ -94,7 +123,41 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 >
 ```
 
+#### Update dependencies non-interactively
+
+The `update` sub-command of `cli.ts` is designed to be used in non-interactive environments, such as CI/CD pipelines.
+
+##### Example: Update dependencies and write changes to files
+
+```sh
+deno run --allow-env --allow-read --allow-net --allow-write=.\
+https://deno.land/x/molt/cli.ts update <...entrypoints>
+```
+
+##### Example: Update dependencies and commit changes to git
+
+```sh
+deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
+https://deno.land/x/molt/cli.ts update --commit <...entrypoints>
+```
+
+## Limitations
+
+See [issues].
+
+## Acknowledgments
+
+Molt is inspired by prior works such as
+
+- [Trex](https://github.com/crewdevio/Trex)
+- [deno-udd](https://github.com/hayd/deno-udd)
+- [dmm](https://github.com/drashland/dmm)
+- [update](https://github.com/deaddeno/update)
+
+and of full respect to the authors of these works.
+
 <!-- Links -->
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
 [API reference]: https://deno.land/x/molt
+[issues]: https://github.com/hasundue/molt/issues
