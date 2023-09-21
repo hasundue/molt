@@ -23,7 +23,16 @@ export interface CommitOptions {
 
 export const defaultCommitOptions: CommitOptions = {
   groupBy: () => "dependencies",
-  composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
+  composeCommitMessage: ({ group, version }) => {
+    let message = `build(deps): update ${group}`
+    if (version?.from) {
+      message += ` from ${version.from}`
+    }
+    if (version?.to) {
+      message += ` to ${version.to}`
+    }
+    return message;
+  },
   gitAddOptions: [],
   gitCommitOptions: [],
 };
