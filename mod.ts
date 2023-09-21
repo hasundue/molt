@@ -68,14 +68,19 @@ export interface CreateDependencyUpdateOptions {
 }
 
 export async function collectDependencyUpdateAll(
-  rootModule: string,
+  entrypoints: string | string[],
   options: CreateDependencyUpdateOptions = {
     loadRemote: false,
   },
 ): Promise<DependencyUpdate[]> {
+  if (!entrypoints) {
+    return [];
+  }
   await DenoGraph.ensureInit();
-  const specifier = toFileUrl(resolve(rootModule)).href;
-  const graph = await createGraph(specifier, {
+  const specifiers = [entrypoints].flat().map((e) =>
+    toFileUrl(resolve(e)).href
+  );
+  const graph = await createGraph(specifiers, {
     load: createLoadCallback(options),
   });
   const updates: DependencyUpdate[] = [];
