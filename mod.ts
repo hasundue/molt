@@ -23,9 +23,6 @@
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
  * });
- *
- * const summary = createPullRequestBody(updates);
- * console.log(summary);
  * ```
  *
  * @module
