@@ -28,7 +28,7 @@ export const defaultCommitOptions: CommitOptions = {
   gitCommitOptions: [],
 };
 
-export async function commitAll(
+export function commitAll(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
 ) {
@@ -48,9 +48,9 @@ export async function commitAll(
   }
   for (const [group, updates] of groups) {
     const results = execAll(updates);
-    await writeAll(results);
-    await addGroup(results, gitAddOptions);
-    await commitGroup(
+    writeAll(results);
+    addGroup(results, gitAddOptions);
+    commitGroup(
       {
         group,
         version: createVersionProp(results),
@@ -61,7 +61,7 @@ export async function commitAll(
   }
 }
 
-export async function addGroup(
+function addGroup(
   results: ModuleUpdateResult[],
   options: string[],
 ) {
@@ -69,13 +69,13 @@ export async function addGroup(
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });
-  const { code } = await command.output();
+  const { code } = command.outputSync();
   if (code !== 0) {
     throw new Error(`git add failed: ${code}`);
   }
 }
 
-export async function commitGroup(
+function commitGroup(
   props: CommitProps,
   composeCommitMessage: (props: CommitProps) => string,
   options: string[],
@@ -84,7 +84,7 @@ export async function commitGroup(
   const command = new Deno.Command("git", {
     args: ["commit", ...options, "-m", `"${message}"`],
   });
-  const { code } = await command.output();
+  const { code } = command.outputSync();
   if (code !== 0) {
     throw new Error(`git commit failed: ${code}`);
   }

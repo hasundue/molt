@@ -4,6 +4,7 @@ import {
   afterAll,
   afterEach,
   beforeAll,
+  beforeEach,
   describe,
   it,
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
@@ -14,8 +15,10 @@ import {
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
 import { commitAll } from "./mod.ts";
+import { log } from "../src/utils.ts";
 
 const OriginalDenoCommand = Deno.Command;
+const readTextFileSyncOriginal = Deno.readTextFileSync;
 
 class DenoCommandStub {
   static commands: string[] = [];
@@ -24,7 +27,7 @@ class DenoCommandStub {
     options.args.forEach((arg) => command += " " + arg);
     DenoCommandStub.commands.push(command);
   }
-  output() {
+  outputSync() {
     return { code: 0 };
   }
   static clear() {
@@ -33,20 +36,37 @@ class DenoCommandStub {
 }
 
 describe("commitAll()", () => {
-  const output = new Map<string, string>();
+  let output: { path: string; content: string }[] = [];
   let updates: DependencyUpdate[];
-  let writeTextFileStub: Stub;
+  let writeTextFileSyncStub: Stub;
+  let readTextFileSyncStub: Stub;
+
+  function debugOutput() {
+    for (const { path, content } of output) {
+      log.debug(path);
+      log.debug(content);
+    }
+  }
 
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
 
-    writeTextFileStub = stub(
+    writeTextFileSyncStub = stub(
       Deno,
-      "writeTextFile", // deno-lint-ignore require-await
-      async (path, data) => {
-        output.set(path.toString(), data.toString());
+      "writeTextFileSync",
+      (path, data) => {
+        output.push({ path: path.toString(), content: data.toString() });
+      },
+    );
+
+    readTextFileSyncStub = stub(
+      Deno,
+      "readTextFileSync",
+      (path) => {
+        const file = output.findLast((file) => file.path === path);
+        return file!.content;
       },
     );
 
@@ -54,17 +74,25 @@ describe("commitAll()", () => {
   });
 
   afterAll(() => {
-    writeTextFileStub.restore();
+    writeTextFileSyncStub.restore();
+    readTextFileSyncStub.restore();
     Deno.Command = OriginalDenoCommand;
+  });
+
+  beforeEach(() => {
+    for (const file of ["src/fixtures/mod.ts", "src/fixtures/lib.ts"]) {
+      const content = readTextFileSyncOriginal(file);
+      Deno.writeTextFileSync(file, content);
+    }
   });
 
   afterEach(() => {
     DenoCommandStub.clear();
-    output.clear();
+    output = [];
   });
 
-  it("no grouping", async () => {
-    await commitAll(updates);
+  it("no grouping", () => {
+    commitAll(updates);
     assertEquals(
       DenoCommandStub.commands,
       [
@@ -72,10 +100,11 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update dependencies"',
       ],
     );
+    debugOutput();
   });
 
-  it("group by dependency name", async () => {
-    await commitAll(updates, {
+  it("group by dependency name", () => {
+    commitAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -90,10 +119,11 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update deno.land/std"',
       ],
     );
+    debugOutput();
   });
 
-  it("group by module (file) name", async () => {
-    await commitAll(updates, {
+  it("group by module (file) name", () => {
+    commitAll(updates, {
       groupBy: (update) => update.referrer,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -106,5 +136,6 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update src/fixtures/lib.ts"',
       ],
     );
+    debugOutput();
   });
 });

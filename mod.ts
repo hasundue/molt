@@ -8,21 +8,17 @@
  * To update all dependencies in a module and commit the changes to git:
  *
  * ```ts
- * import {
- *   collectDependencyUpdates,
- *   execDependencyUpdateAll,
- * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { collectDependencyUpdateAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
  * import {
  *   commitAll,
  *   createPullRequestBody,
  * } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
  *
  * const updates = await collectDependencyUpdateAll("./mod.ts");
- * const results = await execDependencyUpdateAll(updates);
- * console.log(results);
+ * console.log(updates);
  *
  * // Commit all changes to git
- * await commitAll(results, {
+ * await commitAll(updates, {
  *   groupBy: (it) => it.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
@@ -185,12 +181,10 @@ export function exec(
   return result;
 }
 
-export async function writeAll(
+export function writeAll(
   results: ModuleUpdateResult[],
-): Promise<void> {
-  await Promise.all(
-    results.map((result) =>
-      Deno.writeTextFile(result.specifier, result.content)
-    ),
+) {
+  results.forEach((result) =>
+    Deno.writeTextFileSync(result.specifier, result.content)
   );
 }

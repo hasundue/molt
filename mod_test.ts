@@ -1,9 +1,10 @@
 import {
+  afterAll,
   beforeAll,
   describe,
   it,
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import { stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
+import { type Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import {
   assertEquals,
   assertExists,
@@ -13,6 +14,7 @@ import {
   type DependencyUpdate,
   exec,
   execAll,
+  type ModuleUpdateResult,
   writeAll,
 } from "./mod.ts";
 import { log } from "./src/utils.ts";
@@ -78,27 +80,36 @@ describe("execAll", () => {
   });
 });
 
-Deno.test("writeAll", async () => {
-  const output = new Map<string, string>();
-  const writeTextFileStub = stub(
-    Deno,
-    "writeTextFile", // deno-lint-ignore require-await
-    async (path, data) => {
-      output.set(path.toString(), data.toString());
-    },
-  );
-  const results = execAll(
-    await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
-  );
-  try {
-    await writeAll(results);
+describe("writeAll", () => {
+  let output: Map<string, string>;
+  let writeTextFileSyncStub: Stub;
+  let results: ModuleUpdateResult[];
+
+  beforeAll(async () => {
+    output = new Map<string, string>();
+    writeTextFileSyncStub = stub(
+      Deno,
+      "writeTextFileSync", // deno-lint-ignore require-await
+      async (path, data) => {
+        output.set(path.toString(), data.toString());
+      },
+    );
+    results = execAll(
+      await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
+    );
+  });
+
+  afterAll(() => {
+    writeTextFileSyncStub.restore();
+  });
+
+  it("src/fixtures/mod.ts", () => {
+    writeAll(results);
     for (const [file, content] of output.entries()) {
       log.debug(file);
       log.debug(content);
     }
     assertExists(output.get("src/fixtures/mod.ts"));
     assertExists(output.get("src/fixtures/lib.ts"));
-  } finally {
-    writeTextFileStub.restore();
-  }
+  });
 });
