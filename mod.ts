@@ -15,7 +15,7 @@
  * import {
  *   commitAll,
  *   createPullRequestBody,
- * } from "https://deno.land/x/molt@{VERSION}/lib/git.ts";
+ * } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
  *
  * const updates = await collectDependencyUpdateAll("./mod.ts");
  * const results = await execDependencyUpdateAll(updates);
