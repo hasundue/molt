@@ -8,15 +8,25 @@
  * To update all dependencies in a module and commit the changes to git:
  *
  * ```ts
- * import { collectDependencyUpdates } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import { commitAll } from "https://deno.land/x/molt@{VERSION}/lib/git.ts";
+ * import {
+ *   collectDependencyUpdates,
+ *   execDependencyUpdateAll,
+ * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import {
+ *   commitAll,
+ *   createPullRequestBody,
+ * } from "https://deno.land/x/molt@{VERSION}/lib/git.ts";
  *
  * const updates = await collectDependencyUpdateAll("./mod.ts");
  * const results = await execDependencyUpdateAll(updates);
  * console.log(results);
  *
  * // Commit all changes to git
- * await commitAll(results, { groupBy: (it) => it.module });
+ * await commitAll(results, {
+ *   groupBy: (it) => it.name,
+ *   composeCommitMessage: ({ group, version }) =>
+ *     `build(deps): bump ${group} to ${version!.to}`,
+ * });
  *
  * const summary = createPullRequestBody(updates);
  * console.log(summary);

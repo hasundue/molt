@@ -1,48 +1,94 @@
+// Copyright 2023 Shun Ueda. All rights reserved. MIT license.
+
 import { ModuleUpdateResult } from "../mod.ts";
-import { parseModule } from "./util.ts";
+import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
+import { assert } from "https://deno.land/std@0.202.0/assert/mod.ts";
 
 export interface CommitOptions {
-  groupBy?: "module" | "file";
+  groupBy: (result: ModuleUpdateResult) => string;
+  composeCommitMessage: (props: CommitProps) => string;
+  gitAddOptions: string[];
+  gitCommitOptions: string[];
 }
 
-export function commitAll(
+export interface CommitProps {
+  group: string;
+  version?: {
+    from?: string;
+    to: string;
+  };
+}
+
+export const defaultCommitOptions: CommitOptions = {
+  groupBy: () => "dependencies",
+  composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
+  gitAddOptions: [],
+  gitCommitOptions: [],
+};
+
+export async function commitAll(
   results: ModuleUpdateResult[],
-  options: CommitOptions = {},
+  options: CommitOptions = defaultCommitOptions,
 ) {
-  const groups = groupResults(results, options.groupBy);
-}
-
-function groupResults(
-  results: ModuleUpdateResult[],
-  groupBy?: "module" | "file",
-) {
-  switch (groupBy) {
-    case "module":
-      return groupByModule(results);
-    case "file":
-      return groupByFile(results);
-    default:
-      return [results];
-  }
-}
-
-function groupByModule(results: ModuleUpdateResult[]) {
   const groups = new Map<string, ModuleUpdateResult[]>();
   for (const result of results) {
-    const module = parseModule(result.specifier).name;
-    const group = groups.get(module) ?? [];
-    group.push(result);
-    groups.set(module, group);
+    const key = options.groupBy(result);
+    if (!groups.has(key)) {
+      groups.set(key, []);
+    }
+    groups.get(key)!.push(result);
   }
-  return groups;
+  for (const [group, results] of groups) {
+    await addGroup(results, options.gitAddOptions);
+    await commitGroup(
+      {
+        group,
+        version: createVersionProps(results),
+      },
+      options.composeCommitMessage,
+      options.gitCommitOptions,
+    );
+  }
 }
 
-function groupByFile(results: ModuleUpdateResult[]) {
-  const groups = new Map<string, ModuleUpdateResult[]>();
-  for (const result of results) {
-    const group = groups.get(result.referrer) ?? [];
-    group.push(result);
-    groups.set(result.referrer, group);
+async function addGroup(
+  results: ModuleUpdateResult[],
+  options: string[],
+) {
+  const files = results.map((result) => result.referrer);
+  const command = new Deno.Command("git", {
+    args: ["add", ...options, ...files],
+  });
+  const { code } = await command.output();
+  if (code !== 0) {
+    throw new Error(`git add failed: ${code}`);
   }
-  return groups;
+}
+
+async function commitGroup(
+  props: CommitProps,
+  composeCommitMessage: (props: CommitProps) => string,
+  options: string[],
+) {
+  const message = composeCommitMessage(props);
+  const command = new Deno.Command("git", {
+    args: ["commit", ...options, "-m", message],
+  });
+  const { code } = await command.output();
+  if (code !== 0) {
+    throw new Error(`git commit failed: ${code}`);
+  }
+}
+
+function createVersionProps(
+  resultGroup: ModuleUpdateResult[],
+): CommitProps["version"] {
+  const froms = distinct(resultGroup.map((result) => result.version.from));
+  assert(froms.length > 0);
+  const tos = distinct(resultGroup.map((result) => result.version.to));
+  assert(tos.length === 1);
+  return {
+    from: distinct(froms).length === 1 ? froms[0] : undefined,
+    to: tos[0],
+  };
 }

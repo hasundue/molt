@@ -73,15 +73,15 @@ async function resolveLatestSemVer(
     // The specifier is a relative path
     return;
   }
-  const dependency = parseDependencyProps(specifier);
-  if (!dependency) {
+  const props = parseDependencyProps(specifier);
+  if (!props) {
     // The specifier is does not contain a semver.
     return;
   }
   switch (url.protocol) {
     case "npm:": {
       const response = await fetch(
-        `https://registry.npmjs.org/${dependency.name}`,
+        `https://registry.npmjs.org/${props.name}`,
       );
       if (!response.ok) {
         throw new Error(`Failed to fetch npm registry: ${response.statusText}`);
@@ -89,7 +89,7 @@ async function resolveLatestSemVer(
       const json = await response.json();
       if (!json["dist-tags"]?.latest) {
         throw new Error(
-          `Could not find the latest version of ${dependency.name} from registry.`,
+          `Could not find the latest version of ${props.name} from registry.`,
         );
       }
       return json["dist-tags"].latest;
@@ -97,7 +97,7 @@ async function resolveLatestSemVer(
     case "http:":
     case "https:": {
       const response = await fetch(
-        url.protocol + "//" + dependency.name + dependency.path,
+        url.protocol + "//" + props.name + props.path,
         { method: "HEAD" },
       );
       await response.arrayBuffer();
