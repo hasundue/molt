@@ -92,7 +92,12 @@ async function resolveLatestSemVer(
           `Could not find the latest version of ${props.name} from registry.`,
         );
       }
-      return json["dist-tags"].latest;
+      const latestSemVer: string = json["dist-tags"].latest;
+      if (latestSemVer === props.version) {
+        // The dependency is up to date
+        return;
+      }
+      return latestSemVer;
     }
     case "http:":
     case "https:": {
