@@ -2,11 +2,20 @@
 
 A [Deno] module to update dependencies of Deno projects, using [deno_graph] for dependency resolution and parsing.
 
-## Key Features
+## Key Concetps
 
-- **No regex for imports** - Import statements for dependencies are parsed with the same routine as Deno CLI.
-- **No regex for registries** - Latest versions of dependencies are obtained by the module resolution logic of Deno CLI and HTTP redirects by module registries.
+"Traditional" dependency management tools for Deno projects use custom regex and logic for each module registry (deno.land, npm, esm.sh, ..) to find updates. This approach is not robust and requires a lot of maintenance effort.
+
+Molt avoids implementing such custom logic as much as possible by using [deno_graph] to achieve better consistency and maintainability:
+
+- **No regex to parse import statements** - Dependencies of modules are discovered by the same routine as Deno CLI.
+- **No custom logic for each registry** - Latest versions of dependencies are obtained by the module resolution logic of Deno CLI and redirects of fetch requests by module registries.
+
+Also, Molt is designed to be easier to use in development pipelines:
+
 - **Module-first** - The core logic is provided as versatile functions in a Deno module, which enables users to write best scripts for their use cases.
+- **Git-friendly** - The operations can be easily divided into logical groups for subsequent git commits. A submodule and CLI for git operations are also provided.
+
 
 ## Usage
 
