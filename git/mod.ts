@@ -1,15 +1,21 @@
 // Copyright 2023 Shun Ueda. All rights reserved. MIT license.
 
-import { ModuleUpdateResult, writeAll } from "../mod.ts";
-import { createVersionProp, VersionProp } from "./lib.ts";
+import {
+  type DependencyUpdate,
+  execAll,
+  type ModuleUpdateResult,
+  writeAll,
+} from "../mod.ts";
+import { createVersionProp, type VersionProp } from "./lib.ts";
 
 export interface CommitProps {
+  /** The name of the module group */
   group: string;
   version?: VersionProp;
 }
 
 export interface CommitOptions {
-  groupBy: (result: ModuleUpdateResult) => string;
+  groupBy: (dependency: DependencyUpdate) => string;
   composeCommitMessage: (props: CommitProps) => string;
   gitAddOptions: string[];
   gitCommitOptions: string[];
@@ -23,27 +29,34 @@ export const defaultCommitOptions: CommitOptions = {
 };
 
 export async function commitAll(
-  results: ModuleUpdateResult[],
-  options: CommitOptions = defaultCommitOptions,
+  updates: DependencyUpdate[],
+  options?: Partial<CommitOptions>,
 ) {
-  const groups = new Map<string, ModuleUpdateResult[]>();
-  for (const result of results) {
-    const key = options.groupBy(result);
+  const { 
+    groupBy,
+    composeCommitMessage,
+    gitAddOptions,
+    gitCommitOptions,
+  } = { ...defaultCommitOptions, ...options };
+  const groups = new Map<string, DependencyUpdate[]>();
+  for (const u of updates) {
+    const key = groupBy(u);
     if (!groups.has(key)) {
       groups.set(key, []);
     }
-    groups.get(key)!.push(result);
+    groups.get(key)!.push(u);
   }
-  for (const [group, results] of groups) {
+  for (const [group, updates] of groups) {
+    const results = execAll(updates);
     await writeAll(results);
-    await addGroup(results, options.gitAddOptions);
+    await addGroup(results, gitAddOptions);
     await commitGroup(
       {
         group,
         version: createVersionProp(results),
       },
-      options.composeCommitMessage,
-      options.gitCommitOptions,
+      composeCommitMessage,
+      gitCommitOptions,
     );
   }
 }
@@ -69,7 +82,7 @@ export async function commitGroup(
 ) {
   const message = composeCommitMessage(props);
   const command = new Deno.Command("git", {
-    args: ["commit", ...options, "-m", message],
+    args: ["commit", ...options, "-m", `"${message}"`],
   });
   const { code } = await command.output();
   if (code !== 0) {
