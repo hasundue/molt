@@ -37,6 +37,7 @@
 
 import {
   fromFileUrl,
+  relative,
   resolve,
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
@@ -65,6 +66,7 @@ class DenoGraph {
 }
 
 export interface DependencyUpdate extends _DependencyUpdate {
+  /** The relative path to the module from the current working directory. */
   referrer: string;
 }
 
@@ -89,7 +91,10 @@ export async function collectDependencyUpdateAll(
       module.dependencies?.map(async (dependency) => {
         const update = await createDependencyUpdate(dependency);
         return update
-          ? updates.push({ ...update, referrer: module.specifier })
+          ? updates.push({
+            ...update,
+            referrer: relative(Deno.cwd(), fromFileUrl(module.specifier)),
+          })
           : undefined;
       })
     ),
@@ -128,24 +133,28 @@ function createLoadCallback(
   };
 }
 
-export interface ModuleUpdateResult extends DependencyUpdate {
+export interface ModuleUpdateResult {
+  /** The relative path to the module from the current working directory. */
+  specifier: string;
+  /** The updated content of the module. */
   content: string;
+  /** The dependency updates in the module. */
+  dependencies: DependencyUpdate[];
 }
 
-export async function execDependencyUpdateAll(
+export function execAll(
   updates: DependencyUpdate[],
-): Promise<ModuleUpdateResult[]> {
-  const results: ModuleUpdateResult[] = [];
-  await Promise.all(updates.map(async (update) => {
-    const result = await execDependencyUpdate(update);
-    return result ? results.push(result) : undefined;
-  }));
-  return results;
+): ModuleUpdateResult[] {
+  const results = new Map<string, ModuleUpdateResult>();
+  updates.forEach((u) => exec(u, results));
+  return Array.from(results.values());
 }
 
-export async function execDependencyUpdate(
+export function exec(
   update: DependencyUpdate,
-): Promise<ModuleUpdateResult | undefined> {
+  /** The results of previous updates. */
+  results?: Map<string, ModuleUpdateResult>,
+): ModuleUpdateResult | undefined {
   if (!update.code) {
     console.warn(`No code found for ${update.specifier}`);
     return;
@@ -157,15 +166,31 @@ export async function execDependencyUpdate(
     return;
   }
   const line = update.code.span.start.line;
-  const content = await Deno.readTextFile(fromFileUrl(update.referrer));
+  const content = results?.get(update.referrer)?.content ??
+    Deno.readTextFileSync(update.referrer);
   const lines = content.split("\n");
 
   lines[line] = lines[line].slice(0, update.code.span.start.character) +
     `"${update.specifier.replace(update.version.from, update.version.to)}"` +
     lines[line].slice(update.code.span.end.character);
 
-  return {
-    ...update,
-    content: lines.join("\n"),
+  const result: ModuleUpdateResult = results?.get(update.referrer) ?? {
+    specifier: update.referrer,
+    content,
+    dependencies: [],
   };
+  result.content = lines.join("\n");
+  result.dependencies.push(update);
+  results?.set(update.referrer, result);
+  return result;
+}
+
+export async function writeAll(
+  results: ModuleUpdateResult[],
+): Promise<void> {
+  await Promise.all(
+    results.map((result) =>
+      Deno.writeTextFile(result.specifier, result.content)
+    ),
+  );
 }

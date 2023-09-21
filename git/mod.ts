@@ -1,22 +1,18 @@
 // Copyright 2023 Shun Ueda. All rights reserved. MIT license.
 
-import { ModuleUpdateResult } from "../mod.ts";
-import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
-import { assert } from "https://deno.land/std@0.202.0/assert/mod.ts";
+import { ModuleUpdateResult, writeAll } from "../mod.ts";
+import { createVersionProp, VersionProp } from "./lib.ts";
+
+export interface CommitProps {
+  group: string;
+  version?: VersionProp;
+}
 
 export interface CommitOptions {
   groupBy: (result: ModuleUpdateResult) => string;
   composeCommitMessage: (props: CommitProps) => string;
   gitAddOptions: string[];
   gitCommitOptions: string[];
-}
-
-export interface CommitProps {
-  group: string;
-  version?: {
-    from?: string;
-    to: string;
-  };
 }
 
 export const defaultCommitOptions: CommitOptions = {
@@ -39,11 +35,12 @@ export async function commitAll(
     groups.get(key)!.push(result);
   }
   for (const [group, results] of groups) {
+    await writeAll(results);
     await addGroup(results, options.gitAddOptions);
     await commitGroup(
       {
         group,
-        version: createVersionProps(results),
+        version: createVersionProp(results),
       },
       options.composeCommitMessage,
       options.gitCommitOptions,
@@ -51,11 +48,11 @@ export async function commitAll(
   }
 }
 
-async function addGroup(
+export async function addGroup(
   results: ModuleUpdateResult[],
   options: string[],
 ) {
-  const files = results.map((result) => result.referrer);
+  const files = results.map((result) => result.specifier);
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });
@@ -65,7 +62,7 @@ async function addGroup(
   }
 }
 
-async function commitGroup(
+export async function commitGroup(
   props: CommitProps,
   composeCommitMessage: (props: CommitProps) => string,
   options: string[],
@@ -78,17 +75,4 @@ async function commitGroup(
   if (code !== 0) {
     throw new Error(`git commit failed: ${code}`);
   }
-}
-
-function createVersionProps(
-  resultGroup: ModuleUpdateResult[],
-): CommitProps["version"] {
-  const froms = distinct(resultGroup.map((result) => result.version.from));
-  assert(froms.length > 0);
-  const tos = distinct(resultGroup.map((result) => result.version.to));
-  assert(tos.length === 1);
-  return {
-    from: distinct(froms).length === 1 ? froms[0] : undefined,
-    to: tos[0],
-  };
 }
