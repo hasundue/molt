@@ -1,24 +1,34 @@
 # 🦕 Molt
 
 > **Warning**\
-> This project is still in early development. Expect inconveniences and breaking changes.
+> This project is still in early development. Expect inconveniences and breaking
+> changes.
 
-A [Deno] module to update dependencies of Deno projects, using [deno_graph] for dependency resolution and parsing.
+A [Deno] module to update dependencies of Deno projects, using [deno_graph] for
+dependency resolution and parsing.
 
 ## Key Concetps
 
-"Traditional" dependency management tools for Deno projects use custom regex and logic for each module registry (deno.land, npm, esm.sh, ..) to find updates. This approach is not robust and requires a lot of maintenance effort.
+"Traditional" dependency management tools for Deno projects use custom regex and
+logic for each module registry (deno.land, npm, esm.sh, ..) to find updates.
+This approach is not robust and requires a lot of maintenance effort.
 
-Molt avoids implementing such custom logic as much as possible by using [deno_graph] to achieve better consistency and maintainability:
+Molt avoids implementing such custom logic as much as possible by using
+[deno_graph] to achieve better consistency and maintainability:
 
-- **No regex to parse import statements** - Dependencies of modules are discovered by the same routine as Deno CLI.
-- **No custom logic for each registry** - Latest versions of dependencies are obtained by the module resolution logic of Deno CLI and redirects of fetch requests by module registries.
+- **No regex to parse import statements** - Dependencies of modules are
+  discovered by the same routine as Deno CLI.
+- **No custom logic for each registry** - Latest versions of dependencies are
+  obtained by the module resolution logic of Deno CLI and redirects of fetch
+  requests by module registries.
 
 Also, Molt is designed to be easier to use in development pipelines:
 
-- **Module-first** - The core logic is provided as versatile functions in a Deno module, which enables you to write the best scripts for your use cases.
-- **Git-friendly** - The operations can be easily divided into logical groups for subsequent git commits. A submodule and CLI for git operations are also provided.
-
+- **Module-first** - The core logic is provided as versatile functions in a Deno
+  module, which enables you to write the best scripts for your use cases.
+- **Git-friendly** - The operations can be easily divided into logical groups
+  for subsequent git commits. A submodule and CLI for git operations are also
+  provided.
 
 ## Usage
 
@@ -28,21 +38,22 @@ Also, Molt is designed to be easier to use in development pipelines:
 
 ### CLI
 
-Although it is recommended to write your own scripts with the module, a pre-built CLI is also provided as `cli.ts` for convenience, which is supposed to cover most of the use cases.
+Although it is recommended to write your own scripts with the module, a
+pre-built CLI is also provided as `cli.ts` for convenience, which is supposed to
+cover most of the use cases.
 
 #### Installation (optional)
 
 The molt CLI can be installed globally with the following command:
 
 ```sh
-deno install --name=molt\
---allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
-https://deno.land/x/molt/cli.ts
+deno install --allow-env --allow-read --allow-net --allow-write --allow-run=git\
+--name=molt https://deno.land/x/molt/cli.ts
 ```
 
-However, it is recommended to run the remote script directly through `deno task` for more precise control on permissions:
+However, it is recommended to run the remote script directly through `deno task`
+for more precise control on permissions. Here's an example `deno.json`:
 
-deno.json
 ```sh
 {
   "tasks": {
@@ -53,7 +64,7 @@ deno.json
 }
 ```
 
-Of course, you may also use `--allow-all` on your own risk.
+Of course, you may use `--allow-all` instead at your own risk.
 
 #### Update dependencies interactively
 
@@ -128,7 +139,8 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 
 #### Update dependencies non-interactively
 
-The `update` sub-command of `cli.ts` is designed to be used in non-interactive environments, such as CI/CD pipelines.
+The `update` sub-command of `cli.ts` is designed to be used in non-interactive
+environments, such as CI/CD pipelines.
 
 ##### Example: Update dependencies and write changes to files
 
@@ -148,7 +160,8 @@ https://deno.land/x/molt/cli.ts update --commit <...entrypoints>
 
 The following limitations are imposed by the design of Molt:
 
-- Dependencies are always updated to the latest version. No version constraints are supported.
+- Dependencies are always updated to the latest version. No version constraints
+  are supported.
 - Dependencies in import specifiers are only targeted.
 
 See [issues] for other known limitations.
@@ -164,6 +177,7 @@ Molt is inspired by prior works such as
 and of full respect to the authors of these works.
 
 <!-- Links -->
+
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
 [API reference]: https://deno.land/x/molt
