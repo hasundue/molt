@@ -52,7 +52,6 @@ describe("commitAll()", () => {
     updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
-
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",
@@ -60,7 +59,6 @@ describe("commitAll()", () => {
         output.push({ path: path.toString(), content: data.toString() });
       },
     );
-
     readTextFileSyncStub = stub(
       Deno,
       "readTextFileSync",
@@ -69,7 +67,6 @@ describe("commitAll()", () => {
         return file!.content;
       },
     );
-
     Deno.Command = DenoCommandStub as any;
   });
 
