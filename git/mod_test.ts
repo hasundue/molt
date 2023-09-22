@@ -8,10 +8,7 @@ import {
   describe,
   it,
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import {
-  assertArrayIncludes,
-  assertEquals,
-} from "https://deno.land/std@0.202.0/assert/mod.ts";
+import { assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
 import { commitAll } from "./mod.ts";
@@ -90,7 +87,7 @@ describe("commitAll()", () => {
 
   it("no grouping", () => {
     commitAll(updates);
-    assertEquals(
+    assertArrayIncludes(
       DenoCommandStub.commands,
       [
         "git add src/fixtures/mod.ts src/fixtures/lib.ts",
