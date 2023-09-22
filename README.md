@@ -1,5 +1,8 @@
 # 🦕 Molt
 
+> **Warning**\
+> This project is still in early development. Expect inconveniences and breaking changes.
+
 A [Deno] module to update dependencies of Deno projects, using [deno_graph] for dependency resolution and parsing.
 
 ## Key Concetps
@@ -143,13 +146,17 @@ https://deno.land/x/molt/cli.ts update --commit <...entrypoints>
 
 ## Limitations
 
-See [issues].
+The following limitations are imposed by the design of Molt:
+
+- Dependencies are always updated to the latest version. No version constraints are supported.
+- Dependencies in import specifiers are only targeted.
+
+See [issues] for other known limitations.
 
 ## Acknowledgments
 
 Molt is inspired by prior works such as
 
-- [Trex](https://github.com/crewdevio/Trex)
 - [deno-udd](https://github.com/hayd/deno-udd)
 - [dmm](https://github.com/drashland/dmm)
 - [update](https://github.com/deaddeno/update)
