@@ -7,7 +7,7 @@
 A [Deno] module to update dependencies of Deno projects, using [deno_graph] for
 dependency resolution and parsing.
 
-## Key Concetps
+## Key Concepts
 
 "Traditional" dependency management tools for Deno projects use custom regex and
 logic for each module registry (deno.land, npm, esm.sh, ..) to find updates.
