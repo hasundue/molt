@@ -9,10 +9,7 @@
  *
  * ```ts
  * import { collectDependencyUpdateAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import {
- *   commitAll,
- *   createPullRequestBody,
- * } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ * import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
  *
  * const updates = await collectDependencyUpdateAll("./mod.ts");
  * console.log(updates);

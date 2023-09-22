@@ -6,7 +6,7 @@ import {
   type ModuleUpdateResult,
   writeAll,
 } from "../mod.ts";
-import { createVersionProp, type VersionProp } from "./lib.ts";
+import { createVersionProp, type VersionProp } from "../src/versions.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -24,12 +24,12 @@ export interface CommitOptions {
 export const defaultCommitOptions: CommitOptions = {
   groupBy: () => "dependencies",
   composeCommitMessage: ({ group, version }) => {
-    let message = `build(deps): update ${group}`
+    let message = `build(deps): update ${group}`;
     if (version?.from) {
-      message += ` from ${version.from}`
+      message += ` from ${version.from}`;
     }
     if (version?.to) {
-      message += ` to ${version.to}`
+      message += ` to ${version.to}`;
     }
     return message;
   },
@@ -41,7 +41,7 @@ export function commitAll(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
 ) {
-  const { 
+  const {
     groupBy,
     composeCommitMessage,
     gitAddOptions,

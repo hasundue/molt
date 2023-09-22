@@ -5,7 +5,7 @@ import {
   assertEquals,
   assertThrows,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { createVersionProp } from "./lib.ts";
+import { createVersionProp } from "../src/versions.ts";
 
 describe("createVersionProps()", () => {
   it("single version", () => {
