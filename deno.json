@@ -4,6 +4,10 @@
     "fmt": "deno fmt",
     "lint": "deno lint",
     "test": "deno test -A --no-check",
+    "dev": "deno task fmt && deno task lint && deno task test",
     "install": "deno install -A --name molt cli.ts"
+  },
+  "lint": {
+    "exclude": ["src/fixtures/*"]
   }
 }
