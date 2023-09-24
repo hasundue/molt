@@ -27,7 +27,6 @@
 
 import {
   fromFileUrl,
-  relative,
   resolve,
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
@@ -41,7 +40,7 @@ import {
   createDependencyUpdate,
   DependencyUpdate as _DependencyUpdate,
 } from "./src/core.ts";
-import { createUrl } from "./src/utils.ts";
+import { createUrl, relativeFromCwd } from "./src/utils.ts";
 
 class DenoGraph {
   static #initialized = false;
@@ -88,7 +87,7 @@ export async function collectDependencyUpdateAll(
         return update
           ? updates.push({
             ...update,
-            referrer: relative(Deno.cwd(), fromFileUrl(module.specifier)),
+            referrer: relativeFromCwd(fromFileUrl(module.specifier)),
           })
           : undefined;
       })
