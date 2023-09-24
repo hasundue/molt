@@ -6,7 +6,6 @@ import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
   execAll,
-  writeAll,
 } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
 
@@ -99,7 +98,11 @@ function print(updates: DependencyUpdate[]) {
 function write(updates: DependencyUpdate[]) {
   console.log();
   console.log("💾 Writing changes...");
-  writeAll(execAll(updates));
+  const results = execAll(updates);
+  results.forEach((result) => {
+    console.log(`  ${result.specifier}`);
+    Deno.writeTextFileSync(result.specifier, result.content);
+  });
 }
 
 function commit(updates: DependencyUpdate[]) {
