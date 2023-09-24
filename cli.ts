@@ -117,7 +117,7 @@ function _commit(updates: DependencyUpdate[]) {
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
-  .version("0.1.0")
+  .version("0.1.1")
   .command("check", checkCommand)
   .command("update", updateCommand);
 
