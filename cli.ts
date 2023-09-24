@@ -6,6 +6,7 @@ import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
   execAll,
+  write as writeUpdateResult,
 } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
 
@@ -101,7 +102,7 @@ function write(updates: DependencyUpdate[]) {
   const results = execAll(updates);
   results.forEach((result) => {
     console.log(`  ${result.specifier}`);
-    Deno.writeTextFileSync(result.specifier, result.content);
+    writeUpdateResult(result);
   });
 }
 
