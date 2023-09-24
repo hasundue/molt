@@ -181,8 +181,12 @@ export function exec(
 
 export function writeAll(
   results: ModuleUpdateResult[],
-) {
-  results.forEach((result) =>
-    Deno.writeTextFileSync(result.specifier, result.content)
-  );
+): void {
+  results.forEach(write);
+}
+
+export function write(
+  result: ModuleUpdateResult,
+): void {
+  Deno.writeTextFileSync(result.specifier, result.content);
 }
