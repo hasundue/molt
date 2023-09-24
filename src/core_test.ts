@@ -4,7 +4,6 @@ import {
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { createDependencyUpdate, parseDependencyProps } from "./core.ts";
-import { log } from "./utils.ts";
 
 describe("parseDependencyProps()", () => {
   it("https://deno.land/std", () =>
@@ -50,7 +49,6 @@ describe("createDependencyUpdate()", () => {
       specifier: "https://deno.land/std@0.1.0/version.ts",
     });
     assertExists(update);
-    log.debug(update.version);
   });
   it("https://deno.land/std - no semver", async () => {
     const update = await createDependencyUpdate({
@@ -63,13 +61,11 @@ describe("createDependencyUpdate()", () => {
       specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
     });
     assertExists(update);
-    log.debug(update.version);
   });
   it("npm:node-emoji", async () => {
     const update = await createDependencyUpdate({
       specifier: "npm:node-emoji@1.0.0",
     });
     assertExists(update);
-    log.debug(update.version);
   });
 });

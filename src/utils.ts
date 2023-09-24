@@ -15,7 +15,3 @@ export function createUrl(specifier: string): Maybe<URL> {
 export function relativeFromCwd(path: string) {
   return relative(Deno.cwd(), path);
 }
-
-export const log = {
-  debug: Deno.env.get("CI") ? () => {} : globalThis.console.debug,
-};
