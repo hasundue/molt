@@ -8,7 +8,10 @@ import {
   describe,
   it,
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts";
+import {
+  assertArrayIncludes,
+  assertEquals,
+} from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
 import { commitDependencyUpdateAll } from "./mod.ts";

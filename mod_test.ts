@@ -10,12 +10,12 @@ import {
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
+  applyDependencyUpdate,
   collectDependencyUpdateAll,
   type DependencyUpdate,
   execDependencyUpdateAll,
   type ModuleContentUpdate,
   writeModuleContentUpdateAll,
-  applyDependencyUpdate,
 } from "./mod.ts";
 
 describe("collectDependencyUpdates()", () => {
@@ -38,14 +38,20 @@ describe("applyDependencyUpdate", () => {
     const update = updates.find((update) =>
       update.specifier.includes("deno.land/x/deno_graph")
     )!;
-    const result = applyDependencyUpdate(update, Deno.readTextFileSync(update.referrer));
+    const result = applyDependencyUpdate(
+      update,
+      Deno.readTextFileSync(update.referrer),
+    );
     assertExists(result);
   });
   it("npm:node-emoji", () => {
     const update = updates.find((update) =>
       update.specifier.includes("node-emoji")
     )!;
-    const result = applyDependencyUpdate(update, Deno.readTextFileSync(update.referrer));
+    const result = applyDependencyUpdate(
+      update,
+      Deno.readTextFileSync(update.referrer),
+    );
     assertExists(result);
   });
 });
