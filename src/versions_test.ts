@@ -12,12 +12,8 @@ describe("createVersionProps()", () => {
     assertEquals(
       createVersionProp([
         {
-          dependencies: [
-            {
-              name: "deno_graph",
-              version: { from: "0.0.1", to: "0.1.0" },
-            },
-          ],
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
         },
       ] as any),
       {
@@ -29,34 +25,27 @@ describe("createVersionProps()", () => {
   it("multiple versions with different names", () => {
     assertEquals(
       createVersionProp([{
-        dependencies: [
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.1.0" },
-          },
-          {
-            name: "node-emoji",
-            version: { from: "0.0.1", to: "0.1.0" },
-          },
-        ],
+        name: "deno_graph",
+        version: { from: "0.0.1", to: "0.1.0" },
+      }, {
+        name: "node-emoji",
+        version: { from: "0.0.1", to: "0.1.0" },
       }] as any),
       undefined,
     );
   });
   it("multiple versions with different `from`s and a common `to`", () => {
     assertEquals(
-      createVersionProp([{
-        dependencies: [
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.1.0" },
-          },
-          {
-            name: "deno_graph",
-            version: { from: "0.0.2", to: "0.1.0" },
-          },
-        ],
-      }] as any),
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.2", to: "0.1.0" },
+        },
+      ] as any),
       {
         from: undefined,
         to: "0.1.0",
@@ -65,18 +54,16 @@ describe("createVersionProps()", () => {
   });
   it("multiple versions with a common `from` and `to`", () => {
     assertEquals(
-      createVersionProp([{
-        dependencies: [
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.2.0" },
-          },
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.2.0" },
-          },
-        ],
-      }] as any),
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+      ] as any),
       {
         from: "0.0.1",
         to: "0.2.0",
@@ -85,18 +72,16 @@ describe("createVersionProps()", () => {
   });
   it("multiple versions with a common `from` and different `to`s", () => {
     assertThrows(() =>
-      createVersionProp([{
-        dependencies: [
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.1.0" },
-          },
-          {
-            name: "deno_graph",
-            version: { from: "0.0.1", to: "0.2.0" },
-          },
-        ],
-      }] as any)
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+      ] as any)
     );
   });
 });

@@ -8,7 +8,7 @@ import {
   execAll,
   write as writeUpdateResult,
 } from "./mod.ts";
-import { commitAll } from "./git/mod.ts";
+import { createGitCommitSequence, execGitCommitSequence } from "./git/mod.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -24,7 +24,7 @@ async function checkAction(_options: void, entrypoints: string[]) {
     console.log("🍵 No updates found");
     return;
   }
-  print(updates);
+  _print(updates);
   const action = await Select.prompt({
     message: "Choose an action",
     options: [
@@ -46,9 +46,9 @@ async function checkAction(_options: void, entrypoints: string[]) {
     case "abort":
       return;
     case "write":
-      return write(updates);
+      return _write(updates);
     case "commit":
-      return commit(updates);
+      return _commit(updates);
   }
 }
 
@@ -68,14 +68,14 @@ async function updateAction(
     console.log("🍵 No updates found");
     return;
   }
-  print(updates);
+  _print(updates);
   if (options.commit) {
-    return commit(updates);
+    return _commit(updates);
   }
-  return write(updates);
+  return _write(updates);
 }
 
-function print(updates: DependencyUpdate[]) {
+function _print(updates: DependencyUpdate[]) {
   console.log("💡 Found updates:");
   const dependencies = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
@@ -96,7 +96,7 @@ function print(updates: DependencyUpdate[]) {
   console.log();
 }
 
-function write(updates: DependencyUpdate[]) {
+function _write(updates: DependencyUpdate[]) {
   console.log();
   console.log("💾 Writing changes...");
   const results = execAll(updates);
@@ -106,12 +106,17 @@ function write(updates: DependencyUpdate[]) {
   });
 }
 
-function commit(updates: DependencyUpdate[]) {
+function _commit(updates: DependencyUpdate[]) {
   console.log();
   console.log("📝 Committing changes...");
-  commitAll(updates, {
-    groupBy: (dependency) => dependency.name,
-  });
+  execGitCommitSequence(
+    createGitCommitSequence(updates, {
+      groupBy: (dependency) => dependency.name,
+    }),
+    {
+      onCommit: (it) => console.log(`  ${it.message}`),
+    },
+  );
 }
 
 const main = new Command()
