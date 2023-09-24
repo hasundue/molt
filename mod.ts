@@ -16,7 +16,7 @@
  *
  * // Commit all changes to git
  * await commitAll(updates, {
- *   groupBy: (it) => it.name,
+ *   groupBy: (dependency) => dependency.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
  * });
@@ -36,11 +36,10 @@ import {
   init as initDenoGraph,
   load as defaultLoad,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import {
-  createDependencyUpdate,
-  DependencyUpdateProps,
-} from "./src/core.ts";
+import { createDependencyUpdate, type DependencyUpdate } from "./src/core.ts";
 import { createUrl, relativeFromCwd } from "./src/utils.ts";
+
+export { type DependencyUpdate } from "./src/core.ts";
 
 class DenoGraph {
   static #initialized = false;
@@ -52,11 +51,6 @@ class DenoGraph {
     await initDenoGraph();
     this.#initialized = true;
   }
-}
-
-export interface DependencyUpdate extends DependencyUpdateProps {
-  /** The relative path to the module from the current working directory. */
-  referrer: string;
 }
 
 export interface CreateDependencyUpdateOptions {
@@ -127,28 +121,48 @@ function createLoadCallback(
   };
 }
 
-export interface ModuleContentUpdate {
+export interface DependencyUpdateResult {
   /** The relative path to the module from the current working directory. */
   specifier: string;
   /** The updated content of the module. */
   content: string;
+}
+
+export interface ModuleContentUpdate extends DependencyUpdateResult {
   /** The dependency updates in the module. */
   dependencies: DependencyUpdate[];
 }
 
-export function execAll(
+export function execDependencyUpdateAll(
   updates: DependencyUpdate[],
 ): ModuleContentUpdate[] {
+  /** A map of module specifiers to the module content updates. */
   const results = new Map<string, ModuleContentUpdate>();
-  updates.forEach((u) => exec(u, results));
+  for (const dependencyUpdate of updates) {
+    const current = results.get(dependencyUpdate.referrer) ?? {
+      specifier: dependencyUpdate.referrer,
+      content: Deno.readTextFileSync(dependencyUpdate.referrer),
+      dependencies: [],
+    };
+    const content = applyDependencyUpdate(dependencyUpdate, current.content);
+    if (!content) {
+      continue;
+    }
+    results.set(dependencyUpdate.referrer, {
+      specifier: current.specifier,
+      content,
+      dependencies: current.dependencies.concat(dependencyUpdate),
+    });
+  }
   return Array.from(results.values());
 }
 
-export function exec(
+export function applyDependencyUpdate(
+  /** The dependency update to apply. */
   update: DependencyUpdate,
-  /** The results of previous updates. */
-  results?: Map<string, ModuleContentUpdate>,
-): ModuleContentUpdate | undefined {
+  /** Content of the module to update. */
+  content: string,
+): string | undefined {
   if (!update.code) {
     console.warn(`No code found for ${update.specifier}`);
     return;
@@ -160,32 +174,35 @@ export function exec(
     return;
   }
   const line = update.code.span.start.line;
-  const content = results?.get(update.referrer)?.content ??
-    Deno.readTextFileSync(update.referrer);
   const lines = content.split("\n");
 
   lines[line] = lines[line].slice(0, update.code.span.start.character) +
-    `"${update.specifier.replace(update.version.from, update.version.to)}"` +
+    `"${
+      update.specifier.replace(
+        update.version.from,
+        update.version.to,
+      )
+    }"` +
     lines[line].slice(update.code.span.end.character);
 
-  const result: ModuleContentUpdate = results?.get(update.referrer) ?? {
-    specifier: update.referrer,
-    content,
-    dependencies: [],
-  };
-  result.content = lines.join("\n");
-  result.dependencies.push(update);
-  results?.set(update.referrer, result);
-  return result;
+  return lines.join("\n");
 }
 
-export function writeAll(
-  results: ModuleContentUpdate[],
+export interface WriteModuleContentUpdateAllOptions {
+  onWrite?: (result: ModuleContentUpdate) => void;
+}
+
+export function writeModuleContentUpdateAll(
+  updates: ModuleContentUpdate[],
+  options: WriteModuleContentUpdateAllOptions = {},
 ): void {
-  results.forEach(write);
+  updates.forEach((it) => {
+    writeModuleContentUpdate(it);
+    options.onWrite?.(it);
+  });
 }
 
-export function write(
+export function writeModuleContentUpdate(
   result: ModuleContentUpdate,
 ): void {
   Deno.writeTextFileSync(result.specifier, result.content);

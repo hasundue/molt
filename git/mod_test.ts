@@ -8,7 +8,7 @@ import {
   describe,
   it,
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import { assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts";
+import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
 import { createGitCommitSequence, execGitCommitSequence } from "./mod.ts";
@@ -79,10 +79,11 @@ describe("execGitCommitSequence", () => {
 
   it("no grouping", () => {
     execGitCommitSequence(createGitCommitSequence(updates));
+    assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add src/fixtures/mod.ts src/fixtures/lib.ts",
+        // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
         'git commit -m "build(deps): update dependencies"',
       ],
     );
@@ -93,6 +94,7 @@ describe("execGitCommitSequence", () => {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     }));
+    assertEquals(DenoCommandStub.commands.length, 6);
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
@@ -111,6 +113,7 @@ describe("execGitCommitSequence", () => {
       groupBy: (update) => update.referrer,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     }));
+    assertEquals(DenoCommandStub.commands.length, 4);
     assertArrayIncludes(
       DenoCommandStub.commands,
       [

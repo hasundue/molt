@@ -5,8 +5,8 @@ import { Select } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/select.ts"
 import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
-  execAll,
-  write as writeUpdateResult,
+  execDependencyUpdateAll,
+  writeModuleContentUpdateAll,
 } from "./mod.ts";
 import { createGitCommitSequence, execGitCommitSequence } from "./git/mod.ts";
 
@@ -99,10 +99,9 @@ function _print(updates: DependencyUpdate[]) {
 function _write(updates: DependencyUpdate[]) {
   console.log();
   console.log("💾 Writing changes...");
-  const results = execAll(updates);
-  results.forEach((result) => {
-    console.log(`  ${result.specifier}`);
-    writeUpdateResult(result);
+  const results = execDependencyUpdateAll(updates);
+  writeModuleContentUpdateAll(results, {
+    onWrite: (module) => console.log(`  ${module.specifier}`),
   });
 }
 

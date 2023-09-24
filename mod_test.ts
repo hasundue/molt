@@ -12,10 +12,10 @@ import {
 import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
-  exec,
-  execAll,
-  type ModuleUpdateResult,
-  writeAll,
+  execDependencyUpdateAll,
+  type ModuleContentUpdate,
+  writeModuleContentUpdateAll,
+  applyDependencyUpdate,
 } from "./mod.ts";
 
 describe("collectDependencyUpdates()", () => {
@@ -27,7 +27,7 @@ describe("collectDependencyUpdates()", () => {
   });
 });
 
-describe("exec", () => {
+describe("applyDependencyUpdate", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
@@ -38,21 +38,19 @@ describe("exec", () => {
     const update = updates.find((update) =>
       update.specifier.includes("deno.land/x/deno_graph")
     )!;
-    const result = exec(update);
+    const result = applyDependencyUpdate(update, Deno.readTextFileSync(update.referrer));
     assertExists(result);
-    assertExists(result.content);
   });
   it("npm:node-emoji", () => {
     const update = updates.find((update) =>
       update.specifier.includes("node-emoji")
     )!;
-    const result = exec(update);
+    const result = applyDependencyUpdate(update, Deno.readTextFileSync(update.referrer));
     assertExists(result);
-    assertExists(result.content);
   });
 });
 
-describe("execAll", () => {
+describe("execDependencyUpdateArray", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
@@ -60,11 +58,11 @@ describe("execAll", () => {
     );
   });
   it("src/fixtures/mod.ts", () => {
-    const results = execAll(updates);
+    const results = execDependencyUpdateAll(updates);
     assertEquals(results.length, 2);
   });
   it("https://deno.land/std", () => {
-    const results = execAll(
+    const results = execDependencyUpdateAll(
       updates.filter((update) => update.specifier.includes("deno.land/std")),
     );
     assertEquals(results.length, 2);
@@ -77,7 +75,7 @@ describe("execAll", () => {
 describe("writeAll", () => {
   let output: Map<string, string>;
   let writeTextFileSyncStub: Stub;
-  let results: ModuleUpdateResult[];
+  let results: ModuleContentUpdate[];
 
   beforeAll(async () => {
     output = new Map<string, string>();
@@ -88,7 +86,7 @@ describe("writeAll", () => {
         output.set(path.toString(), data.toString());
       },
     );
-    results = execAll(
+    results = execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
   });
@@ -98,7 +96,7 @@ describe("writeAll", () => {
   });
 
   it("src/fixtures/mod.ts", () => {
-    writeAll(results);
+    writeModuleContentUpdateAll(results);
     assertExists(output.get("src/fixtures/mod.ts"));
     assertExists(output.get("src/fixtures/lib.ts"));
   });

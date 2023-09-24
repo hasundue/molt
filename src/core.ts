@@ -33,12 +33,18 @@ export function parseDependencyProps(
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-export interface DependencyUpdateProps extends Omit<DependencyProps, "version"> {
+export interface DependencyUpdateProps
+  extends Omit<DependencyProps, "version"> {
   version: {
     from: string;
     to: string;
   };
   code: NonNullable<DependencyJson["code"]>;
+}
+
+export interface DependencyUpdate extends DependencyUpdateProps {
+  /** The relative path to the module from the current working directory. */
+  referrer: string;
 }
 
 export async function createDependencyUpdate(
