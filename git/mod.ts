@@ -1,4 +1,4 @@
-// Copyright 2023 Shun Ueda. All rights reserved. MIT license.
+// Copyright 2023 Chiezo (Shun Ueda). All rights reserved. MIT license.
 
 import {
   type DependencyUpdate,
@@ -37,40 +37,66 @@ export const defaultCommitOptions: CommitOptions = {
   gitCommitOptions: [],
 };
 
-export function commitAll(
+export interface GitCommit {
+  message: string;
+  updates: DependencyUpdate[];
+}
+
+export interface GitCommitSequence {
+  commits: GitCommit[];
+  options: CommitOptions;
+}
+
+export function createGitCommitSequence(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
-) {
-  const {
-    groupBy,
-    composeCommitMessage,
-    gitAddOptions,
-    gitCommitOptions,
-  } = { ...defaultCommitOptions, ...options };
+): GitCommitSequence {
+  const _options = { ...defaultCommitOptions, ...options };
   const groups = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
-    const key = groupBy(u);
+    const key = _options.groupBy(u);
     if (!groups.has(key)) {
       groups.set(key, []);
     }
     groups.get(key)!.push(u);
   }
-  for (const [group, updates] of groups) {
-    const results = execAll(updates);
-    writeAll(results);
-    addGroup(results, gitAddOptions);
-    commitGroup(
-      {
-        group,
-        version: createVersionProp(results),
-      },
-      composeCommitMessage,
-      gitCommitOptions,
-    );
-  }
+  const commits: GitCommit[] = Array.from(groups.entries()).map((
+    [group, updates],
+  ) => ({
+    message: _options.composeCommitMessage({
+      group,
+      version: createVersionProp(updates),
+    }),
+    updates,
+  }));
+  return { commits, options: _options };
 }
 
-function addGroup(
+export interface ExecGitCommitSequenceOptions {
+  onCommit?: (commit: GitCommit) => void;
+}
+
+export function execGitCommitSequence(
+  sequence: GitCommitSequence,
+  options: ExecGitCommitSequenceOptions = {},
+) {
+  sequence.commits.forEach((it) => {
+    execGitCommit(it, sequence.options);
+    options.onCommit?.(it);
+  });
+}
+
+export function execGitCommit(
+  commit: GitCommit,
+  options: CommitOptions,
+) {
+  const results = execAll(commit.updates);
+  writeAll(results);
+  _add(results, options.gitAddOptions);
+  _commit(commit.message, options.gitCommitOptions);
+}
+
+function _add(
   results: ModuleUpdateResult[],
   options: string[],
 ) {
@@ -84,12 +110,10 @@ function addGroup(
   }
 }
 
-function commitGroup(
-  props: CommitProps,
-  composeCommitMessage: (props: CommitProps) => string,
+function _commit(
+  message: string,
   options: string[],
 ) {
-  const message = composeCommitMessage(props);
   const command = new Deno.Command("git", {
     args: ["commit", ...options, "-m", `"${message}"`],
   });

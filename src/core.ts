@@ -1,5 +1,5 @@
 import { ModuleJson } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import { createUrl, type Brand, type Maybe } from "./utils.ts";
+import { type Brand, createUrl, type Maybe } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
 
 export type Specifier = Brand<string, "specifier">;
