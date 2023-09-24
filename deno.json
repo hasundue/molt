@@ -7,6 +7,9 @@
     "dev": "deno task fmt && deno task lint && deno task test",
     "install": "deno install -A --name molt cli.ts"
   },
+  "fmt": {
+    "exclude": ["CHANGELOG.md"]
+  },
   "lint": {
     "exclude": ["src/fixtures/*"]
   }
