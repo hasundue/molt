@@ -47,6 +47,20 @@ export interface GitCommitSequence {
   options: CommitOptions;
 }
 
+export interface ExecGitCommitSequenceOptions {
+  onCommit?: (commit: GitCommit) => void;
+}
+
+export function commitDependencyUpdateAll(
+  updates: DependencyUpdate[],
+  options?: Partial<CommitOptions> & ExecGitCommitSequenceOptions,
+): void {
+  execGitCommitSequence(
+    createGitCommitSequence(updates, options),
+    options,
+  );
+}
+
 export function createGitCommitSequence(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
@@ -70,10 +84,6 @@ export function createGitCommitSequence(
     updates,
   }));
   return { commits, options: _options };
-}
-
-export interface ExecGitCommitSequenceOptions {
-  onCommit?: (commit: GitCommit) => void;
 }
 
 export function execGitCommitSequence(

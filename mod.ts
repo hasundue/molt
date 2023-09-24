@@ -9,13 +9,13 @@
  *
  * ```ts
  * import { collectDependencyUpdateAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ * import { commitDependencyUpdateAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
  *
  * const updates = await collectDependencyUpdateAll("./mod.ts");
  * console.log(updates);
  *
  * // Commit all changes to git
- * await commitAll(updates, {
+ * commitDependencyUpdateAll(updates, {
  *   groupBy: (dependency) => dependency.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,

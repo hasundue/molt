@@ -8,7 +8,7 @@ import {
   execDependencyUpdateAll,
   writeModuleContentUpdateAll,
 } from "./mod.ts";
-import { createGitCommitSequence, execGitCommitSequence } from "./git/mod.ts";
+import { commitDependencyUpdateAll } from "./git/mod.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -108,14 +108,10 @@ function _write(updates: DependencyUpdate[]) {
 function _commit(updates: DependencyUpdate[]) {
   console.log();
   console.log("📝 Committing changes...");
-  execGitCommitSequence(
-    createGitCommitSequence(updates, {
-      groupBy: (dependency) => dependency.name,
-    }),
-    {
-      onCommit: (it) => console.log(`  ${it.message}`),
-    },
-  );
+  commitDependencyUpdateAll(updates, {
+    groupBy: (dependency) => dependency.name,
+    onCommit: (commit) => console.log(`  ${commit.message}`),
+  });
 }
 
 const main = new Command()

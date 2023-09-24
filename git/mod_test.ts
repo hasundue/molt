@@ -11,7 +11,7 @@ import {
 import { assertEquals, assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
-import { createGitCommitSequence, execGitCommitSequence } from "./mod.ts";
+import { commitDependencyUpdateAll } from "./mod.ts";
 
 const OriginalDenoCommand = Deno.Command;
 const readTextFileSyncOriginal = Deno.readTextFileSync;
@@ -31,7 +31,7 @@ class DenoCommandStub {
   }
 }
 
-describe("execGitCommitSequence", () => {
+describe("commitDependencyUpdateAll()", () => {
   let output: { path: string; content: string }[] = [];
   let updates: DependencyUpdate[];
   let writeTextFileSyncStub: Stub;
@@ -78,7 +78,7 @@ describe("execGitCommitSequence", () => {
   });
 
   it("no grouping", () => {
-    execGitCommitSequence(createGitCommitSequence(updates));
+    commitDependencyUpdateAll(updates);
     assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -90,10 +90,10 @@ describe("execGitCommitSequence", () => {
   });
 
   it("group by dependency name", () => {
-    execGitCommitSequence(createGitCommitSequence(updates, {
+    commitDependencyUpdateAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
-    }));
+    });
     assertEquals(DenoCommandStub.commands.length, 6);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -109,10 +109,10 @@ describe("execGitCommitSequence", () => {
   });
 
   it("group by module (file) name", () => {
-    execGitCommitSequence(createGitCommitSequence(updates, {
+    commitDependencyUpdateAll(updates, {
       groupBy: (update) => update.referrer,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
-    }));
+    });
     assertEquals(DenoCommandStub.commands.length, 4);
     assertArrayIncludes(
       DenoCommandStub.commands,
