@@ -12,7 +12,6 @@ import { assertArrayIncludes } from "https://deno.land/std@0.202.0/assert/mod.ts
 import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
 import { commitAll } from "./mod.ts";
-import { log } from "../src/utils.ts";
 
 const OriginalDenoCommand = Deno.Command;
 const readTextFileSyncOriginal = Deno.readTextFileSync;
@@ -37,13 +36,6 @@ describe("commitAll()", () => {
   let updates: DependencyUpdate[];
   let writeTextFileSyncStub: Stub;
   let readTextFileSyncStub: Stub;
-
-  function debugOutput() {
-    for (const { path, content } of output) {
-      log.debug(path);
-      log.debug(content);
-    }
-  }
 
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
@@ -94,7 +86,6 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update dependencies"',
       ],
     );
-    debugOutput();
   });
 
   it("group by dependency name", () => {
@@ -113,7 +104,6 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update deno.land/std"',
       ],
     );
-    debugOutput();
   });
 
   it("group by module (file) name", () => {
@@ -130,6 +120,5 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update src/fixtures/lib.ts"',
       ],
     );
-    debugOutput();
   });
 });
