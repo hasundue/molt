@@ -33,7 +33,7 @@ export function parseDependencyProps(
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
+export interface DependencyUpdateProps extends Omit<DependencyProps, "version"> {
   version: {
     from: string;
     to: string;
@@ -44,7 +44,7 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
 export async function createDependencyUpdate(
   dependency: DependencyJson,
   targetVersion?: string,
-): Promise<DependencyUpdate | undefined> {
+): Promise<DependencyUpdateProps | undefined> {
   const newSemVer = targetVersion
     ? targetVersion
     : await resolveLatestSemVer(dependency.specifier);

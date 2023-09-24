@@ -38,7 +38,7 @@ import {
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import {
   createDependencyUpdate,
-  DependencyUpdate as _DependencyUpdate,
+  DependencyUpdateProps,
 } from "./src/core.ts";
 import { createUrl, relativeFromCwd } from "./src/utils.ts";
 
@@ -54,7 +54,7 @@ class DenoGraph {
   }
 }
 
-export interface DependencyUpdate extends _DependencyUpdate {
+export interface DependencyUpdate extends DependencyUpdateProps {
   /** The relative path to the module from the current working directory. */
   referrer: string;
 }
@@ -127,7 +127,7 @@ function createLoadCallback(
   };
 }
 
-export interface ModuleUpdateResult {
+export interface ModuleContentUpdate {
   /** The relative path to the module from the current working directory. */
   specifier: string;
   /** The updated content of the module. */
@@ -138,8 +138,8 @@ export interface ModuleUpdateResult {
 
 export function execAll(
   updates: DependencyUpdate[],
-): ModuleUpdateResult[] {
-  const results = new Map<string, ModuleUpdateResult>();
+): ModuleContentUpdate[] {
+  const results = new Map<string, ModuleContentUpdate>();
   updates.forEach((u) => exec(u, results));
   return Array.from(results.values());
 }
@@ -147,8 +147,8 @@ export function execAll(
 export function exec(
   update: DependencyUpdate,
   /** The results of previous updates. */
-  results?: Map<string, ModuleUpdateResult>,
-): ModuleUpdateResult | undefined {
+  results?: Map<string, ModuleContentUpdate>,
+): ModuleContentUpdate | undefined {
   if (!update.code) {
     console.warn(`No code found for ${update.specifier}`);
     return;
@@ -168,7 +168,7 @@ export function exec(
     `"${update.specifier.replace(update.version.from, update.version.to)}"` +
     lines[line].slice(update.code.span.end.character);
 
-  const result: ModuleUpdateResult = results?.get(update.referrer) ?? {
+  const result: ModuleContentUpdate = results?.get(update.referrer) ?? {
     specifier: update.referrer,
     content,
     dependencies: [],
@@ -180,13 +180,13 @@ export function exec(
 }
 
 export function writeAll(
-  results: ModuleUpdateResult[],
+  results: ModuleContentUpdate[],
 ): void {
   results.forEach(write);
 }
 
 export function write(
-  result: ModuleUpdateResult,
+  result: ModuleContentUpdate,
 ): void {
   Deno.writeTextFileSync(result.specifier, result.content);
 }
