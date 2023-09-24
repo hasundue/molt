@@ -2,9 +2,9 @@
 
 import {
   type DependencyUpdate,
-  execAll,
-  type ModuleUpdateResult,
-  writeAll,
+  execDependencyUpdateAll,
+  type ModuleContentUpdate,
+  writeModuleContentUpdateAll,
 } from "../mod.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
 
@@ -90,14 +90,14 @@ export function execGitCommit(
   commit: GitCommit,
   options: CommitOptions,
 ) {
-  const results = execAll(commit.updates);
-  writeAll(results);
+  const results = execDependencyUpdateAll(commit.updates);
+  writeModuleContentUpdateAll(results);
   _add(results, options.gitAddOptions);
   _commit(commit.message, options.gitCommitOptions);
 }
 
 function _add(
-  results: ModuleUpdateResult[],
+  results: ModuleContentUpdate[],
   options: string[],
 ) {
   const files = results.map((result) => result.specifier);
