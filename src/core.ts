@@ -5,7 +5,7 @@ import {
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import { type Brand, createUrl, type Maybe } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
-import { readFromJson } from "./import_map.ts";
+import { ImportMap, readFromJson } from "./import_map.ts";
 
 export type Specifier = Brand<string, "specifier">;
 
@@ -57,7 +57,7 @@ export async function createResolve(
   const importMap = await readFromJson(options.importMap);
   return (specifier, referrer) => {
     try {
-      return importMap.resolve(specifier, referrer);
+      return importMap.tryResolve(specifier, referrer);
     } catch {
       // Let the loader handle invalid specifiers
       return specifier;
@@ -94,36 +94,57 @@ export function parseDependencyProps(
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-export interface DependencyUpdateProps
+export interface DependencyUpdate
   extends Omit<DependencyProps, "version"> {
   version: {
     from: string;
     to: string;
   };
   code: NonNullable<DependencyJson["code"]>;
+  /** The relative path to the module from the current working directory. */
+  referrer: string;
+}
+
+export interface CreateDependencyUpdateOptions {
+  /** The path to the json including import maps. */
+  importMap?: string;
 }
 
 export async function createDependencyUpdate(
   dependency: DependencyJson,
-  targetVersion?: string,
-): Promise<DependencyUpdateProps | undefined> {
-  const newSemVer = targetVersion
-    ? targetVersion
-    : await resolveLatestSemVer(dependency.specifier);
+  /** The specifier of the module that depends on the dependency. */
+  referrer: string,
+  options?: CreateDependencyUpdateOptions,
+): Promise<DependencyUpdate | undefined> {
+  if (!dependency?.code?.specifier) {
+    console.warn(
+      `The dependency ${dependency.specifier} has no resolved specifier.`,
+    );
+    return;
+  }
+  const newSemVer = await resolveLatestSemVer(dependency.code.specifier);
   if (!newSemVer) {
     return;
   }
-  const props = parseDependencyProps(dependency.specifier);
+  const importMap = options?.importMap
+    ? await readFromJson(options.importMap)
+    : undefined;
+  const mapped = importMap?.tryResolve(dependency.specifier, referrer);
+  const specifier = mapped
+    ? importMap!.imports[mapped.key]
+    : dependency.code.specifier;
+  const props = parseDependencyProps(dependency.code.specifier);
   if (!props) {
     return;
   }
   return {
     ...props,
-    code: dependency.code!,
+    code: dependency.code,
     version: {
       from: (props.version),
       to: newSemVer,
     },
+    referrer,
   };
 }
 

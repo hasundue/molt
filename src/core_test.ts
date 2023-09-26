@@ -18,7 +18,9 @@ import { toFileSpecifier } from "./utils.ts";
 describe("createResolveImportMap()", () => {
   let resolve: NonNullable<CreateGraphOptions["resolve"]>;
   beforeAll(async () => {
-    const _resolve = await createResolve({ importMap: "src/fixtures/deno.json" });
+    const _resolve = await createResolve({
+      importMap: "src/fixtures/deno.json",
+    });
     assertExists(_resolve);
     resolve = _resolve;
   });
@@ -96,6 +98,15 @@ describe("createDependencyUpdate()", () => {
   it("npm:node-emoji", async () => {
     const update = await createDependencyUpdate({
       specifier: "npm:node-emoji@1.0.0",
+    });
+    assertExists(update);
+  });
+});
+
+describe("createDependencyUpdate() - with import map", () => {
+  it("https://deno.land/std", async () => {
+    const update = await createDependencyUpdate({
+      specifier: "https://deno.land/std@0.1.0/version.ts",
     });
     assertExists(update);
   });

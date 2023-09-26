@@ -33,12 +33,11 @@ import {
 import {
   createDependencyUpdate,
   createLoad,
-  type CreateLoadOptions,
   createResolve,
-  type CreateResolveOptions,
-  type DependencyUpdateProps,
+  type DependencyUpdate,
 } from "./src/core.ts";
 import { ensureArray, relativeFromCwd, toFileSpecifier } from "./src/utils.ts";
+import { readFromJson } from "./src/import_map.ts";
 
 class DenoGraph {
   static #initialized = false;
@@ -52,13 +51,10 @@ class DenoGraph {
   }
 }
 
-export type CollectDependencyUpdateOptions =
-  & CreateLoadOptions
-  & CreateResolveOptions;
-
-export interface DependencyUpdate extends DependencyUpdateProps {
-  /** The relative path to the module from the current working directory. */
-  referrer: string;
+export interface CollectDependencyUpdateOptions {
+  /** The path to the json including import maps. */
+  importMap?: string;
+  loadRemote?: boolean;
 }
 
 export async function collectDependencyUpdateAll(
@@ -76,15 +72,27 @@ export async function collectDependencyUpdateAll(
     load: createLoad(options),
     resolve: await createResolve(options),
   });
+  console.debug(graph.modules);
+  const importMap = options.importMap
+    ? await readFromJson(options.importMap)
+    : undefined;
   const updates: DependencyUpdate[] = [];
   await Promise.all(
     graph.modules.flatMap((module) =>
       module.dependencies?.map(async (dependency) => {
-        const update = await createDependencyUpdate(dependency);
+        const update = await createDependencyUpdate(
+          dependency,
+          module.specifier,
+          {
+            importMap: options.importMap,
+          },
+        );
         return update
           ? updates.push({
             ...update,
-            referrer: relativeFromCwd(fromFileUrl(module.specifier)),
+            referrer: importMap?.resolve(dependency.specifier, module.specifier)
+              ? options.importMap!
+              : relativeFromCwd(fromFileUrl(module.specifier)),
           })
           : undefined;
       })
