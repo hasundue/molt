@@ -73,7 +73,7 @@ export async function readFromJson(path: FilePath): Promise<ImportMap> {
   };
 }
 
-export async function isImportMap(path: string): Promise<boolean> {
+export async function isImportMap(path: FilePath): Promise<boolean> {
   const content = await Deno.readTextFile(path);
   try {
     // The url doesn't matter here.

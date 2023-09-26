@@ -5,13 +5,13 @@ import {
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import type {
   DependencySpecifier,
+  FilePath,
   Maybe,
   ModuleSpecifier,
   Path,
   RelativePath,
   ResolvedDependencySpecifier,
   SemVerString,
-  UrlString,
 } from "./types.ts";
 import {
   isFileSpecifier,
@@ -56,7 +56,7 @@ export function createLoad(
 
 export async function createResolve(
   options?: {
-    importMap?: Path;
+    importMap?: FilePath;
   },
 ): Promise<CreateGraphOptions["resolve"]> {
   if (!options?.importMap) {
@@ -111,9 +111,9 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The relative path to the module from the current working directory. */
-  referrer: RelativePath | UrlString;
+  referrer: Path;
   /** The path to the import map used to resolve the dependency. */
-  importMap?: RelativePath;
+  importMap?: FilePath;
 }
 
 export interface CreateDependencyUpdateOptions {

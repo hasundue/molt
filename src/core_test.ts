@@ -9,6 +9,7 @@ import {
   assertObjectMatch,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { CreateGraphOptions } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
+import type { DependencySpecifier, FilePath } from "./types.ts";
 import {
   createDependencyUpdate,
   createResolve,
@@ -21,7 +22,7 @@ describe("createResolve()", () => {
   let resolve: NonNullable<CreateGraphOptions["resolve"]>;
   beforeAll(async () => {
     const _resolve = await createResolve({
-      importMap: "src/fixtures/_deno.json",
+      importMap: "src/fixtures/_deno.json" as FilePath,
     });
     assertExists(_resolve);
     resolve = _resolve;
@@ -32,8 +33,8 @@ describe("createResolve()", () => {
   });
   it("resolve an absolute path", () => {
     assertEquals(
-      resolve("/lib.ts", toFileSpecifier("src/fixtures/mod.ts")),
-      toFileSpecifier("src/fixtures/lib.ts"),
+      resolve("/lib.ts", toFileSpecifier("src/fixtures/mod.ts" as FilePath)),
+      toFileSpecifier("src/fixtures/lib.ts" as FilePath),
     );
   });
 });
@@ -41,7 +42,9 @@ describe("createResolve()", () => {
 describe("parseDependencyProps()", () => {
   it("https://deno.land/std", () =>
     assertEquals(
-      parseDependencyProps("https://deno.land/std@0.1.0/version.ts"),
+      parseDependencyProps(
+        "https://deno.land/std@0.1.0/version.ts" as DependencySpecifier,
+      ),
       {
         name: "deno.land/std",
         version: "0.1.0",
@@ -50,12 +53,16 @@ describe("parseDependencyProps()", () => {
     ));
   it("https://deno.land/std (no semver)", () =>
     assertEquals(
-      parseDependencyProps("https://deno.land/std/version.ts"),
+      parseDependencyProps(
+        "https://deno.land/std/version.ts" as DependencySpecifier,
+      ),
       undefined,
     ));
   it("https://deno.land/x/hono (with a leading 'v')", () =>
     assertEquals(
-      parseDependencyProps("https://deno.land/x/hono@v0.1.0"),
+      parseDependencyProps(
+        "https://deno.land/x/hono@v0.1.0" as DependencySpecifier,
+      ),
       {
         name: "deno.land/x/hono",
         version: "v0.1.0",
@@ -64,7 +71,7 @@ describe("parseDependencyProps()", () => {
     ));
   it("npm:node-emoji", () =>
     assertEquals(
-      parseDependencyProps("npm:node-emoji@1.0.0"),
+      parseDependencyProps("npm:node-emoji@1.0.0" as DependencySpecifier),
       {
         name: "node-emoji",
         version: "1.0.0",
@@ -81,7 +88,7 @@ describe("createDependencyUpdate()", () => {
         specifier: "https://deno.land/std@0.1.0/version.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, "src/fixtures/mod.ts");
+    }, toFileSpecifier("src/fixtures/mod.ts" as FilePath));
     assertExists(update);
   });
   it("https://deno.land/std - no semver", async () => {
@@ -91,7 +98,7 @@ describe("createDependencyUpdate()", () => {
         specifier: "https://deno.land/std/version.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, "src/fixtures/mod.ts");
+    }, toFileSpecifier("src/fixtures/mod.ts" as FilePath));
     assertEquals(update, undefined);
   });
   it("https://deno.land/x/deno_graph", async () => {
@@ -101,7 +108,7 @@ describe("createDependencyUpdate()", () => {
         specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, "src/fixtures/mod.ts");
+    }, toFileSpecifier("src/fixtures/mod.ts" as FilePath));
     assertExists(update);
   });
   it("npm:node-emoji", async () => {
@@ -111,7 +118,7 @@ describe("createDependencyUpdate()", () => {
         specifier: "npm:node-emoji@1.0.0",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, "src/fixtures/mod.ts");
+    }, toFileSpecifier("src/fixtures/mod.ts" as FilePath));
     assertExists(update);
   });
 });
@@ -119,7 +126,7 @@ describe("createDependencyUpdate()", () => {
 describe("createDependencyUpdate() - with import map", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
-    importMap = await readFromJson("src/fixtures/_deno.json");
+    importMap = await readFromJson("src/fixtures/_deno.json" as FilePath);
   });
   it("std/version.ts", async () => {
     const update = await createDependencyUpdate(
@@ -130,7 +137,7 @@ describe("createDependencyUpdate() - with import map", () => {
           // deno-lint-ignore no-explicit-any
         } as any,
       },
-      "src/fixtures/import_maps.ts",
+      toFileSpecifier("src/fixtures/import_maps.ts" as FilePath),
       { importMap },
     );
     assertExists(update);
