@@ -1,8 +1,69 @@
-import { ModuleJson } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
+import {
+  CreateGraphOptions,
+  load as defaultLoad,
+  ModuleJson,
+} from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import { type Brand, createUrl, type Maybe } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
+import { readFromJson } from "./import_map.ts";
 
 export type Specifier = Brand<string, "specifier">;
+
+export interface CreateLoadOptions {
+  loadRemote?: boolean;
+}
+
+export function createLoad(
+  options: CreateLoadOptions = {},
+): NonNullable<CreateGraphOptions["load"]> {
+  return async (specifier) => {
+    const url = createUrl(specifier);
+    if (!url) {
+      throw new Error(`Invalid specifier: ${specifier}`);
+    }
+    switch (url.protocol) {
+      case "node:":
+      case "npm:":
+        return {
+          kind: "external",
+          specifier,
+        };
+      case "http:":
+      case "https:":
+        if (options.loadRemote) {
+          return await defaultLoad(specifier);
+        }
+        return {
+          kind: "external",
+          specifier,
+        };
+      default:
+        return await defaultLoad(specifier);
+    }
+  };
+}
+
+export interface CreateResolveOptions {
+  /** The path to the json file of the import map. */
+  importMap?: string;
+}
+
+export async function createResolve(
+  options: CreateResolveOptions = {},
+): Promise<CreateGraphOptions["resolve"]> {
+  if (!options.importMap) {
+    return undefined;
+  }
+  const importMap = await readFromJson(options.importMap);
+  return (specifier, referrer) => {
+    try {
+      return importMap.resolve(specifier, referrer);
+    } catch {
+      // Let the loader handle invalid specifiers
+      return specifier;
+    }
+  };
+}
 
 export interface DependencyProps {
   specifier: string;
@@ -40,11 +101,6 @@ export interface DependencyUpdateProps
     to: string;
   };
   code: NonNullable<DependencyJson["code"]>;
-}
-
-export interface DependencyUpdate extends DependencyUpdateProps {
-  /** The relative path to the module from the current working directory. */
-  referrer: string;
 }
 
 export async function createDependencyUpdate(

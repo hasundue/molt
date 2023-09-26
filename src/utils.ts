@@ -1,4 +1,9 @@
-import { relative } from "https://deno.land/std@0.202.0/path/mod.ts";
+import {
+  isAbsolute,
+  relative,
+  resolve,
+  toFileUrl,
+} from "https://deno.land/std@0.202.0/path/mod.ts";
 
 export type Brand<T, B> = T & { __brand: B };
 
@@ -14,4 +19,16 @@ export function createUrl(specifier: string): Maybe<URL> {
 
 export function relativeFromCwd(path: string) {
   return relative(Deno.cwd(), path);
+}
+
+export function toFileSpecifier(path: string) {
+  return toFileUrl(
+    isAbsolute(path) ? path : resolve(path),
+  ).href;
+}
+
+export function ensureArray<T>(
+  arg: T | T[],
+): T[] {
+  return Array.isArray(arg) ? arg : [arg];
 }

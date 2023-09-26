@@ -19,7 +19,7 @@ import {
 } from "./mod.ts";
 
 describe("collectDependencyUpdates()", () => {
-  it("https://deno.land/x/deno_graph", async () => {
+  it("src/fixtures/mod.ts", async () => {
     const updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );

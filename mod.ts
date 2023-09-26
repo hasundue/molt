@@ -25,21 +25,20 @@
  * @module
  */
 
-import {
-  fromFileUrl,
-  resolve,
-  toFileUrl,
-} from "https://deno.land/std@0.202.0/path/mod.ts";
+import { fromFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
-  CreateGraphOptions,
   init as initDenoGraph,
-  load as defaultLoad,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import { createDependencyUpdate, type DependencyUpdate } from "./src/core.ts";
-import { createUrl, relativeFromCwd } from "./src/utils.ts";
-
-export { type DependencyUpdate } from "./src/core.ts";
+import {
+  createDependencyUpdate,
+  createLoad,
+  type CreateLoadOptions,
+  createResolve,
+  type CreateResolveOptions,
+  type DependencyUpdateProps,
+} from "./src/core.ts";
+import { ensureArray, relativeFromCwd, toFileSpecifier } from "./src/utils.ts";
 
 class DenoGraph {
   static #initialized = false;
@@ -53,25 +52,29 @@ class DenoGraph {
   }
 }
 
-export interface CreateDependencyUpdateOptions {
-  loadRemote?: boolean;
+export type CollectDependencyUpdateOptions =
+  & CreateLoadOptions
+  & CreateResolveOptions;
+
+export interface DependencyUpdate extends DependencyUpdateProps {
+  /** The relative path to the module from the current working directory. */
+  referrer: string;
 }
 
 export async function collectDependencyUpdateAll(
   entrypoints: string | string[],
-  options: CreateDependencyUpdateOptions = {
-    loadRemote: false,
-  },
+  options: CollectDependencyUpdateOptions = {},
 ): Promise<DependencyUpdate[]> {
   if (!entrypoints) {
     return [];
   }
   await DenoGraph.ensureInit();
-  const specifiers = [entrypoints].flat().map((e) =>
-    toFileUrl(resolve(e)).href
+  const specifiers = ensureArray(entrypoints).map((path) =>
+    toFileSpecifier(path)
   );
   const graph = await createGraph(specifiers, {
-    load: createLoadCallback(options),
+    load: createLoad(options),
+    resolve: await createResolve(options),
   });
   const updates: DependencyUpdate[] = [];
   await Promise.all(
@@ -88,37 +91,6 @@ export async function collectDependencyUpdateAll(
     ),
   );
   return updates;
-}
-
-function createLoadCallback(
-  options: CreateDependencyUpdateOptions,
-): CreateGraphOptions["load"] {
-  // deno-lint-ignore require-await
-  return async (specifier) => {
-    const url = createUrl(specifier);
-    if (!url) {
-      throw new Error(`Invalid specifier: ${specifier}`);
-    }
-    switch (url.protocol) {
-      case "node:":
-      case "npm:":
-        return {
-          kind: "external",
-          specifier,
-        };
-      case "http:":
-      case "https:":
-        if (options.loadRemote) {
-          return defaultLoad(specifier);
-        }
-        return {
-          kind: "external",
-          specifier,
-        };
-      default:
-        return defaultLoad(specifier);
-    }
-  };
 }
 
 export interface DependencyUpdateResult {

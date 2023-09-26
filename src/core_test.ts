@@ -1,9 +1,40 @@
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
+import {
+  beforeAll,
+  describe,
+  it,
+} from "https://deno.land/std@0.202.0/testing/bdd.ts";
 import {
   assertEquals,
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { createDependencyUpdate, parseDependencyProps } from "./core.ts";
+import { CreateGraphOptions } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
+import {
+  createDependencyUpdate,
+  createResolve,
+  parseDependencyProps,
+} from "./core.ts";
+import { toFileSpecifier } from "./utils.ts";
+
+describe("createResolveImportMap()", () => {
+  let resolve: NonNullable<CreateGraphOptions["resolve"]>;
+  beforeAll(async () => {
+    const _resolve = await createResolve({ importMap: "src/fixtures/deno.json" });
+    assertExists(_resolve);
+    resolve = _resolve;
+  });
+  it("does not resolve a file specifier", () => {
+    assertEquals(
+      resolve("./lib.ts", toFileSpecifier("mod.ts")),
+      toFileSpecifier("lib.ts"),
+    );
+  });
+  it("resolve a relative path", () => {
+    assertEquals(
+      resolve("lodash", toFileSpecifier("mod.ts")),
+      "https://esm.sh/lodash@4.17.21",
+    );
+  });
+});
 
 describe("parseDependencyProps()", () => {
   it("https://deno.land/std", () =>
