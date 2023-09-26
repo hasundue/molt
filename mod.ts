@@ -29,13 +29,14 @@ import {
   createGraph,
   init as initDenoGraph,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
+import type { ModuleSpecifier } from "./src/types.ts";
 import {
   createDependencyUpdate,
   createLoad,
   createResolve,
   type DependencyUpdate,
 } from "./src/core.ts";
-import { ensureArray, toFileSpecifier } from "./src/utils.ts";
+import { ensureFilePath, toArray, toFileSpecifier } from "./src/utils.ts";
 import { readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
@@ -62,16 +63,21 @@ export async function collectDependencyUpdateAll(
   entrypoints: string | string[],
   options: CollectDependencyUpdateOptions = {},
 ): Promise<DependencyUpdate[]> {
-  if (!entrypoints) {
+  const _entrypoints = toArray(entrypoints);
+  if (!_entrypoints.length) {
     return [];
   }
+  const _options = {
+    importMap: options.importMap ? ensureFilePath(options.importMap) : undefined,
+    loadRemote: options.loadRemote,
+  };
+  const specifiers = _entrypoints.map((path) => {
+    return toFileSpecifier(ensureFilePath(path))
+  });
   await DenoGraph.ensureInit();
-  const specifiers = ensureArray(entrypoints).map((path) =>
-    toFileSpecifier(path)
-  );
   const graph = await createGraph(specifiers, {
-    load: createLoad(options),
-    resolve: await createResolve(options),
+    load: createLoad(_options),
+    resolve: await createResolve(_options),
   });
   const updates: DependencyUpdate[] = [];
   await Promise.all(
@@ -79,10 +85,10 @@ export async function collectDependencyUpdateAll(
       module.dependencies?.map(async (dependency) => {
         const update = await createDependencyUpdate(
           dependency,
-          module.specifier,
+          module.specifier as ModuleSpecifier,
           {
-            importMap: options.importMap
-              ? await readFromJson(options.importMap)
+            importMap: _options.importMap
+              ? await readFromJson(_options.importMap)
               : undefined,
           },
         );

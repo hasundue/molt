@@ -13,10 +13,6 @@ export type AbsolutePath = Brand<string, "AbsolutePath">;
 export type UrlString = Brand<string, "UrlString">;
 
 export type DependencySpecifier = Brand<string, "DependencySpecifier">;
-export type ResolvedDependencySpecifier = Brand<
-  DependencySpecifier,
-  "ResolvedDependencySpecifier"
->;
 export type ModuleSpecifier = FileSpecifier | UrlSpecifier;
 export type FileSpecifier = Brand<string, "FileSpecifier">;
 export type UrlSpecifier = Brand<string, "UrlSpecifier">;

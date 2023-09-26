@@ -53,3 +53,24 @@ export function ensureArray<T>(
 ): T[] {
   return Array.isArray(arg) ? arg : [arg];
 }
+
+export function isUrlString(str: string): str is UrlString {
+  try {
+    new URL(str);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function ensureFilePath(str: string): FilePath {
+  if (isUrlString(str)) {
+    throw new TypeError(`Invalid file path: ${str}`);
+  }
+  try {
+    toFileUrl(resolve(str));
+    return str as FilePath;
+  } catch {
+    throw new TypeError(`Invalid file path: ${str}`);
+  }
+}

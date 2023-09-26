@@ -8,10 +8,9 @@ import type {
   FilePath,
   Maybe,
   ModuleSpecifier,
-  Path,
   RelativePath,
-  ResolvedDependencySpecifier,
   SemVerString,
+  UrlString,
 } from "./types.ts";
 import {
   isFileSpecifier,
@@ -24,7 +23,7 @@ import { ImportMap, readFromJson } from "./import_map.ts";
 
 export function createLoad(
   options?: {
-    loadRemote?: false;
+    loadRemote?: boolean;
   },
 ): NonNullable<CreateGraphOptions["load"]> {
   return async (specifier) => {
@@ -99,7 +98,7 @@ type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: ResolvedDependencySpecifier;
+  specifier: DependencySpecifier;
   version: {
     from: SemVerString;
     to: SemVerString;
@@ -111,7 +110,7 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The relative path to the module from the current working directory. */
-  referrer: Path;
+  referrer: RelativePath | UrlString;
   /** The path to the import map used to resolve the dependency. */
   importMap?: FilePath;
 }
@@ -151,7 +150,7 @@ export async function createDependencyUpdate(
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: dependency.code.specifier as ResolvedDependencySpecifier,
+    specifier: dependency.code.specifier as DependencySpecifier,
     code: {
       // We prefer to put the original specifier here.
       specifier: dependency.specifier as DependencySpecifier,
