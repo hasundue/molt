@@ -25,7 +25,6 @@
  * @module
  */
 
-import { fromFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
   init as initDenoGraph,
@@ -36,7 +35,7 @@ import {
   createResolve,
   type DependencyUpdate,
 } from "./src/core.ts";
-import { ensureArray, relativeFromCwd, toFileSpecifier } from "./src/utils.ts";
+import { ensureArray, toFileSpecifier } from "./src/utils.ts";
 import { readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
@@ -74,10 +73,6 @@ export async function collectDependencyUpdateAll(
     load: createLoad(options),
     resolve: await createResolve(options),
   });
-  console.debug(graph.modules);
-  const importMap = options.importMap
-    ? await readFromJson(options.importMap)
-    : undefined;
   const updates: DependencyUpdate[] = [];
   await Promise.all(
     graph.modules.flatMap((module) =>
@@ -86,17 +81,12 @@ export async function collectDependencyUpdateAll(
           dependency,
           module.specifier,
           {
-            importMap: options.importMap,
+            importMap: options.importMap
+              ? await readFromJson(options.importMap)
+              : undefined,
           },
         );
-        return update
-          ? updates.push({
-            ...update,
-            referrer: importMap?.tryResolve(dependency.specifier, module.specifier)
-              ? options.importMap!
-              : relativeFromCwd(fromFileUrl(module.specifier)),
-          })
-          : undefined;
+        return update ? updates.push(update) : undefined;
       })
     ),
   );

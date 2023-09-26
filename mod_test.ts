@@ -18,21 +18,22 @@ import {
   writeModuleContentUpdateAll,
 } from "./mod.ts";
 
-describe.only("collectDependencyUpdates()", () => {
+describe("collectDependencyUpdates()", () => {
   it("src/fixtures/mod.ts", async () => {
     const updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
     assertEquals(updates.length, 4);
   });
-  it.only("src/fixtures/mod.ts - with deno.json", async () => {
+  it("src/fixtures/mod.ts - with deno.json", async () => {
     const updates = await collectDependencyUpdateAll(
       "./src/fixtures/import_maps.ts",
       {
         importMap: "src/fixtures/_deno.json",
       },
     );
-    console.log(updates);
+    console.debug(updates);
+    assertEquals(updates.length, 4);
   });
 });
 
@@ -87,7 +88,7 @@ describe("execDependencyUpdateArray", () => {
   });
 });
 
-describe("writeAll", () => {
+describe.only("writeAll", () => {
   let output: Map<string, string>;
   let writeTextFileSyncStub: Stub;
   let results: ModuleContentUpdate[];
@@ -104,6 +105,7 @@ describe("writeAll", () => {
     results = execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
+    console.debug(results);
   });
 
   afterAll(() => {

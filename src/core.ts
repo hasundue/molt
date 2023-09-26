@@ -3,21 +3,32 @@ import {
   load as defaultLoad,
   ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import { type Brand, createUrl, type Maybe, toFileSpecifier } from "./utils.ts";
+import type {
+  DependencySpecifier,
+  Maybe,
+  ModuleSpecifier,
+  Path,
+  RelativePath,
+  ResolvedDependencySpecifier,
+  SemVerString,
+  UrlString,
+} from "./types.ts";
+import {
+  isFileSpecifier,
+  toRelativePath,
+  toUrlString,
+  tryCreateUrl,
+} from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
 
-export type Specifier = Brand<string, "specifier">;
-
-export interface CreateLoadOptions {
-  loadRemote?: boolean;
-}
-
 export function createLoad(
-  options: CreateLoadOptions = {},
+  options?: {
+    loadRemote?: false;
+  },
 ): NonNullable<CreateGraphOptions["load"]> {
   return async (specifier) => {
-    const url = createUrl(specifier);
+    const url = tryCreateUrl(specifier);
     if (!url) {
       throw new Error(`Invalid specifier: ${specifier}`);
     }
@@ -30,7 +41,7 @@ export function createLoad(
         };
       case "http:":
       case "https:":
-        if (options.loadRemote) {
+        if (options?.loadRemote) {
           return await defaultLoad(specifier);
         }
         return {
@@ -43,33 +54,31 @@ export function createLoad(
   };
 }
 
-export interface CreateResolveOptions {
-  /** The path to the json file of the import map. */
-  importMap?: string;
-}
-
 export async function createResolve(
-  options: CreateResolveOptions = {},
+  options?: {
+    importMap?: Path;
+  },
 ): Promise<CreateGraphOptions["resolve"]> {
-  if (!options.importMap) {
+  if (!options?.importMap) {
     return undefined;
   }
   const importMap = await readFromJson(options.importMap);
   return (specifier, referrer) => {
-    return importMap.tryResolve(specifier, referrer)?.specifier ?? specifier;
+    return importMap.tryResolve(specifier, referrer as ModuleSpecifier)
+      ?.specifier ?? specifier;
   };
 }
 
 export interface DependencyProps {
   name: string;
-  version: string;
-  path: string;
+  version: SemVerString;
+  path: RelativePath;
 }
 
 export function parseDependencyProps(
-  specifier: string,
+  specifier: DependencySpecifier,
 ): Maybe<DependencyProps> {
-  const url = createUrl(specifier);
+  const url = tryCreateUrl(specifier);
   if (!url) {
     // The specifier is a relative path
     return;
@@ -83,28 +92,28 @@ export function parseDependencyProps(
   const atSemver = "@" + semver;
   const name = body.split(atSemver)[0];
   const path = body.slice(name.length + atSemver.length);
-  return { name, version: semver, path };
+  return { name, version: semver, path: path as RelativePath };
 }
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: string;
+  specifier: ResolvedDependencySpecifier;
   version: {
-    from: string;
-    to: string;
+    from: SemVerString;
+    to: SemVerString;
   };
   /** The code of the dependency. */
   code: {
     /** The original specifier of the dependency appeared in the code. */
-    specifier: string;
+    specifier: DependencySpecifier;
     span: NonNullable<DependencyJson["code"]>["span"];
-  },
+  };
   /** The relative path to the module from the current working directory. */
-  referrer: string;
+  referrer: RelativePath | UrlString;
   /** The path to the import map used to resolve the dependency. */
-  importMap?: string;
+  importMap?: RelativePath;
 }
 
 export interface CreateDependencyUpdateOptions {
@@ -114,8 +123,7 @@ export interface CreateDependencyUpdateOptions {
 
 export async function createDependencyUpdate(
   dependency: DependencyJson,
-  /** The specifier of the module that depends on the dependency. */
-  referrer: string,
+  referrer: ModuleSpecifier,
   options?: CreateDependencyUpdateOptions,
 ): Promise<DependencyUpdate | undefined> {
   if (!dependency?.code?.specifier) {
@@ -124,40 +132,46 @@ export async function createDependencyUpdate(
     );
     return;
   }
-  const newSemVer = await resolveLatestSemVer(dependency.code.specifier);
+  const newSemVer = await resolveLatestSemVer(
+    dependency.code.specifier as DependencySpecifier,
+  );
   if (!newSemVer) {
     return;
   }
-  const props = parseDependencyProps(dependency.code.specifier);
+  const props = parseDependencyProps(
+    dependency.code.specifier as DependencySpecifier,
+  );
   if (!props) {
     return;
   }
   const mapped = !!options?.importMap?.tryResolve(
     dependency.specifier,
-    toFileSpecifier(referrer),
+    referrer,
   );
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: dependency.code.specifier,
+    specifier: dependency.code.specifier as ResolvedDependencySpecifier,
     code: {
       // We prefer to put the original specifier here.
-      specifier: dependency.specifier,
+      specifier: dependency.specifier as DependencySpecifier,
       span: dependency.code.span,
     },
     version: {
-      from: (props.version),
-      to: newSemVer,
+      from: props.version as SemVerString,
+      to: newSemVer as SemVerString,
     },
-    referrer,
+    referrer: isFileSpecifier(referrer)
+      ? toRelativePath(referrer)
+      : toUrlString(referrer),
     importMap: mapped ? options!.importMap!.path : undefined,
   };
 }
 
 async function resolveLatestSemVer(
-  specifier: string,
-): Promise<Maybe<string>> {
-  const url = createUrl(specifier);
+  specifier: DependencySpecifier,
+): Promise<Maybe<SemVerString>> {
+  const url = tryCreateUrl(specifier);
   if (!url) {
     // The specifier is a relative path
     return;
@@ -186,7 +200,7 @@ async function resolveLatestSemVer(
         // The dependency is up to date
         return;
       }
-      return latestSemVer;
+      return latestSemVer as SemVerString;
     }
     case "http:":
     case "https:": {

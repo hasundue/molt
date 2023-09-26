@@ -4,27 +4,48 @@ import {
   resolve,
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
+import type {
+  FilePath,
+  FileSpecifier,
+  Maybe,
+  ModuleSpecifier,
+  RelativePath,
+  UrlSpecifier,
+  UrlString,
+} from "./types.ts";
 
-export type Brand<T, B> = T & { __brand: B };
-
-export type Maybe<T> = T | undefined;
-
-export function createUrl(specifier: string): Maybe<URL> {
+export function tryCreateUrl(specifier: string): Maybe<URL> {
   try {
     return new URL(specifier);
   } catch {
-    return;
+    return undefined;
   }
 }
 
-export function relativeFromCwd(path: string) {
-  return relative(Deno.cwd(), path);
+export function ensureRelative(path: FilePath) {
+  return relative(Deno.cwd(), path) as RelativePath;
 }
 
-export function toFileSpecifier(path: string) {
+export function toFileSpecifier(path: FilePath) {
   return toFileUrl(
     isAbsolute(path) ? path : resolve(path),
-  ).href;
+  ).href as FileSpecifier;
+}
+
+export function isFileSpecifier(
+  specifier: ModuleSpecifier,
+): specifier is FileSpecifier {
+  return specifier.startsWith("file:///");
+}
+
+export function toRelativePath(specifier: FileSpecifier) {
+  return ensureRelative(
+    new URL(specifier).pathname as FilePath,
+  ) as RelativePath;
+}
+
+export function toUrlString(specifier: UrlSpecifier) {
+  return new URL(specifier).href as UrlString;
 }
 
 export function ensureArray<T>(

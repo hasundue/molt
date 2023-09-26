@@ -4,22 +4,34 @@ import {
   ImportMapJson,
   parseFromJson,
 } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
-import { type Maybe, toFileSpecifier } from "./utils.ts";
+import type {
+  Brand,
+  DependencySpecifier,
+  FilePath,
+  Maybe,
+  ModuleSpecifier,
+} from "./types.ts";
+import { toFileSpecifier } from "./utils.ts";
+
+export type ImportMapKey = Brand<string, "ImportMapKey">;
 
 interface ImportMapResolveResult {
   /** The key in the import map that used to resolve a specifier. */
-  key: string;
+  key: ImportMapKey;
   /** The full specifier resolved from the import map. */
-  specifier: string;
+  specifier: DependencySpecifier;
 }
 
 export interface ImportMap {
-  path: string;
+  path: FilePath;
   imports: ImportMapJson["imports"];
-  tryResolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
+  tryResolve(
+    specifier: string,
+    referrer: ModuleSpecifier,
+  ): Maybe<ImportMapResolveResult>;
 }
 
-export async function readFromJson(path: string): Promise<ImportMap> {
+export async function readFromJson(path: FilePath): Promise<ImportMap> {
   // Instead of validate the json by ourself, let the import_map module do it.
   const inner = await parseFromJson(
     toFileSpecifier(path),
@@ -30,12 +42,11 @@ export async function readFromJson(path: string): Promise<ImportMap> {
   return {
     path,
     imports: json.imports,
-    tryResolve(specifier: string, referrer: string) {
+    tryResolve(specifier: string, referrer: ModuleSpecifier) {
       let resolved: string;
       try {
         resolved = inner.resolve.bind(inner)(specifier, referrer);
-      } catch (e) {
-        console.warn(e);
+      } catch {
         return undefined;
       }
       // Find which key is used for the resolution.
@@ -55,8 +66,8 @@ export async function readFromJson(path: string): Promise<ImportMap> {
         );
       }
       return {
-        key: used,
-        specifier: resolved,
+        key: used as ImportMapKey,
+        specifier: resolved as DependencySpecifier,
       };
     },
   };
@@ -65,7 +76,8 @@ export async function readFromJson(path: string): Promise<ImportMap> {
 export async function isImportMap(path: string): Promise<boolean> {
   const content = await Deno.readTextFile(path);
   try {
-    await parseFromJson("file:///", content);
+    // The url doesn't matter here.
+    await parseFromJson("file:///import_map.json", content);
     return true;
   } catch {
     return false;
