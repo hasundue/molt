@@ -14,7 +14,8 @@ interface ImportMapResolveResult {
 }
 
 export interface ImportMap {
-  json: ImportMapJson;
+  path: string;
+  imports: ImportMapJson["imports"];
   tryResolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
 }
 
@@ -27,12 +28,14 @@ export async function readFromJson(path: string): Promise<ImportMap> {
   );
   const json = JSON.parse(inner.toJSON()) as ImportMapJson;
   return {
-    json,
+    path,
+    imports: json.imports,
     tryResolve(specifier: string, referrer: string) {
       let resolved: string;
       try {
         resolved = inner.resolve.bind(inner)(specifier, referrer);
-      } catch {
+      } catch (e) {
+        console.warn(e);
         return undefined;
       }
       // Find which key is used for the resolution.
@@ -57,4 +60,14 @@ export async function readFromJson(path: string): Promise<ImportMap> {
       };
     },
   };
+}
+
+export async function isImportMap(path: string): Promise<boolean> {
+  const content = await Deno.readTextFile(path);
+  try {
+    await parseFromJson("file:///", content);
+    return true;
+  } catch {
+    return false;
+  }
 }

@@ -11,7 +11,7 @@ describe("readFromJson", () => {
     const importMap = await readFromJson("src/fixtures/deno.json");
     assertExists(importMap);
     assertEquals(
-      importMap.resolve("lodash", toFileSpecifier("mod.ts")),
+      importMap.tryResolve("lodash", toFileSpecifier("mod.ts")),
       "https://esm.sh/lodash@4.17.21",
     );
   });

@@ -39,6 +39,8 @@ import {
 import { ensureArray, relativeFromCwd, toFileSpecifier } from "./src/utils.ts";
 import { readFromJson } from "./src/import_map.ts";
 
+export { type DependencyUpdate } from "./src/core.ts";
+
 class DenoGraph {
   static #initialized = false;
 
@@ -90,7 +92,7 @@ export async function collectDependencyUpdateAll(
         return update
           ? updates.push({
             ...update,
-            referrer: importMap?.resolve(dependency.specifier, module.specifier)
+            referrer: importMap?.tryResolve(dependency.specifier, module.specifier)
               ? options.importMap!
               : relativeFromCwd(fromFileUrl(module.specifier)),
           })

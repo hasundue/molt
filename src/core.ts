@@ -3,7 +3,7 @@ import {
   load as defaultLoad,
   ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import { type Brand, createUrl, type Maybe } from "./utils.ts";
+import { type Brand, createUrl, type Maybe, toFileSpecifier } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
 
@@ -56,17 +56,11 @@ export async function createResolve(
   }
   const importMap = await readFromJson(options.importMap);
   return (specifier, referrer) => {
-    try {
-      return importMap.tryResolve(specifier, referrer);
-    } catch {
-      // Let the loader handle invalid specifiers
-      return specifier;
-    }
+    return importMap.tryResolve(specifier, referrer)?.specifier ?? specifier;
   };
 }
 
 export interface DependencyProps {
-  specifier: string;
   name: string;
   version: string;
   path: string;
@@ -89,25 +83,33 @@ export function parseDependencyProps(
   const atSemver = "@" + semver;
   const name = body.split(atSemver)[0];
   const path = body.slice(name.length + atSemver.length);
-  return { specifier, name, version: semver, path };
+  return { name, version: semver, path };
 }
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-export interface DependencyUpdate
-  extends Omit<DependencyProps, "version"> {
+export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
+  /** The fully resolved specifier of the dependency. */
+  specifier: string;
   version: {
     from: string;
     to: string;
   };
-  code: NonNullable<DependencyJson["code"]>;
+  /** The code of the dependency. */
+  code: {
+    /** The original specifier of the dependency appeared in the code. */
+    specifier: string;
+    span: NonNullable<DependencyJson["code"]>["span"];
+  },
   /** The relative path to the module from the current working directory. */
   referrer: string;
+  /** The path to the import map used to resolve the dependency. */
+  importMap?: string;
 }
 
 export interface CreateDependencyUpdateOptions {
   /** The path to the json including import maps. */
-  importMap?: string;
+  importMap?: ImportMap;
 }
 
 export async function createDependencyUpdate(
@@ -126,25 +128,29 @@ export async function createDependencyUpdate(
   if (!newSemVer) {
     return;
   }
-  const importMap = options?.importMap
-    ? await readFromJson(options.importMap)
-    : undefined;
-  const mapped = importMap?.tryResolve(dependency.specifier, referrer);
-  const specifier = mapped
-    ? importMap!.imports[mapped.key]
-    : dependency.code.specifier;
   const props = parseDependencyProps(dependency.code.specifier);
   if (!props) {
     return;
   }
+  const mapped = !!options?.importMap?.tryResolve(
+    dependency.specifier,
+    toFileSpecifier(referrer),
+  );
   return {
     ...props,
-    code: dependency.code,
+    // We prefer to put the fully resolved specifier here.
+    specifier: dependency.code.specifier,
+    code: {
+      // We prefer to put the original specifier here.
+      specifier: dependency.specifier,
+      span: dependency.code.span,
+    },
     version: {
       from: (props.version),
       to: newSemVer,
     },
     referrer,
+    importMap: mapped ? options!.importMap!.path : undefined,
   };
 }
 
