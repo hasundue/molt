@@ -25,7 +25,6 @@
  * @module
  */
 
-import { fromFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
   init as initDenoGraph,
@@ -103,7 +102,7 @@ export function execDependencyUpdateAll(
     const referrer = update.map?.source ?? update.referrer;
     const current = results.get(referrer) ?? {
       specifier: referrer,
-      content: Deno.readTextFileSync(fromFileUrl(referrer)),
+      content: Deno.readTextFileSync(new URL(referrer)),
       dependencies: [],
     } satisfies FileUpdate;
     const content = update.map
@@ -173,5 +172,5 @@ export function writeModuleContentUpdateAll(
 export function writeModuleContentUpdate(
   result: FileUpdate,
 ): void {
-  Deno.writeTextFileSync(result.specifier, result.content);
+  Deno.writeTextFileSync(new URL(result.specifier), result.content);
 }

@@ -45,7 +45,7 @@ export async function createResolve(
   }
   const importMap = await readFromJson(options.importMap);
   if (!importMap) {
-    return undefined
+    return undefined;
   }
   return (specifier, referrer) => {
     return importMap.tryResolve(

@@ -156,8 +156,8 @@ describe("createDependencyUpdate() - with import map", () => {
       map: {
         source: URI.from("src/fixtures/_deno.json"),
         from: "std/",
-        to: "https://deno.land/std@0.200.0/"
-      }
+        to: "https://deno.land/std@0.200.0/",
+      },
     });
   });
 });

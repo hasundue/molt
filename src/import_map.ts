@@ -34,6 +34,7 @@ export async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
   );
   const json = JSON.parse(inner.toJSON()) as ImportMapJson;
   if (!json.imports) {
+    // The import map is empty
     return undefined;
   }
   return {
@@ -49,7 +50,7 @@ export async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
         ({ to }) => to.length,
       );
       if (!replacement) {
-        // The specifier is a file path
+        // The specifier should be a file path
         URI.ensure("file")(resolved);
       }
       return {
