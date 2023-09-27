@@ -4,7 +4,7 @@ import {
   type ModuleJson,
 } from "../lib/x/deno_graph.ts";
 import { URI } from "../lib/uri.ts";
-import type { Path, SemVerString } from "./types.ts";
+import type { SemVerString } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
 import { Dependency } from "./dependency.ts";
 import { load } from "./loader.ts";
@@ -22,7 +22,7 @@ export interface DependencyUpdate extends Omit<Dependency, "version"> {
   /** The code of the dependency. */
   code: {
     /** The original specifier of the dependency appeared in the code. */
-    specifier: Path;
+    specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The specifier of the module that imports the dependency. */
@@ -31,7 +31,7 @@ export interface DependencyUpdate extends Omit<Dependency, "version"> {
   map?: {
     /** The path to the import map used to resolve the dependency. */
     source: URI<"file">;
-    from: Path;
+    from: string;
     /** The string in the dependency specifier being replaced by the import map.
      * Mapping on a file specifier should not happen. */
     to: URI<"http" | "https" | "npm">;
@@ -129,7 +129,7 @@ async function create(
     ),
     code: {
       // We prefer to put the original specifier here.
-      specifier: dependency.specifier as Path,
+      specifier: dependency.specifier,
       span: dependency.code.span,
     },
     version: {
@@ -140,7 +140,7 @@ async function create(
     map: mapped
       ? {
         source: options!.importMap!.specifier,
-        from: mapped.from! as Path,
+        from: mapped.from!,
         to: URI.ensure("http", "https", "npm")(mapped.to!),
       }
       : undefined,
