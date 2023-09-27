@@ -1,3 +1,4 @@
+import { existsSync } from "https://deno.land/std@0.202.0/fs/mod.ts";
 import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
 import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts";
 import { colors } from "https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts";
@@ -9,17 +10,24 @@ import {
   writeModuleContentUpdateAll,
 } from "./mod.ts";
 import { commitDependencyUpdateAll } from "./git/mod.ts";
+import { URI } from "./src/uri.ts";
 
 const { gray, yellow, bold } = colors;
 
 const checkCommand = new Command()
   .arguments("<entrypoints...:string[]>")
   .description("Check for the latest version of dependencies")
+  .option("--import-map <file:string>", "Specify import map file")
   .action(checkAction);
 
-async function checkAction(_options: void, entrypoints: string[]) {
+async function checkAction(
+  options: { importMap?: string },
+  entrypoints: string[],
+) {
   console.log("🔎 Checking for updates...");
-  const updates = await collectDependencyUpdateAll(entrypoints);
+  const updates = await collectDependencyUpdateAll(entrypoints, {
+    importMap: options.importMap ?? _findImportMap(),
+  });
   if (!updates.length) {
     console.log("🍵 No updates found");
     return;
@@ -56,14 +64,17 @@ const updateCommand = new Command()
   .arguments("<entrypoints...:string[]>")
   .description("Update dependencies to the latest version")
   .option("--commit", "Commit changes to git")
+  .option("--import-map <file:string>", "Specify import map file")
   .action(updateAction);
 
 async function updateAction(
-  options: { commit?: boolean },
+  options: { commit?: boolean; importMap?: string },
   entrypoints: string[],
 ) {
   console.log("🔎 Checking for updates...");
-  const updates = await collectDependencyUpdateAll(entrypoints);
+  const updates = await collectDependencyUpdateAll(entrypoints, {
+    importMap: options.importMap ?? _findImportMap(),
+  });
   if (!updates.length) {
     console.log("🍵 No updates found");
     return;
@@ -73,6 +84,11 @@ async function updateAction(
     return _commit(updates);
   }
   return _write(updates);
+}
+
+function _findImportMap(): string | undefined {
+  return ["./import_map.json", "./deno.json", "./deno.jsonc"]
+    .find((path) => existsSync(path));
 }
 
 function _print(updates: DependencyUpdate[]) {
@@ -89,9 +105,12 @@ function _print(updates: DependencyUpdate[]) {
     console.log(
       `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].version.to)}`,
     );
-    for (const u of list) {
-      console.log(`  ${u.referrer} ` + gray(u.version.from));
-    }
+    distinct(
+      list.map((u) => {
+        const source = URI.toRelativePath(u.map?.source ?? u.referrer);
+        return `  ${source} ` + gray(u.version.from);
+      }),
+    ).forEach((line) => console.log(line));
   }
   console.log();
 }
@@ -101,7 +120,8 @@ function _write(updates: DependencyUpdate[]) {
   console.log("💾 Writing changes...");
   const results = execDependencyUpdateAll(updates);
   writeModuleContentUpdateAll(results, {
-    onWrite: (module) => console.log(`  ${module.specifier}`),
+    onWrite: (module) =>
+      console.log(`  ${URI.toRelativePath(module.specifier)}`),
   });
 }
 
@@ -117,7 +137,7 @@ function _commit(updates: DependencyUpdate[]) {
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
-  .version("0.1.1")
+  .version("0.2.0")
   .command("check", checkCommand)
   .command("update", updateCommand);
 

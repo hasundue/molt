@@ -4,7 +4,7 @@ import {
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import { URI } from "./uri.ts";
-import { isImportMap, readFromJson } from "./import_map.ts";
+import { readFromJson } from "./import_map.ts";
 
 describe("readFromJson", () => {
   it("src/fixtures/_deno.json", async () => {
@@ -14,7 +14,7 @@ describe("readFromJson", () => {
     assertEquals(
       importMap.tryResolve("std/version.ts", referrer),
       {
-        source: "https://deno.land/std@0.200.0/version.ts",
+        specifier: "https://deno.land/std@0.200.0/version.ts",
         from: "std/",
         to: "https://deno.land/std@0.200.0/",
       },
@@ -22,7 +22,7 @@ describe("readFromJson", () => {
     assertEquals(
       importMap.tryResolve("deno_graph", referrer),
       {
-        source: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
         from: "deno_graph",
         to: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
       },
@@ -30,7 +30,7 @@ describe("readFromJson", () => {
     assertEquals(
       importMap.tryResolve("node-emoji", referrer),
       {
-        source: "npm:node-emoji@1.0.0",
+        specifier: "npm:node-emoji@1.0.0",
         from: "node-emoji",
         to: "npm:node-emoji@1.0.0",
       },
@@ -38,23 +38,8 @@ describe("readFromJson", () => {
     assertEquals(
       importMap.tryResolve("/lib.ts", referrer),
       {
-        source: URI.from("src/fixtures/lib.ts"),
+        specifier: URI.from("src/fixtures/lib.ts"),
       },
-    );
-  });
-});
-
-describe("isImportMap()", () => {
-  it("src/fixtures/_deno.json", async () => {
-    assertEquals(
-      await isImportMap("src/fixtures/_deno.json"),
-      true,
-    );
-  });
-  it("src/fixtures/mod.ts", async () => {
-    assertEquals(
-      await isImportMap("src/fixtures/mod.ts"),
-      false,
     );
   });
 });

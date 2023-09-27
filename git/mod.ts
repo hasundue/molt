@@ -7,6 +7,7 @@ import {
   writeModuleContentUpdateAll,
 } from "../mod.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
+import { URI } from "../src/uri.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -54,8 +55,8 @@ export interface ExecGitCommitSequenceOptions {
 export function commitDependencyUpdateAll(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions> & ExecGitCommitSequenceOptions,
-): Promise<void> {
-  return execGitCommitSequence(
+): void {
+  execGitCommitSequence(
     createGitCommitSequence(updates, options),
     options,
   );
@@ -86,21 +87,21 @@ export function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-export async function execGitCommitSequence(
+export function execGitCommitSequence(
   sequence: GitCommitSequence,
   options: ExecGitCommitSequenceOptions = {},
 ) {
-  for await (const commit of sequence.commits) {
+  for (const commit of sequence.commits) {
     execGitCommit(commit, sequence.options);
     options.onCommit?.(commit);
   }
 }
 
-export async function execGitCommit(
+export function execGitCommit(
   commit: GitCommit,
   options: CommitOptions,
 ) {
-  const results = await execDependencyUpdateAll(commit.updates);
+  const results = execDependencyUpdateAll(commit.updates);
   writeModuleContentUpdateAll(results);
   _add(results, options.gitAddOptions);
   _commit(commit.message, options.gitCommitOptions);
@@ -110,7 +111,7 @@ function _add(
   results: FileUpdate[],
   options: string[],
 ) {
-  const files = results.map((result) => result.specifier);
+  const files = results.map((result) => URI.toRelativePath(result.specifier));
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });

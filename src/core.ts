@@ -8,11 +8,7 @@ import { parseSemVer } from "./semver.ts";
 import { URI } from "./uri.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
 
-export function createLoad(
-  options?: {
-    loadRemote?: boolean;
-  },
-): NonNullable<CreateGraphOptions["load"]> {
+export function createLoad(): NonNullable<CreateGraphOptions["load"]> {
   return async (specifier) => {
     let url: URL;
     try {
@@ -29,9 +25,6 @@ export function createLoad(
         };
       case "http:":
       case "https:":
-        if (options?.loadRemote) {
-          return await defaultLoad(specifier);
-        }
         return {
           kind: "external",
           specifier,
@@ -51,11 +44,14 @@ export async function createResolve(
     return undefined;
   }
   const importMap = await readFromJson(options.importMap);
+  if (!importMap) {
+    return undefined
+  }
   return (specifier, referrer) => {
     return importMap.tryResolve(
       specifier,
-      URI.ensure("http", "https", "file")(referrer),
-    )?.source ?? specifier;
+      URI.ensure("file")(referrer),
+    )?.specifier ?? specifier;
   };
 }
 
@@ -84,7 +80,7 @@ type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: URI<"file" | "http" | "https" | "npm">;
+  specifier: URI<"http" | "https" | "npm">;
   version: {
     from: SemVerString;
     to: SemVerString;
@@ -96,13 +92,13 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The specifier of the module that imports the dependency. */
-  referrer: URI<"file" | "http" | "https">;
+  referrer: URI<"file">;
   /** Information about the import map used to resolve the dependency. */
   map?: {
     /** The path to the import map used to resolve the dependency. */
     source: URI<"file">;
     from: string;
-    /** THe string in the dependency specifier being replaced by the import map.
+    /** The string in the dependency specifier being replaced by the import map.
      * Mapping on a file specifier should not happen. */
     to: URI<"http" | "https" | "npm">;
   };
@@ -115,7 +111,7 @@ export interface CreateDependencyUpdateOptions {
 
 export async function createDependencyUpdate(
   dependency: DependencyJson,
-  referrer: URI<"file" | "http" | "https">,
+  referrer: URI<"file">,
   options?: CreateDependencyUpdateOptions,
 ): Promise<DependencyUpdate | undefined> {
   if (!dependency?.code?.specifier) {
@@ -141,7 +137,7 @@ export async function createDependencyUpdate(
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: URI.ensure("http", "https", "file", "npm")(
+    specifier: URI.ensure("http", "https", "npm")(
       dependency.code.specifier,
     ),
     code: {

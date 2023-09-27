@@ -25,6 +25,7 @@
  * @module
  */
 
+import { fromFileUrl } from "https://deno.land/std@0.202.0/path/mod.ts";
 import {
   createGraph,
   init as initDenoGraph,
@@ -52,20 +53,16 @@ class DenoGraph {
   }
 }
 
-export interface CollectDependencyUpdateOptions {
-  /** The path to the json including import maps. */
-  importMap?: string;
-  loadRemote?: boolean;
-}
-
 export async function collectDependencyUpdateAll(
   entrypoints: string | string[],
-  options: CollectDependencyUpdateOptions = {},
+  options: {
+    importMap?: string;
+  } = {},
 ): Promise<DependencyUpdate[]> {
   const specifiers = [entrypoints].flat().map((path) => URI.from(path));
   await DenoGraph.ensureInit();
   const graph = await createGraph(specifiers, {
-    load: createLoad(options),
+    load: createLoad(),
     resolve: await createResolve(options),
   });
   const updates: DependencyUpdate[] = [];
@@ -88,28 +85,25 @@ export async function collectDependencyUpdateAll(
   return updates;
 }
 
-export interface DependencyUpdateResult {
-  /** The specifier of the updated dependency (a remote module or an import map.) */
-  specifier: URI<"http" | "https" | "file">;
+export interface FileUpdate {
+  /** The specifier of the updated dependency (a remote module.) */
+  specifier: URI<"file">;
   /** The updated content of the module. */
   content: string;
-}
-
-export interface FileUpdate extends DependencyUpdateResult {
   /** The dependency updates in the module. */
   dependencies: DependencyUpdate[];
 }
 
-export async function execDependencyUpdateAll(
+export function execDependencyUpdateAll(
   updates: DependencyUpdate[],
-): Promise<FileUpdate[]> {
+): FileUpdate[] {
   /** A map of module specifiers to the module content updates. */
-  const results = new Map<URI<"http" | "https" | "file">, FileUpdate>();
+  const results = new Map<URI<"file">, FileUpdate>();
   for (const update of updates) {
     const referrer = update.map?.source ?? update.referrer;
     const current = results.get(referrer) ?? {
       specifier: referrer,
-      content: await fetch(referrer).then((it) => it.text()),
+      content: Deno.readTextFileSync(fromFileUrl(referrer)),
       dependencies: [],
     } satisfies FileUpdate;
     const content = update.map

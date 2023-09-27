@@ -12,8 +12,10 @@ import {
   assertArrayIncludes,
   assertEquals,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
-import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
+import { type Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
+import { resolve } from "https://deno.land/std@0.202.0/path/mod.ts";
+import { URI } from "../src/uri.ts";
+import { collectDependencyUpdateAll, type DependencyUpdate } from "../mod.ts";
 import { commitDependencyUpdateAll } from "./mod.ts";
 
 const OriginalDenoCommand = Deno.Command;
@@ -41,21 +43,24 @@ describe("commitDependencyUpdateAll()", () => {
   let readTextFileSyncStub: Stub;
 
   beforeAll(async () => {
-    updates = await collectDependencyUpdateAll(
-      "./src/fixtures/mod.ts",
-    );
+    updates = await collectDependencyUpdateAll("./src/fixtures/mod.ts");
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",
       (path, data) => {
-        output.push({ path: path.toString(), content: data.toString() });
+        output.push({
+          path: resolve(path.toString()),
+          content: data.toString(),
+        });
       },
     );
     readTextFileSyncStub = stub(
       Deno,
       "readTextFileSync",
       (path) => {
-        const file = output.findLast((file) => file.path === path);
+        const file = output.findLast((file) =>
+          file.path === resolve(path.toString())
+        );
         return file!.content;
       },
     );
@@ -80,8 +85,8 @@ describe("commitDependencyUpdateAll()", () => {
     output = [];
   });
 
-  it("no grouping", async () => {
-    await commitDependencyUpdateAll(updates);
+  it("no grouping", () => {
+    commitDependencyUpdateAll(updates);
     assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -92,8 +97,8 @@ describe("commitDependencyUpdateAll()", () => {
     );
   });
 
-  it("group by dependency name", async () => {
-    await commitDependencyUpdateAll(updates, {
+  it("group by dependency name", () => {
+    commitDependencyUpdateAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -111,9 +116,9 @@ describe("commitDependencyUpdateAll()", () => {
     );
   });
 
-  it("group by module (file) name", async () => {
-    await commitDependencyUpdateAll(updates, {
-      groupBy: (update) => update.referrer,
+  it("group by module (file) name", () => {
+    commitDependencyUpdateAll(updates, {
+      groupBy: (update) => URI.toRelativePath(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
     assertEquals(DenoCommandStub.commands.length, 4);

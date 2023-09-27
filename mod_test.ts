@@ -95,16 +95,16 @@ describe("applyDependencyUpdateToImportMap", () => {
   });
 });
 
-describe.only("execDependencyUpdateAll", () => {
+describe("execDependencyUpdateAll", () => {
   it("src/fixtures/mod.ts", async () => {
-    const results = await execDependencyUpdateAll(
+    const results = execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
     assertEquals(results.length, 2);
   });
   it("src/fixtures/import_maps.ts", async () => {
     const originalContnet = Deno.readTextFileSync("./src/fixtures/_deno.json");
-    const results = await execDependencyUpdateAll(
+    const results = execDependencyUpdateAll(
       await collectDependencyUpdateAll(
         "./src/fixtures/import_maps.ts",
         { importMap: "src/fixtures/_deno.json" },
@@ -136,7 +136,7 @@ describe("writeAll", () => {
         output.set(path.toString(), data.toString());
       },
     );
-    results = await execDependencyUpdateAll(
+    results = execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
   });
