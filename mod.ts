@@ -29,16 +29,15 @@ import {
   createGraph,
   init as initDenoGraph,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import type { Path } from "./src/types.ts";
-import { URI } from "./src/uri.ts";
 import {
   createDependencyUpdate,
   createLoad,
   createResolve,
   type DependencyUpdate,
 } from "./src/core.ts";
-import { ensurePath, ensureUri, toArray, toFileUri } from "./src/utils.ts";
-import { readFromJson } from "./src/import_map.ts";
+import { URI } from "./src/uri.ts";
+import { parseSemVer } from "./src/semver.ts";
+import { ImportMapJson, readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
 
@@ -64,21 +63,11 @@ export async function collectDependencyUpdateAll(
   entrypoints: string | string[],
   options: CollectDependencyUpdateOptions = {},
 ): Promise<DependencyUpdate[]> {
-  const _entrypoints = toArray(entrypoints);
-  if (!_entrypoints.length) {
-    return [];
-  }
-  const _options = {
-    importMap: options.importMap ? ensurePath(options.importMap) : undefined,
-    loadRemote: options.loadRemote,
-  };
-  const specifiers = _entrypoints.map((path) => {
-    return toFileUri(ensurePath(path));
-  });
+  const specifiers = [entrypoints].flat().map((path) => URI.from(path));
   await DenoGraph.ensureInit();
   const graph = await createGraph(specifiers, {
-    load: createLoad(_options),
-    resolve: await createResolve(_options),
+    load: createLoad(options),
+    resolve: await createResolve(options),
   });
   const updates: DependencyUpdate[] = [];
   await Promise.all(
@@ -86,10 +75,10 @@ export async function collectDependencyUpdateAll(
       module.dependencies?.map(async (dependency) => {
         const update = await createDependencyUpdate(
           dependency,
-          ensureUri(module.specifier),
+          URI.from(module.specifier),
           {
-            importMap: _options.importMap
-              ? await readFromJson(_options.importMap)
+            importMap: options.importMap
+              ? await readFromJson(options.importMap)
               : undefined,
           },
         );
@@ -118,10 +107,10 @@ export function execDependencyUpdateAll(
   /** A map of module specifiers to the module content updates. */
   const results = new Map<URI<"http" | "https" | "file">, FileUpdate>();
   for (const update of updates) {
-    const specifier = update.map ?? update.referrer;
-    const current = results.get(specifier) ?? {
-      specifier,
-      content: Deno.readTextFileSync(specifier),
+    const referrer = update.map?.source ?? update.referrer;
+    const current = results.get(referrer) ?? {
+      specifier: referrer,
+      content: Deno.readTextFileSync(referrer),
       dependencies: [],
     } satisfies FileUpdate;
     const content = update.map
@@ -160,6 +149,18 @@ export function applyDependencyUpdate(
     lines[line].slice(update.code.span.end.character);
 
   return lines.join("\n");
+}
+
+export function applyDependencyUpdateToImportMap(
+  update: DependencyUpdate,
+  content: string,
+): string {
+  const json = JSON.parse(content) as ImportMapJson;
+  json.imports[update.map!.from] = update.map!.to.replace(
+    update.version.from,
+    update.version.to,
+  );
+  return JSON.stringify(json, null, 2);
 }
 
 export interface WriteModuleContentUpdateAllOptions {

@@ -6,11 +6,13 @@ import {
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
 import { type Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import {
+  assertNotEquals,
   assertEquals,
   assertExists,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
   applyDependencyUpdate,
+  applyDependencyUpdateToImportMap,
   collectDependencyUpdateAll,
   type DependencyUpdate,
   execDependencyUpdateAll,
@@ -32,17 +34,18 @@ describe("collectDependencyUpdates()", () => {
         importMap: "src/fixtures/_deno.json",
       },
     );
-    console.debug(updates);
     assertEquals(updates.length, 4);
   });
 });
 
 describe("applyDependencyUpdate", () => {
   let updates: DependencyUpdate[];
+  let content: string;
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
       "./src/fixtures/mod.ts",
     );
+    content = Deno.readTextFileSync("./src/fixtures/mod.ts");
   });
   it("https://deno.land/x/deno_graph", () => {
     const update = updates.find((update) =>
@@ -50,9 +53,10 @@ describe("applyDependencyUpdate", () => {
     )!;
     const result = applyDependencyUpdate(
       update,
-      Deno.readTextFileSync(update.referrer),
+      content,
     );
     assertExists(result);
+    assertNotEquals(result, content);
   });
   it("npm:node-emoji", () => {
     const update = updates.find((update) =>
@@ -60,34 +64,37 @@ describe("applyDependencyUpdate", () => {
     )!;
     const result = applyDependencyUpdate(
       update,
-      Deno.readTextFileSync(update.referrer),
+      content,
     );
     assertExists(result);
+    assertNotEquals(result, content);
   });
 });
 
-describe.only("applyDependencyUpdate() - with import maps", () => {
+describe("applyDependencyUpdateToImportMap", () => {
   let updates: DependencyUpdate[];
+  let content: string;
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(
       "./src/fixtures/import_maps.ts",
       { importMap: "src/fixtures/_deno.json" },
     );
+    content = await Deno.readTextFile("src/fixtures/_deno.json");
   });
   it("deno_graph", () => {
     const update = updates.find((update) =>
       update.code.specifier === "deno_graph"
     )!;
-    const result = applyDependencyUpdate(
+    const result = applyDependencyUpdateToImportMap(
       update,
-      Deno.readTextFileSync(update.referrer),
+      content,
     );
     assertExists(result);
-    console.debug(result);
+    assertNotEquals(result, content);
   });
 });
 
-describe("execDependencyUpdateArray", () => {
+describe("execDependencyUpdateAll", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
     updates = await collectDependencyUpdateAll(

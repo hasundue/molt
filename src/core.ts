@@ -4,10 +4,10 @@ import {
   ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
 import type { Maybe, Path, SemVerString } from "./types.ts";
-import { ensurePath, ensureUri, tryCreateUrl } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
 import { URI } from "./uri.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
+import { catchMe as _try } from "./utils.ts";
 
 export function createLoad(
   options?: {
@@ -15,9 +15,11 @@ export function createLoad(
   },
 ): NonNullable<CreateGraphOptions["load"]> {
   return async (specifier) => {
-    const url = tryCreateUrl(specifier);
+    const url = _try(
+      () => new URL(specifier),
+    ).catchWith(undefined);
     if (!url) {
-      throw new Error(`Invalid specifier: ${specifier}`);
+      return defaultLoad(specifier);
     }
     switch (url.protocol) {
       case "node:":
@@ -43,7 +45,7 @@ export function createLoad(
 
 export async function createResolve(
   options?: {
-    importMap?: Path;
+    importMap?: string | Path;
   },
 ): Promise<CreateGraphOptions["resolve"]> {
   if (!options?.importMap) {
@@ -54,7 +56,7 @@ export async function createResolve(
     return importMap.tryResolve(
       specifier,
       URI.ensure("http", "https", "file")(referrer),
-    )?.specifier ?? specifier;
+    )?.source ?? specifier;
   };
 }
 
@@ -76,7 +78,7 @@ export function parseDependencyProps(
   const atSemver = "@" + semver;
   const name = body.split(atSemver)[0];
   const path = body.slice(name.length + atSemver.length);
-  return { name, version: semver, path: ensurePath(path) };
+  return { name, version: semver, path: path as Path };
 }
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
@@ -94,10 +96,17 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
   };
-  /** The relative path to the module from the current working directory. */
+  /** The specifier of the module that imports the dependency. */
   referrer: URI<"file" | "http" | "https">;
-  /** The path to the import map used to resolve the dependency. */
-  map?: URI<"file">;
+  /** Information about the import map used to resolve the dependency. */
+  map?: {
+    /** The path to the import map used to resolve the dependency. */
+    source: URI<"file">;
+    from: string;
+    /** THe string in the dependency specifier being replaced by the import map.
+     * Mapping on a file specifier should not happen. */
+    to: URI<"http" | "https" | "npm">;
+  };
 }
 
 export interface CreateDependencyUpdateOptions {
@@ -126,14 +135,16 @@ export async function createDependencyUpdate(
   if (!props) {
     return;
   }
-  const mapped = !!options?.importMap?.tryResolve(
+  const mapped = options?.importMap?.tryResolve(
     dependency.specifier,
     referrer,
   );
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: ensureUri(dependency.code.specifier),
+    specifier: URI.ensure("http", "https", "file", "npm")(
+      dependency.code.specifier,
+    ),
     code: {
       // We prefer to put the original specifier here.
       specifier: dependency.specifier,
@@ -144,7 +155,13 @@ export async function createDependencyUpdate(
       to: newSemVer as SemVerString,
     },
     referrer,
-    map: mapped ? options!.importMap!.specifier : undefined,
+    map: mapped
+      ? {
+        source: options!.importMap!.specifier,
+        from: mapped.from!,
+        to: URI.ensure("http", "https", "npm")(mapped.to!),
+      }
+      : undefined,
   };
 }
 

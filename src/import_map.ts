@@ -1,19 +1,22 @@
 import { maxBy } from "https://deno.land/std@0.202.0/collections/max_by.ts";
 import { parse as parseJsonc } from "https://deno.land/std@0.202.0/jsonc/mod.ts";
 import {
-  ImportMapJson,
+  type ImportMapJson,
   parseFromJson,
 } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
 import { type Maybe, URISchemes } from "./types.ts";
 import { URI } from "./uri.ts";
 import { catchMe as _try } from "./utils.ts";
 
+export { type ImportMapJson } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
+
 interface ImportMapResolveResult {
   /** The full specifier resolved from the import map. */
-  specifier: URI<URISchemes>;
+  source: URI<URISchemes>;
+  from?: string;
   /** The string that replaced the matched part of the specifier.
    * Undefined if the specifier is a file path. */
-  replacement?: string;
+  to?: string;
 }
 
 export interface ImportMap {
@@ -46,16 +49,18 @@ export async function readFromJson(path: string): Promise<ImportMap> {
       // Find which key is used for the resolution. The process here is ridiculously
       // inefficient, but we prefer not to reimplement the whole import_map module.
       const replacement = maxBy(
-        Object.values(json.imports).filter((str) => resolved.includes(str)),
-        (str) => str.length,
+        Object.entries(json.imports)
+          .map(([from, to]) => ({ from, to }))
+          .filter(({ to }) => resolved.includes(to)),
+        ({ to }) => to.length,
       );
       if (!replacement) {
         // The specifier is a file path
         URI.ensure("file")(resolved);
       }
       return {
-        specifier: URI.ensure(...URISchemes)(resolved),
-        replacement,
+        source: URI.ensure(...URISchemes)(resolved),
+        ...replacement,
       };
     },
     specifier,

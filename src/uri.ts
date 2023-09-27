@@ -18,8 +18,14 @@ export type URI<
 
 export const URI = {
   from(path: string): URI<"file"> {
-    return toFileUrl(
-      isAbsolute(path) ? path : resolve(path),
+    return _try(() => {
+      const url = new URL(path);
+      if (url.protocol !== "file:") {
+        throw new TypeError();
+      }
+      return url;
+    }).catch(
+      () => toFileUrl(isAbsolute(path) ? path : resolve(path)),
     ).href as URI<"file">;
   },
   toRelativePath(uri: URI<"file">): string {

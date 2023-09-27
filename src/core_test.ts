@@ -151,9 +151,13 @@ describe("createDependencyUpdate() - with import map", () => {
       },
       path: "/version.ts",
       specifier: "https://deno.land/std@0.200.0/version.ts",
-      code: { specifier: "std/version.ts", span: undefined },
+      code: { specifier: "std/version.ts" },
       referrer: URI.from("src/fixtures/import_maps.ts"),
-      map: URI.from("src/fixtures/_deno.json"),
+      map: {
+        source: URI.from("src/fixtures/_deno.json"),
+        from: "std/",
+        to: "https://deno.land/std@0.200.0/"
+      }
     });
   });
 });
