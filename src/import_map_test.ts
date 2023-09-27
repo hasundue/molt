@@ -1,18 +1,26 @@
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import {
-  assertEquals,
-  assertExists,
-} from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { URI } from "./uri.ts";
-import { readFromJson } from "./import_map.ts";
+import { describe, it, beforeAll } from "https://deno.land/std@0.202.0/testing/bdd.ts";
+import { assertEquals, assertExists } from "../lib/std/assert.ts";
+import { URI } from "../lib/uri.ts";
+import { ImportMap } from "./import_map.ts";
 
-describe("readFromJson", () => {
+describe("readFromJson()", () => {
   it("src/fixtures/_deno.json", async () => {
-    const importMap = await readFromJson("src/fixtures/_deno.json");
+    const importMap = await ImportMap.readFromJson("src/fixtures/_deno.json");
     assertExists(importMap);
+  });
+});
+
+describe("resolve()", () => {
+  let importMap: ImportMap;
+  beforeAll(async () => {
+    const maybe = await ImportMap.readFromJson("src/fixtures/_deno.json");
+    assertExists(maybe);
+    importMap = maybe;
+  });
+  it("resolve an absolute path", () => {
     const referrer = URI.from("src/fixtures/mod.ts");
     assertEquals(
-      importMap.tryResolve("std/version.ts", referrer),
+      importMap.resolve("std/version.ts", referrer),
       {
         specifier: "https://deno.land/std@0.200.0/version.ts",
         from: "std/",
@@ -20,7 +28,7 @@ describe("readFromJson", () => {
       },
     );
     assertEquals(
-      importMap.tryResolve("deno_graph", referrer),
+      importMap.resolve("deno_graph", referrer),
       {
         specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
         from: "deno_graph",
@@ -28,7 +36,7 @@ describe("readFromJson", () => {
       },
     );
     assertEquals(
-      importMap.tryResolve("node-emoji", referrer),
+      importMap.resolve("node-emoji", referrer),
       {
         specifier: "npm:node-emoji@1.0.0",
         from: "node-emoji",
@@ -36,10 +44,25 @@ describe("readFromJson", () => {
       },
     );
     assertEquals(
-      importMap.tryResolve("/lib.ts", referrer),
+      importMap.resolve("/lib.ts", referrer),
       {
         specifier: URI.from("src/fixtures/lib.ts"),
       },
+    );
+  });
+});
+
+describe("resolveSimple()", () => {
+  let importMap: ImportMap;
+  beforeAll(async () => {
+    const maybe = await ImportMap.readFromJson("src/fixtures/_deno.json");
+    assertExists(maybe);
+    importMap = maybe;
+  });
+  it("resolve an absolute path", () => {
+    assertEquals(
+      importMap.resolveSimple("/lib.ts", URI.from("src/fixtures/mod.ts")),
+      URI.from("src/fixtures/lib.ts"),
     );
   });
 });
