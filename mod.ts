@@ -25,64 +25,7 @@
  * @module
  */
 
-import {
-  createGraph,
-  init as initDenoGraph,
-} from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import {
-  createDependencyUpdate,
-  createLoad,
-  createResolve,
-  type DependencyUpdate,
-} from "./src/core.ts";
-import { URI } from "./src/uri.ts";
-import { ImportMapJson, readFromJson } from "./src/import_map.ts";
-
-export { type DependencyUpdate } from "./src/core.ts";
-
-class DenoGraph {
-  static #initialized = false;
-
-  static async ensureInit() {
-    if (this.#initialized) {
-      return;
-    }
-    await initDenoGraph();
-    this.#initialized = true;
-  }
-}
-
-export async function collectDependencyUpdateAll(
-  entrypoints: string | string[],
-  options: {
-    importMap?: string;
-  } = {},
-): Promise<DependencyUpdate[]> {
-  const specifiers = [entrypoints].flat().map((path) => URI.from(path));
-  await DenoGraph.ensureInit();
-  const graph = await createGraph(specifiers, {
-    load: createLoad(),
-    resolve: await createResolve(options),
-  });
-  const updates: DependencyUpdate[] = [];
-  await Promise.all(
-    graph.modules.flatMap((module) =>
-      module.dependencies?.map(async (dependency) => {
-        const update = await createDependencyUpdate(
-          dependency,
-          URI.from(module.specifier),
-          {
-            importMap: options.importMap
-              ? await readFromJson(options.importMap)
-              : undefined,
-          },
-        );
-        return update ? updates.push(update) : undefined;
-      })
-    ),
-  );
-  return updates;
-}
+import { URI } from "./lib/uri.ts";
 
 export interface FileUpdate {
   /** The specifier of the updated dependency (a remote module.) */
@@ -115,44 +58,6 @@ export function execDependencyUpdateAll(
     });
   }
   return Array.from(results.values());
-}
-
-export function applyDependencyUpdate(
-  /** The dependency update to apply. */
-  update: DependencyUpdate,
-  /** Content of the module to update. */
-  content: string,
-): string {
-  if (update.code.span.start.line !== update.code.span.end.line) {
-    throw new Error(
-      `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
-    );
-  }
-  const line = update.code.span.start.line;
-  const lines = content.split("\n");
-
-  lines[line] = lines[line].slice(0, update.code.span.start.character) +
-    `"${
-      update.specifier.replace(
-        update.version.from,
-        update.version.to,
-      )
-    }"` +
-    lines[line].slice(update.code.span.end.character);
-
-  return lines.join("\n");
-}
-
-export function applyDependencyUpdateToImportMap(
-  update: DependencyUpdate,
-  content: string,
-): string {
-  const json = JSON.parse(content) as ImportMapJson;
-  json.imports[update.map!.from] = update.map!.to.replace(
-    update.version.from,
-    update.version.to,
-  );
-  return JSON.stringify(json, null, 2);
 }
 
 export interface WriteModuleContentUpdateAllOptions {

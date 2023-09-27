@@ -7,14 +7,12 @@ import {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import {
-  assertArrayIncludes,
-  assertEquals,
-} from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { type Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
-import { resolve } from "https://deno.land/std@0.202.0/path/mod.ts";
-import { URI } from "../src/uri.ts";
+  type Stub,
+  stub,
+} from "../lib/std/testing.ts";
+import { assertArrayIncludes, assertEquals } from "../lib/std/assert.ts";
+import { resolve } from "../lib/std/path.ts";
+import { URI } from "../lib/uri.ts";
 import { collectDependencyUpdateAll, type DependencyUpdate } from "../mod.ts";
 import { commitDependencyUpdateAll } from "./mod.ts";
 

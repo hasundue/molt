@@ -1,8 +1,8 @@
 // Copyright 2023 Shun Ueda. All rights reserved. MIT license.
 
-import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
+import type { Maybe } from "../lib/types.ts";
+import { distinct } from "../lib/std/collections.ts";
 import { DependencyUpdate } from "../mod.ts";
-import { Maybe } from "./types.ts";
 
 export type VersionProp = {
   from?: string;

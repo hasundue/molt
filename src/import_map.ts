@@ -1,30 +1,30 @@
-import { maxBy } from "https://deno.land/std@0.202.0/collections/max_by.ts";
-import { parse as parseJsonc } from "https://deno.land/std@0.202.0/jsonc/mod.ts";
-import {
-  type ImportMapJson,
-  parseFromJson,
-} from "https://deno.land/x/import_map@v0.15.0/mod.ts";
-import { type Maybe, URISchemes } from "./types.ts";
-import { URI } from "./uri.ts";
+import { maxBy } from "../lib/std/collections.ts";
+import { parse as parseJsonc } from "../lib/std/jsonc.ts";
+import { type ImportMapJson, parseFromJson } from "../lib/x/import_map.ts";
+import type { Maybe } from "../lib/types.ts";
+import { URI } from "../lib/uri.ts";
+import { URIScheme } from "./types.ts";
 
-export { type ImportMapJson } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
+export type { ImportMapJson };
 
 export interface ImportMapResolveResult {
   /** The full specifier resolved from the import map. */
-  specifier: URI<URISchemes>;
+  specifier: URI<URIScheme>;
   from?: string;
   to?: string;
 }
 
 export interface ImportMap {
   specifier: URI<"file">;
-  tryResolve(
-    specifier: string,
-    referrer: URI<"file">,
-  ): Maybe<ImportMapResolveResult>;
+  resolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
+  resolveSimple(specifier: string, referrer: string): string;
 }
 
-export async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
+export const ImportMap = {
+  readFromJson,
+};
+
+async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
   const specifier = URI.from(path);
   // Instead of validate the json by ourself, let the import_map module do it.
   const inner = await parseFromJson(
@@ -39,7 +39,7 @@ export async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
   }
   return {
     specifier,
-    tryResolve(specifier, referrer) {
+    resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
       // Find which key is used for the resolution. This is ridiculously inefficient,
       // but we prefer not to reimplement the whole import_map module.
@@ -54,9 +54,10 @@ export async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
         URI.ensure("file")(resolved);
       }
       return {
-        specifier: URI.ensure(...URISchemes)(resolved),
+        specifier: URI.ensure(...URIScheme.values)(resolved),
         ...replacement,
       };
     },
+    resolveSimple: inner.resolve.bind(inner),
   };
 }

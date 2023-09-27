@@ -1,8 +1,7 @@
-import { existsSync } from "https://deno.land/std@0.202.0/fs/mod.ts";
-import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
-import { Command } from "https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts";
-import { colors } from "https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/colors.ts";
-import { Select } from "https://deno.land/x/cliffy@v1.0.0-rc.3/prompt/select.ts";
+import { existsSync } from "./lib/std/fs.ts";
+import { distinct } from "./lib/std/collections.ts";
+import { Command, colors, Select } from "./lib/x/cliffy.ts";
+import { URI } from "./lib/uri.ts";
 import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
@@ -10,7 +9,6 @@ import {
   writeModuleContentUpdateAll,
 } from "./mod.ts";
 import { commitDependencyUpdateAll } from "./git/mod.ts";
-import { URI } from "./src/uri.ts";
 
 const { gray, yellow, bold } = colors;
 
