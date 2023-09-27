@@ -3,7 +3,7 @@
 import {
   type DependencyUpdate,
   execDependencyUpdateAll,
-  type ModuleContentUpdate,
+  type FileUpdate,
   writeModuleContentUpdateAll,
 } from "../mod.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
@@ -107,7 +107,7 @@ export function execGitCommit(
 }
 
 function _add(
-  results: ModuleContentUpdate[],
+  results: FileUpdate[],
   options: string[],
 ) {
   const files = results.map((result) => result.specifier);

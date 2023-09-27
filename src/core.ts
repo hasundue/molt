@@ -3,19 +3,12 @@ import {
   load as defaultLoad,
   ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import type {
-  DependencySpecifier,
-  FilePath,
-  Maybe,
-  ModuleSpecifier,
-  RelativePath,
-  SemVerString,
-  UrlString,
-} from "./types.ts";
+import type { Maybe, Path, SemVerString, Uri, Url } from "./types.ts";
 import {
-  isFileSpecifier,
+  ensurePath,
+  ensureUri,
+  isFileUri,
   toRelativePath,
-  toUrlString,
   tryCreateUrl,
 } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
@@ -55,7 +48,7 @@ export function createLoad(
 
 export async function createResolve(
   options?: {
-    importMap?: FilePath;
+    importMap?: Path;
   },
 ): Promise<CreateGraphOptions["resolve"]> {
   if (!options?.importMap) {
@@ -63,7 +56,7 @@ export async function createResolve(
   }
   const importMap = await readFromJson(options.importMap);
   return (specifier, referrer) => {
-    return importMap.tryResolve(specifier, referrer as ModuleSpecifier)
+    return importMap.tryResolve(specifier, ensureUri(referrer))
       ?.specifier ?? specifier;
   };
 }
@@ -71,19 +64,14 @@ export async function createResolve(
 export interface DependencyProps {
   name: string;
   version: SemVerString;
-  path: RelativePath;
+  path: Path;
 }
 
 export function parseDependencyProps(
-  specifier: DependencySpecifier,
+  url: URL,
 ): Maybe<DependencyProps> {
-  const url = tryCreateUrl(specifier);
-  if (!url) {
-    // The specifier is a relative path
-    return;
-  }
   const body = url.hostname + url.pathname;
-  const semver = parseSemVer(specifier);
+  const semver = parseSemVer(url.href);
   if (!semver) {
     // The specifier does not contain a semver.
     return;
@@ -91,14 +79,14 @@ export function parseDependencyProps(
   const atSemver = "@" + semver;
   const name = body.split(atSemver)[0];
   const path = body.slice(name.length + atSemver.length);
-  return { name, version: semver, path: path as RelativePath };
+  return { name, version: semver, path: ensurePath(path) };
 }
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: DependencySpecifier;
+  specifier: Uri;
   version: {
     from: SemVerString;
     to: SemVerString;
@@ -106,13 +94,13 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The code of the dependency. */
   code: {
     /** The original specifier of the dependency appeared in the code. */
-    specifier: DependencySpecifier;
+    specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The relative path to the module from the current working directory. */
-  referrer: RelativePath | UrlString;
+  referrer: Path | Url;
   /** The path to the import map used to resolve the dependency. */
-  importMap?: FilePath;
+  importMap?: Path;
 }
 
 export interface CreateDependencyUpdateOptions {
@@ -122,7 +110,7 @@ export interface CreateDependencyUpdateOptions {
 
 export async function createDependencyUpdate(
   dependency: DependencyJson,
-  referrer: ModuleSpecifier,
+  referrer: Uri,
   options?: CreateDependencyUpdateOptions,
 ): Promise<DependencyUpdate | undefined> {
   if (!dependency?.code?.specifier) {
@@ -132,13 +120,13 @@ export async function createDependencyUpdate(
     return;
   }
   const newSemVer = await resolveLatestSemVer(
-    dependency.code.specifier as DependencySpecifier,
+    new URL(dependency.code.specifier),
   );
   if (!newSemVer) {
     return;
   }
   const props = parseDependencyProps(
-    dependency.code.specifier as DependencySpecifier,
+    new URL(dependency.code.specifier),
   );
   if (!props) {
     return;
@@ -150,32 +138,25 @@ export async function createDependencyUpdate(
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: dependency.code.specifier as DependencySpecifier,
+    specifier: ensureUri(dependency.code.specifier),
     code: {
       // We prefer to put the original specifier here.
-      specifier: dependency.specifier as DependencySpecifier,
+      specifier: dependency.specifier,
       span: dependency.code.span,
     },
     version: {
       from: props.version as SemVerString,
       to: newSemVer as SemVerString,
     },
-    referrer: isFileSpecifier(referrer)
-      ? toRelativePath(referrer)
-      : toUrlString(referrer),
+    referrer: isFileUri(referrer) ? toRelativePath(referrer) : referrer,
     importMap: mapped ? options!.importMap!.path : undefined,
   };
 }
 
 async function resolveLatestSemVer(
-  specifier: DependencySpecifier,
+  url: URL,
 ): Promise<Maybe<SemVerString>> {
-  const url = tryCreateUrl(specifier);
-  if (!url) {
-    // The specifier is a relative path
-    return;
-  }
-  const props = parseDependencyProps(specifier);
+  const props = parseDependencyProps(url);
   if (!props) {
     // The specifier is does not contain a semver.
     return;
@@ -213,7 +194,7 @@ async function resolveLatestSemVer(
         return;
       }
       const specifierWithLatestSemVer = response.url;
-      if (specifierWithLatestSemVer === specifier) {
+      if (specifierWithLatestSemVer === url.href) {
         // The dependency is up to date
         return;
       }

@@ -4,37 +4,30 @@ import {
   ImportMapJson,
   parseFromJson,
 } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
-import type {
-  Brand,
-  DependencySpecifier,
-  FilePath,
-  Maybe,
-  ModuleSpecifier,
-} from "./types.ts";
-import { toFileSpecifier } from "./utils.ts";
-
-export type ImportMapKey = Brand<string, "ImportMapKey">;
+import type { Maybe, Path, Uri } from "./types.ts";
+import { assertFileUri, ensureUri, toFileUri } from "./utils.ts";
 
 interface ImportMapResolveResult {
-  /** The key in the import map that used to resolve a specifier. */
-  key: ImportMapKey;
+  /** The key in the import map that used to resolve a specifier.
+   * Undefined when the resolved specifier is a file URI. */
+  key?: string;
   /** The full specifier resolved from the import map. */
-  specifier: DependencySpecifier;
+  specifier: Uri;
 }
 
 export interface ImportMap {
-  path: FilePath;
+  path: Path;
   imports: ImportMapJson["imports"];
   tryResolve(
     specifier: string,
-    referrer: ModuleSpecifier,
+    referrer: Uri,
   ): Maybe<ImportMapResolveResult>;
 }
 
-export async function readFromJson(path: FilePath): Promise<ImportMap> {
+export async function readFromJson(path: Path): Promise<ImportMap> {
   // Instead of validate the json by ourself, let the import_map module do it.
   const inner = await parseFromJson(
-    toFileSpecifier(path),
+    toFileUri(path),
     // deno-lint-ignore no-explicit-any
     parseJsonc(Deno.readTextFileSync(path)) as any,
   );
@@ -42,7 +35,7 @@ export async function readFromJson(path: FilePath): Promise<ImportMap> {
   return {
     path,
     imports: json.imports,
-    tryResolve(specifier: string, referrer: ModuleSpecifier) {
+    tryResolve(specifier: string, referrer: Uri) {
       let resolved: string;
       try {
         resolved = inner.resolve.bind(inner)(specifier, referrer);
@@ -53,27 +46,26 @@ export async function readFromJson(path: FilePath): Promise<ImportMap> {
       // The process here is ridiculously inefficient, but we prefer not to reimplement
       // the whole import_map module.
       const matched: string[] = [];
-      for (const key of Object.keys(json.imports)) {
-        if (resolved.includes(key)) matched.push(key);
+      for (const [key, value] of Object.entries(json.imports)) {
+        if (resolved.includes(value)) matched.push(key);
       }
-      const used = maxBy(
-        Object.keys(json.imports).filter((key) => resolved.includes(key)),
-        (key) => key.length,
-      );
+      const used = maxBy(matched, (key) => key.length);
       if (!used) {
-        throw new Error(
-          `Cannot find the key used for resolving ${specifier} from ${referrer}`,
-        );
+        assertFileUri(resolved);
+        return {
+          key: undefined,
+          specifier: resolved,
+        };
       }
       return {
-        key: used as ImportMapKey,
-        specifier: resolved as DependencySpecifier,
+        key: used,
+        specifier: ensureUri(resolved),
       };
     },
   };
 }
 
-export async function isImportMap(path: FilePath): Promise<boolean> {
+export async function isImportMap(path: Path): Promise<boolean> {
   const content = await Deno.readTextFile(path);
   try {
     // The url doesn't matter here.

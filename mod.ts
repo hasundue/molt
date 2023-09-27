@@ -29,14 +29,14 @@ import {
   createGraph,
   init as initDenoGraph,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import type { ModuleSpecifier } from "./src/types.ts";
+import type { Path, Url } from "./src/types.ts";
 import {
   createDependencyUpdate,
   createLoad,
   createResolve,
   type DependencyUpdate,
 } from "./src/core.ts";
-import { ensureFilePath, toArray, toFileSpecifier } from "./src/utils.ts";
+import { ensureUri, ensurePath, toArray, toFileUri } from "./src/utils.ts";
 import { readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
@@ -68,11 +68,11 @@ export async function collectDependencyUpdateAll(
     return [];
   }
   const _options = {
-    importMap: options.importMap ? ensureFilePath(options.importMap) : undefined,
+    importMap: options.importMap ? ensurePath(options.importMap) : undefined,
     loadRemote: options.loadRemote,
   };
   const specifiers = _entrypoints.map((path) => {
-    return toFileSpecifier(ensureFilePath(path))
+    return toFileUri(ensurePath(path))
   });
   await DenoGraph.ensureInit();
   const graph = await createGraph(specifiers, {
@@ -85,7 +85,7 @@ export async function collectDependencyUpdateAll(
       module.dependencies?.map(async (dependency) => {
         const update = await createDependencyUpdate(
           dependency,
-          module.specifier as ModuleSpecifier,
+          ensureUri(module.specifier),
           {
             importMap: _options.importMap
               ? await readFromJson(_options.importMap)
@@ -100,36 +100,36 @@ export async function collectDependencyUpdateAll(
 }
 
 export interface DependencyUpdateResult {
-  /** The relative path to the module from the current working directory. */
-  specifier: string;
+  /** The specifier of the updated dependency. */
+  specifier: Path | Url;
   /** The updated content of the module. */
   content: string;
 }
 
-export interface ModuleContentUpdate extends DependencyUpdateResult {
+export interface FileUpdate extends DependencyUpdateResult {
   /** The dependency updates in the module. */
   dependencies: DependencyUpdate[];
 }
 
 export function execDependencyUpdateAll(
   updates: DependencyUpdate[],
-): ModuleContentUpdate[] {
+): FileUpdate[] {
   /** A map of module specifiers to the module content updates. */
-  const results = new Map<string, ModuleContentUpdate>();
-  for (const dependencyUpdate of updates) {
-    const current = results.get(dependencyUpdate.referrer) ?? {
-      specifier: dependencyUpdate.referrer,
-      content: Deno.readTextFileSync(dependencyUpdate.referrer),
+  const results = new Map<Path | Url, FileUpdate>();
+  for (const update of updates) {
+    const specifier = update.importMap ?? update.referrer;
+    const current = results.get(specifier) ?? {
+      specifier,
+      content: Deno.readTextFileSync(specifier),
       dependencies: [],
-    };
-    const content = applyDependencyUpdate(dependencyUpdate, current.content);
-    if (!content) {
-      continue;
-    }
-    results.set(dependencyUpdate.referrer, {
+    } satisfies FileUpdate;
+    const content = update.importMap
+      ? applyDependencyUpdateToImportMap(update, current.content)
+      : applyDependencyUpdate(update, current.content);
+    results.set(update.referrer, {
       specifier: current.specifier,
       content,
-      dependencies: current.dependencies.concat(dependencyUpdate),
+      dependencies: current.dependencies.concat(update),
     });
   }
   return Array.from(results.values());
@@ -140,16 +140,11 @@ export function applyDependencyUpdate(
   update: DependencyUpdate,
   /** Content of the module to update. */
   content: string,
-): string | undefined {
-  if (!update.code) {
-    console.warn(`No code found for ${update.specifier}`);
-    return;
-  }
+): string {
   if (update.code.span.start.line !== update.code.span.end.line) {
-    console.warn(
+    throw new Error(
       `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
     );
-    return;
   }
   const line = update.code.span.start.line;
   const lines = content.split("\n");
@@ -167,11 +162,11 @@ export function applyDependencyUpdate(
 }
 
 export interface WriteModuleContentUpdateAllOptions {
-  onWrite?: (result: ModuleContentUpdate) => void;
+  onWrite?: (result: FileUpdate) => void;
 }
 
 export function writeModuleContentUpdateAll(
-  updates: ModuleContentUpdate[],
+  updates: FileUpdate[],
   options: WriteModuleContentUpdateAllOptions = {},
 ): void {
   updates.forEach((it) => {
@@ -181,7 +176,7 @@ export function writeModuleContentUpdateAll(
 }
 
 export function writeModuleContentUpdate(
-  result: ModuleContentUpdate,
+  result: FileUpdate,
 ): void {
   Deno.writeTextFileSync(result.specifier, result.content);
 }

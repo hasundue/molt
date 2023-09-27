@@ -1,11 +1,11 @@
-import type { DependencySpecifier, Maybe, SemVerString } from "./types.ts";
+import type { Maybe, SemVerString } from "./types.ts";
 
 // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 const SEMVER_REGEXP =
   /@v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/g;
 
 export function parseSemVer(
-  specifier: string | DependencySpecifier,
+  specifier: string,
 ): Maybe<SemVerString> {
   const match = specifier.match(SEMVER_REGEXP);
   if (!match) {

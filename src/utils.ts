@@ -5,13 +5,11 @@ import {
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
 import type {
-  FilePath,
-  FileSpecifier,
+  Path,
+  FileUri,
   Maybe,
-  ModuleSpecifier,
-  RelativePath,
-  UrlSpecifier,
-  UrlString,
+  Url,
+  Uri,
 } from "./types.ts";
 
 export function tryCreateUrl(specifier: string): Maybe<URL> {
@@ -22,39 +20,41 @@ export function tryCreateUrl(specifier: string): Maybe<URL> {
   }
 }
 
-export function ensureRelative(path: FilePath) {
-  return relative(Deno.cwd(), path) as RelativePath;
+export function toRelative(path: Path) {
+  return relative(Deno.cwd(), path) as Path;
 }
 
-export function toFileSpecifier(path: FilePath) {
+export function toFileUri(path: Path) {
   return toFileUrl(
     isAbsolute(path) ? path : resolve(path),
-  ).href as FileSpecifier;
+  ).href as FileUri;
 }
 
-export function isFileSpecifier(
-  specifier: ModuleSpecifier,
-): specifier is FileSpecifier {
+export function isFileUri(
+  specifier: string,
+): specifier is FileUri {
   return specifier.startsWith("file:///");
 }
 
-export function toRelativePath(specifier: FileSpecifier) {
-  return ensureRelative(
-    new URL(specifier).pathname as FilePath,
-  ) as RelativePath;
+export function assertFileUri(str: string): asserts str is FileUri {
+  if (!isFileUri(str)) {
+    throw new TypeError(`Invalid file URI: ${str}`);
+  }
 }
 
-export function toUrlString(specifier: UrlSpecifier) {
-  return new URL(specifier).href as UrlString;
+export function toRelativePath(specifier: FileUri) {
+  return toRelative(
+    new URL(specifier).pathname as Path,
+  ) as Path;
 }
 
-export function ensureArray<T>(
+export function toArray<T>(
   arg: T | T[],
 ): T[] {
   return Array.isArray(arg) ? arg : [arg];
 }
 
-export function isUrlString(str: string): str is UrlString {
+export function isUrl(str: string): str is Url {
   try {
     new URL(str);
     return true;
@@ -63,13 +63,21 @@ export function isUrlString(str: string): str is UrlString {
   }
 }
 
-export function ensureFilePath(str: string): FilePath {
-  if (isUrlString(str)) {
+export function ensureUri(str: string): Uri {
+  try {
+    return new URL(str).href as Uri;
+  } catch {
+    throw new TypeError(`Invalid URI: ${str}`);
+  }
+}
+
+export function ensurePath(str: string): Path {
+  if (isUrl(str)) {
     throw new TypeError(`Invalid file path: ${str}`);
   }
   try {
     toFileUrl(resolve(str));
-    return str as FilePath;
+    return str as Path;
   } catch {
     throw new TypeError(`Invalid file path: ${str}`);
   }

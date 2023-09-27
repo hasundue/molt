@@ -14,7 +14,7 @@ import {
   collectDependencyUpdateAll,
   type DependencyUpdate,
   execDependencyUpdateAll,
-  type ModuleContentUpdate,
+  type FileUpdate,
   writeModuleContentUpdateAll,
 } from "./mod.ts";
 
@@ -25,7 +25,7 @@ describe("collectDependencyUpdates()", () => {
     );
     assertEquals(updates.length, 4);
   });
-  it("src/fixtures/mod.ts - with deno.json", async () => {
+  it("src/fixtures/import_maps.ts", async () => {
     const updates = await collectDependencyUpdateAll(
       "./src/fixtures/import_maps.ts",
       {
@@ -66,6 +66,27 @@ describe("applyDependencyUpdate", () => {
   });
 });
 
+describe.only("applyDependencyUpdate() - with import maps", () => {
+  let updates: DependencyUpdate[];
+  beforeAll(async () => {
+    updates = await collectDependencyUpdateAll(
+      "./src/fixtures/import_maps.ts",
+      { importMap: "src/fixtures/_deno.json" },
+    );
+  });
+  it("deno_graph", () => {
+    const update = updates.find((update) =>
+      update.code.specifier === "deno_graph"
+    )!;
+    const result = applyDependencyUpdate(
+      update,
+      Deno.readTextFileSync(update.referrer),
+    );
+    assertExists(result);
+    console.debug(result);
+  });
+});
+
 describe("execDependencyUpdateArray", () => {
   let updates: DependencyUpdate[];
   beforeAll(async () => {
@@ -88,10 +109,10 @@ describe("execDependencyUpdateArray", () => {
   });
 });
 
-describe.only("writeAll", () => {
+describe("writeAll", () => {
   let output: Map<string, string>;
   let writeTextFileSyncStub: Stub;
-  let results: ModuleContentUpdate[];
+  let results: FileUpdate[];
 
   beforeAll(async () => {
     output = new Map<string, string>();
@@ -105,7 +126,6 @@ describe.only("writeAll", () => {
     results = execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
-    console.debug(results);
   });
 
   afterAll(() => {
