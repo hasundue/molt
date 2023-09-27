@@ -3,15 +3,10 @@ import {
   load as defaultLoad,
   ModuleJson,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import type { Maybe, Path, SemVerString, Uri, Url } from "./types.ts";
-import {
-  ensurePath,
-  ensureUri,
-  isFileUri,
-  toRelativePath,
-  tryCreateUrl,
-} from "./utils.ts";
+import type { Maybe, Path, SemVerString } from "./types.ts";
+import { ensurePath, ensureUri, tryCreateUrl } from "./utils.ts";
 import { parseSemVer } from "./semver.ts";
+import { URI } from "./uri.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
 
 export function createLoad(
@@ -56,8 +51,10 @@ export async function createResolve(
   }
   const importMap = await readFromJson(options.importMap);
   return (specifier, referrer) => {
-    return importMap.tryResolve(specifier, ensureUri(referrer))
-      ?.specifier ?? specifier;
+    return importMap.tryResolve(
+      specifier,
+      URI.ensure("http", "https", "file")(referrer),
+    )?.specifier ?? specifier;
   };
 }
 
@@ -86,7 +83,7 @@ type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: Uri;
+  specifier: URI<"file" | "http" | "https" | "npm">;
   version: {
     from: SemVerString;
     to: SemVerString;
@@ -98,9 +95,9 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The relative path to the module from the current working directory. */
-  referrer: Uri;
+  referrer: URI<"file" | "http" | "https">;
   /** The path to the import map used to resolve the dependency. */
-  importMap?: Path;
+  map?: URI<"file">;
 }
 
 export interface CreateDependencyUpdateOptions {
@@ -110,7 +107,7 @@ export interface CreateDependencyUpdateOptions {
 
 export async function createDependencyUpdate(
   dependency: DependencyJson,
-  referrer: Uri,
+  referrer: URI<"file" | "http" | "https">,
   options?: CreateDependencyUpdateOptions,
 ): Promise<DependencyUpdate | undefined> {
   if (!dependency?.code?.specifier) {
@@ -125,9 +122,7 @@ export async function createDependencyUpdate(
   if (!newSemVer) {
     return;
   }
-  const props = parseDependencyProps(
-    new URL(dependency.code.specifier),
-  );
+  const props = parseDependencyProps(new URL(dependency.code.specifier));
   if (!props) {
     return;
   }
@@ -148,8 +143,8 @@ export async function createDependencyUpdate(
       from: props.version as SemVerString,
       to: newSemVer as SemVerString,
     },
-    referrer: isFileUri(referrer) ? toRelativePath(referrer) : referrer,
-    importMap: mapped ? options!.importMap!.path : undefined,
+    referrer,
+    map: mapped ? options!.importMap!.specifier : undefined,
   };
 }
 

@@ -4,6 +4,7 @@ import {
   resolve,
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
+import { catchMe as _try } from "./utils.ts";
 
 type DefaultProtocol<Scheme extends string> = Scheme extends "http" | "https"
   ? `${Scheme}://`
@@ -29,28 +30,15 @@ export const URI = {
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {
-      let url: URL;
-      try {
-        url = new URL(uri);
-      } catch {
+      const url = _try(
+        () => new URL(uri),
+      ).catch(() => {
         throw new TypeError(`Invalid URI: ${uri}`);
-      }
-      if (url.protocol.split(":")[0] in schemes) {
+      });
+      if (schemes.includes(url.protocol.split(":")[0] as S)) {
         return uri as URI<S>;
       }
       throw new TypeError(`Unexpected URI protocol: ${url.protocol}`);
     };
   },
-  assert(uri: string): asserts uri is URI {
-    try {
-      new URL(uri);
-    } catch {
-      throw new TypeError(`Invalid URI: ${uri}`);
-    }
-  },
 };
-
-// deno-lint-ignore no-explicit-any
-export interface CatchMe<T = any> {
-  catch: (you: (exception: unknown) => T) => T;
-}

@@ -23,28 +23,28 @@ describe("ensureFilePath()", () => {
 
 describe("catchMe()", () => {
   it("returns a CatchMe object", () => {
-    const result = catchMe(() => 1);
-    assert(isCatchMe(result));
+    assert(isCatchMe(
+      catchMe(() => 1),
+    ));
   });
   it("`catch` method of CatchMe returns a value", () => {
-    const result = catchMe(() => 1);
-    assert(typeof result.catch === "function");
-    const value = result.catch(() => 2);
-    assertEquals(value, 1);
+    assertEquals(
+      catchMe(() => 1).catch(() => 2),
+      1,
+    );
   });
   it("`catchWith` method of CatchMe returns a value", () => {
-    const result = catchMe(() => 1);
-    assert(typeof result.catchWith === "function");
-    const value = result.catchWith(2);
-    assertEquals(value, 1);
+    assertEquals(
+      catchMe(() => 1).catchWith(2),
+      1,
+    );
   });
 });
 
 describe("sayCatchMe()", () => {
   it("returns a function that returns CatchMe object", () => {
-    const fn = sayCatchMe(() => 1);
-    assert(typeof fn === "function");
-    const result = fn();
-    assert(isCatchMe(result));
+    assert(isCatchMe(
+      sayCatchMe(() => 1)(),
+    ));
   });
 });

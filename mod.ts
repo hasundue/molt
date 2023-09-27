@@ -29,14 +29,15 @@ import {
   createGraph,
   init as initDenoGraph,
 } from "https://deno.land/x/deno_graph@0.55.0/mod.ts";
-import type { Path, Url } from "./src/types.ts";
+import type { Path } from "./src/types.ts";
+import { URI } from "./src/uri.ts";
 import {
   createDependencyUpdate,
   createLoad,
   createResolve,
   type DependencyUpdate,
 } from "./src/core.ts";
-import { ensureUri, ensurePath, toArray, toFileUri } from "./src/utils.ts";
+import { ensurePath, ensureUri, toArray, toFileUri } from "./src/utils.ts";
 import { readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
@@ -72,7 +73,7 @@ export async function collectDependencyUpdateAll(
     loadRemote: options.loadRemote,
   };
   const specifiers = _entrypoints.map((path) => {
-    return toFileUri(ensurePath(path))
+    return toFileUri(ensurePath(path));
   });
   await DenoGraph.ensureInit();
   const graph = await createGraph(specifiers, {
@@ -100,8 +101,8 @@ export async function collectDependencyUpdateAll(
 }
 
 export interface DependencyUpdateResult {
-  /** The specifier of the updated dependency. */
-  specifier: Path | Url;
+  /** The specifier of the updated dependency (a remote module or an import map.) */
+  specifier: URI<"http" | "https" | "file">;
   /** The updated content of the module. */
   content: string;
 }
@@ -115,15 +116,15 @@ export function execDependencyUpdateAll(
   updates: DependencyUpdate[],
 ): FileUpdate[] {
   /** A map of module specifiers to the module content updates. */
-  const results = new Map<Path | Url, FileUpdate>();
+  const results = new Map<URI<"http" | "https" | "file">, FileUpdate>();
   for (const update of updates) {
-    const specifier = update.importMap ?? update.referrer;
+    const specifier = update.map ?? update.referrer;
     const current = results.get(specifier) ?? {
       specifier,
       content: Deno.readTextFileSync(specifier),
       dependencies: [],
     } satisfies FileUpdate;
-    const content = update.importMap
+    const content = update.map
       ? applyDependencyUpdateToImportMap(update, current.content)
       : applyDependencyUpdate(update, current.content);
     results.set(update.referrer, {

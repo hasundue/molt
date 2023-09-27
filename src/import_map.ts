@@ -4,19 +4,20 @@ import {
   ImportMapJson,
   parseFromJson,
 } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
-import type { Maybe } from "./types.ts";
+import { type Maybe, URISchemes } from "./types.ts";
 import { URI } from "./uri.ts";
 import { catchMe as _try } from "./utils.ts";
 
 interface ImportMapResolveResult {
   /** The full specifier resolved from the import map. */
-  specifier: URI<"http" | "https" | "file" | "npm">;
-  /** The string that replaced the matched part of the specifier. */
-  replacement: string;
+  specifier: URI<URISchemes>;
+  /** The string that replaced the matched part of the specifier.
+   * Undefined if the specifier is a file path. */
+  replacement?: string;
 }
 
 export interface ImportMap {
-  path: string;
+  specifier: URI<"file">;
   imports: ImportMapJson["imports"];
   tryResolve(
     specifier: string,
@@ -25,17 +26,19 @@ export interface ImportMap {
 }
 
 export async function readFromJson(path: string): Promise<ImportMap> {
+  const specifier = URI.from(path);
   // Instead of validate the json by ourself, let the import_map module do it.
   const inner = await parseFromJson(
-    URI.from(path),
+    specifier,
     // deno-lint-ignore no-explicit-any
     parseJsonc(Deno.readTextFileSync(path)) as any,
   );
   const json = JSON.parse(inner.toJSON()) as ImportMapJson;
   return {
     tryResolve(specifier, referrer) {
-      const resolved = _try(inner.resolve)(specifier, referrer)
-        .catchWith(undefined);
+      const resolved = _try(
+        () => inner.resolve(specifier, referrer),
+      ).catchWith(undefined);
       if (!resolved) {
         // The specifier is not in the import map.
         return undefined;
@@ -47,14 +50,15 @@ export async function readFromJson(path: string): Promise<ImportMap> {
         (str) => str.length,
       );
       if (!replacement) {
-        throw new Error(`Cannot find a mapping for ${resolved} in ${path}`);
+        // The specifier is a file path
+        URI.ensure("file")(resolved);
       }
       return {
-        specifier: URI.ensure("http", "https", "file")(resolved),
+        specifier: URI.ensure(...URISchemes)(resolved),
         replacement,
       };
     },
-    path,
+    specifier,
     imports: json.imports,
   };
 }
