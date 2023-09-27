@@ -2,7 +2,7 @@
 
 import { distinct } from "https://deno.land/std@0.202.0/collections/distinct.ts";
 import { DependencyUpdate } from "../mod.ts";
-import { Maybe } from "../src/utils.ts";
+import { Maybe } from "./types.ts";
 
 export type VersionProp = {
   from?: string;

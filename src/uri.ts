@@ -4,7 +4,6 @@ import {
   resolve,
   toFileUrl,
 } from "https://deno.land/std@0.202.0/path/mod.ts";
-import { catchMe as _try } from "./utils.ts";
 
 type DefaultProtocol<Scheme extends string> = Scheme extends "http" | "https"
   ? `${Scheme}://`
@@ -18,15 +17,18 @@ export type URI<
 
 export const URI = {
   from(path: string): URI<"file"> {
-    return _try(() => {
-      const url = new URL(path);
-      if (url.protocol !== "file:") {
-        throw new TypeError();
-      }
-      return url;
-    }).catch(
-      () => toFileUrl(isAbsolute(path) ? path : resolve(path)),
-    ).href as URI<"file">;
+    let url: URL;
+    try {
+      url = new URL(path);
+    } catch {
+      return toFileUrl(
+        isAbsolute(path) ? path : resolve(path),
+      ).href as URI<"file">;
+    }
+    if (url.protocol !== "file:") {
+      throw new TypeError();
+    }
+    return url.href as URI<"file">;
   },
   toRelativePath(uri: URI<"file">): string {
     return relative(Deno.cwd(), new URL(uri).pathname);
@@ -36,11 +38,12 @@ export const URI = {
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {
-      const url = _try(
-        () => new URL(uri),
-      ).catch(() => {
+      let url: URL;
+      try {
+        url = new URL(uri);
+      } catch {
         throw new TypeError(`Invalid URI: ${uri}`);
-      });
+      }
       if (schemes.includes(url.protocol.split(":")[0] as S)) {
         return uri as URI<S>;
       }

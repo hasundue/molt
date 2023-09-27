@@ -6,7 +6,6 @@ import {
 } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
 import { type Maybe, URISchemes } from "./types.ts";
 import { URI } from "./uri.ts";
-import { catchMe as _try } from "./utils.ts";
 
 export { type ImportMapJson } from "https://deno.land/x/import_map@v0.15.0/mod.ts";
 
@@ -39,15 +38,15 @@ export async function readFromJson(path: string): Promise<ImportMap> {
   const json = JSON.parse(inner.toJSON()) as ImportMapJson;
   return {
     tryResolve(specifier, referrer) {
-      const resolved = _try(
-        () => inner.resolve(specifier, referrer),
-      ).catchWith(undefined);
-      if (!resolved) {
+      let resolved: string;
+      try {
+        resolved = inner.resolve(specifier, referrer);
+      } catch {
         // The specifier is not in the import map.
         return undefined;
       }
-      // Find which key is used for the resolution. The process here is ridiculously
-      // inefficient, but we prefer not to reimplement the whole import_map module.
+      // Find which key is used for the resolution. This is ridiculously inefficient,
+      // but we prefer not to reimplement the whole import_map module.
       const replacement = maxBy(
         Object.entries(json.imports)
           .map(([from, to]) => ({ from, to }))

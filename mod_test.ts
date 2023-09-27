@@ -6,9 +6,9 @@ import {
 } from "https://deno.land/std@0.202.0/testing/bdd.ts";
 import { type Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
 import {
-  assertNotEquals,
   assertEquals,
   assertExists,
+  assertNotEquals,
 } from "https://deno.land/std@0.202.0/assert/mod.ts";
 import {
   applyDependencyUpdate,
@@ -19,6 +19,7 @@ import {
   type FileUpdate,
   writeModuleContentUpdateAll,
 } from "./mod.ts";
+import { URI } from "./src/uri.ts";
 
 describe("collectDependencyUpdates()", () => {
   it("src/fixtures/mod.ts", async () => {
@@ -94,25 +95,30 @@ describe("applyDependencyUpdateToImportMap", () => {
   });
 });
 
-describe("execDependencyUpdateAll", () => {
-  let updates: DependencyUpdate[];
-  beforeAll(async () => {
-    updates = await collectDependencyUpdateAll(
-      "./src/fixtures/mod.ts",
-    );
-  });
-  it("src/fixtures/mod.ts", () => {
-    const results = execDependencyUpdateAll(updates);
-    assertEquals(results.length, 2);
-  });
-  it("https://deno.land/std", () => {
-    const results = execDependencyUpdateAll(
-      updates.filter((update) => update.specifier.includes("deno.land/std")),
+describe.only("execDependencyUpdateAll", () => {
+  it("src/fixtures/mod.ts", async () => {
+    const results = await execDependencyUpdateAll(
+      await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
     assertEquals(results.length, 2);
-    for (const result of results) {
-      assertExists(result.content);
-    }
+  });
+  it("src/fixtures/import_maps.ts", async () => {
+    const originalContnet = Deno.readTextFileSync("./src/fixtures/_deno.json");
+    const results = await execDependencyUpdateAll(
+      await collectDependencyUpdateAll(
+        "./src/fixtures/import_maps.ts",
+        { importMap: "src/fixtures/_deno.json" },
+      ),
+    );
+    assertEquals(results.length, 2);
+    assertNotEquals(
+      results[0].content,
+      originalContnet,
+    );
+    assertNotEquals(
+      results[1].content,
+      originalContnet,
+    );
   });
 });
 
@@ -130,7 +136,7 @@ describe("writeAll", () => {
         output.set(path.toString(), data.toString());
       },
     );
-    results = execDependencyUpdateAll(
+    results = await execDependencyUpdateAll(
       await collectDependencyUpdateAll("./src/fixtures/mod.ts"),
     );
   });
@@ -141,7 +147,7 @@ describe("writeAll", () => {
 
   it("src/fixtures/mod.ts", () => {
     writeModuleContentUpdateAll(results);
-    assertExists(output.get("src/fixtures/mod.ts"));
-    assertExists(output.get("src/fixtures/lib.ts"));
+    assertExists(output.get(URI.from("src/fixtures/mod.ts")));
+    assertExists(output.get(URI.from("src/fixtures/lib.ts")));
   });
 });

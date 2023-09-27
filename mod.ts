@@ -36,7 +36,6 @@ import {
   type DependencyUpdate,
 } from "./src/core.ts";
 import { URI } from "./src/uri.ts";
-import { parseSemVer } from "./src/semver.ts";
 import { ImportMapJson, readFromJson } from "./src/import_map.ts";
 
 export { type DependencyUpdate } from "./src/core.ts";
@@ -101,16 +100,16 @@ export interface FileUpdate extends DependencyUpdateResult {
   dependencies: DependencyUpdate[];
 }
 
-export function execDependencyUpdateAll(
+export async function execDependencyUpdateAll(
   updates: DependencyUpdate[],
-): FileUpdate[] {
+): Promise<FileUpdate[]> {
   /** A map of module specifiers to the module content updates. */
   const results = new Map<URI<"http" | "https" | "file">, FileUpdate>();
   for (const update of updates) {
     const referrer = update.map?.source ?? update.referrer;
     const current = results.get(referrer) ?? {
       specifier: referrer,
-      content: Deno.readTextFileSync(referrer),
+      content: await fetch(referrer).then((it) => it.text()),
       dependencies: [],
     } satisfies FileUpdate;
     const content = update.map

@@ -80,8 +80,8 @@ describe("commitDependencyUpdateAll()", () => {
     output = [];
   });
 
-  it("no grouping", () => {
-    commitDependencyUpdateAll(updates);
+  it("no grouping", async () => {
+    await commitDependencyUpdateAll(updates);
     assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -92,8 +92,8 @@ describe("commitDependencyUpdateAll()", () => {
     );
   });
 
-  it("group by dependency name", () => {
-    commitDependencyUpdateAll(updates, {
+  it("group by dependency name", async () => {
+    await commitDependencyUpdateAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -111,8 +111,8 @@ describe("commitDependencyUpdateAll()", () => {
     );
   });
 
-  it("group by module (file) name", () => {
-    commitDependencyUpdateAll(updates, {
+  it("group by module (file) name", async () => {
+    await commitDependencyUpdateAll(updates, {
       groupBy: (update) => update.referrer,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });

@@ -54,8 +54,8 @@ export interface ExecGitCommitSequenceOptions {
 export function commitDependencyUpdateAll(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions> & ExecGitCommitSequenceOptions,
-): void {
-  execGitCommitSequence(
+): Promise<void> {
+  return execGitCommitSequence(
     createGitCommitSequence(updates, options),
     options,
   );
@@ -86,21 +86,21 @@ export function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-export function execGitCommitSequence(
+export async function execGitCommitSequence(
   sequence: GitCommitSequence,
   options: ExecGitCommitSequenceOptions = {},
 ) {
-  sequence.commits.forEach((it) => {
-    execGitCommit(it, sequence.options);
-    options.onCommit?.(it);
-  });
+  for await (const commit of sequence.commits) {
+    execGitCommit(commit, sequence.options);
+    options.onCommit?.(commit);
+  }
 }
 
-export function execGitCommit(
+export async function execGitCommit(
   commit: GitCommit,
   options: CommitOptions,
 ) {
-  const results = execDependencyUpdateAll(commit.updates);
+  const results = await execDependencyUpdateAll(commit.updates);
   writeModuleContentUpdateAll(results);
   _add(results, options.gitAddOptions);
   _commit(commit.message, options.gitCommitOptions);

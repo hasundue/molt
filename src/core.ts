@@ -7,7 +7,6 @@ import type { Maybe, Path, SemVerString } from "./types.ts";
 import { parseSemVer } from "./semver.ts";
 import { URI } from "./uri.ts";
 import { ImportMap, readFromJson } from "./import_map.ts";
-import { catchMe as _try } from "./utils.ts";
 
 export function createLoad(
   options?: {
@@ -15,10 +14,10 @@ export function createLoad(
   },
 ): NonNullable<CreateGraphOptions["load"]> {
   return async (specifier) => {
-    const url = _try(
-      () => new URL(specifier),
-    ).catchWith(undefined);
-    if (!url) {
+    let url: URL;
+    try {
+      url = new URL(specifier);
+    } catch {
       return defaultLoad(specifier);
     }
     switch (url.protocol) {
