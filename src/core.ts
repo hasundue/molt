@@ -98,7 +98,7 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The relative path to the module from the current working directory. */
-  referrer: Path | Url;
+  referrer: Uri;
   /** The path to the import map used to resolve the dependency. */
   importMap?: Path;
 }

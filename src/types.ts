@@ -4,6 +4,8 @@ export type Brand<T, B> = T & { __brand: B };
 /** A string that represents a path segment (e.g. `src/lib.ts`.) */
 export type Path = Brand<string, "Path">;
 
+export type FilePath = Path;
+
 export type Uri = Url | FileUri;
 
 /** A string of a URL (e.g. `https://deno.land/x/deno_graph/mod.ts`.) */
