@@ -18,7 +18,6 @@ async function checkAction(
   ...entrypoints: string[]
 ) {
   console.log("🔎 Checking for updates...");
-  console.debug(entrypoints);
   const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
   });
