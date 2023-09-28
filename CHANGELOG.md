@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.2.0](https://github.com/hasundue/deno-molt/compare/0.1.1...0.2.0) (2023-09-28)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mod:** restructure the module completely
+
+### Features
+
+* support import maps ([#7](https://github.com/hasundue/deno-molt/issues/7)) ([f452df3](https://github.com/hasundue/deno-molt/commit/f452df33c44d018761bc138b0cb1706025183421))
+
+
+### Code Refactoring
+
+* **mod:** restructure the module completely ([f452df3](https://github.com/hasundue/deno-molt/commit/f452df33c44d018761bc138b0cb1706025183421))
+
 ## [0.1.1](https://github.com/hasundue/deno-molt/compare/0.1.0...v0.1.1) (2023-09-24)
 
 
