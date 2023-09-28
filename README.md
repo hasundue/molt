@@ -11,8 +11,8 @@ registry.
 
 ## Key Concepts
 
-- **No regex to parse import statements** - Import specifiers of dependencies
-  are parsed by the same routine as Deno CLI.
+- **No regex to detect dependencies** - Import specifiers of dependencies are
+  discovered by the same parser as Deno runtime.
 - **No custom logic for each registry** - Latest versions of dependencies are
   obtained by redirects of fetch requests by module registries.
 - **Module-first** - The core logic is provided as versatile functions in a Deno
@@ -86,10 +86,10 @@ for more precise control on permissions. Here's an example `deno.json`:
 ```sh
 {
   "tasks": {
-    "update:run": "deno run --allow-env --allow-read --allow-net",
-    "update": "deno task update:run --allow-write=. https://deno.land/x/molt/cli.ts update",
-    "update:check": "deno task update:run https://deno.land/x/molt/cli.ts check",
-    "update:commit": "deno task update:run --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
+    "run": "deno run --allow-env --allow-read --allow-net",
+    "update": "deno task run --allow-write=. https://deno.land/x/molt/cli.ts update",
+    "update:check": "deno task run https://deno.land/x/molt/cli.ts check",
+    "update:commit": "deno task run --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
   },
 }
 ```
