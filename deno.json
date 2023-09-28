@@ -4,7 +4,7 @@
     "lock": "deno cache --lock=deno.lock --lock-write ./*.ts src/*.ts git/*.ts",
     "test": "deno test -A --no-check",
     "dev": "deno fmt --check && deno lint && deno task lock && deno task test",
-    "update": "deno task run --allow-run=git https://deno.land/x/molt/cli.ts check lib/**/*.ts && deno task lock",
+    "update": "deno task run --allow-run=git ./cli.ts check lib/**/*.ts && deno task lock",
     "install": "deno install -A --name molt cli.ts"
   },
   "fmt": {
