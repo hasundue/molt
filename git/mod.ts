@@ -1,13 +1,9 @@
 // Copyright 2023 Chiezo (Shun Ueda). All rights reserved. MIT license.
 
-import {
-  type DependencyUpdate,
-  execDependencyUpdateAll,
-  type FileUpdate,
-  writeModuleContentUpdateAll,
-} from "../mod.ts";
+import { DependencyUpdate } from "../src/update.ts";
+import { FileUpdate } from "../src/file.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
-import { URI } from "../src/uri.ts";
+import { URI } from "../lib/uri.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -101,8 +97,8 @@ export function execGitCommit(
   commit: GitCommit,
   options: CommitOptions,
 ) {
-  const results = execDependencyUpdateAll(commit.updates);
-  writeModuleContentUpdateAll(results);
+  const results = FileUpdate.collect(commit.updates);
+  FileUpdate.writeAll(results);
   _add(results, options.gitAddOptions);
   _commit(commit.message, options.gitCommitOptions);
 }
