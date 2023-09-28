@@ -1,8 +1,4 @@
-import {
-  beforeAll,
-  describe,
-  it,
-} from "https://deno.land/std@0.202.0/testing/bdd.ts";
+import { beforeAll, describe, it } from "../lib/std/testing.ts";
 import { assertEquals, assertExists } from "../lib/std/assert.ts";
 import { URI } from "../lib/uri.ts";
 import { ImportMap } from "./import_map.ts";

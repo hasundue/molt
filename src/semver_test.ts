@@ -1,5 +1,5 @@
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import { assertEquals } from "https://deno.land/std@0.202.0/assert/mod.ts";
+import { describe, it } from "../lib/std/testing.ts";
+import { assertEquals } from "../lib/std/assert.ts";
 import { parseSemVer } from "./semver.ts";
 
 describe("parseSemVer", () => {
