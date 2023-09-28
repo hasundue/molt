@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.2](https://github.com/hasundue/deno-molt/compare/0.2.1...0.2.2) (2023-09-28)
+
+
+### Bug Fixes
+
+* **cli:** remove unnecessary quotes from commit message ([24e96fc](https://github.com/hasundue/deno-molt/commit/24e96fc3fca39d94c3f4969a69cbbff65ca7ed20))
+
 ## [0.2.1](https://github.com/hasundue/deno-molt/compare/0.2.0...0.2.1) (2023-09-28)
 
 
