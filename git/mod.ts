@@ -151,7 +151,7 @@ function _commit(
   options: string[],
 ) {
   const command = new Deno.Command("git", {
-    args: ["commit", ...options, "-m", `"${message}"`],
+    args: ["commit", ...options, "-m", message],
   });
   const { code } = command.outputSync();
   if (code !== 0) {
