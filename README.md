@@ -48,9 +48,10 @@ for more precise control on permissions. Here's an example `deno.json`:
 ```sh
 {
   "tasks": {
-    "update": "deno run --allow-env --allow-read --allow-net --allow-write=. https://deno.land/x/molt/cli.ts update",
-    "update:check": "deno run --allow-env --allow-read --allow-net https://deno.land/x/molt/cli.ts check",
-    "update:commit": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
+    "update:run": "deno run --allow-env --allow-read --allow-net",
+    "update": "deno task update:run --allow-write=. https://deno.land/x/molt/cli.ts update",
+    "update:check": "deno task update:run https://deno.land/x/molt/cli.ts check",
+    "update:commit": "deno task update:run --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
   },
 }
 ```
@@ -63,8 +64,12 @@ The most interactive interface is provided as `check` sub-command of `cli.ts`.
 
 ```sh
 deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
-https://deno.land/x/molt/cli.ts check <...entrypoints>
+https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ```
+
+> **Note**\
+> Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc` if available.\
+> You can't, however, use import maps as an entrypoint.
 
 ##### Example: Just check
 

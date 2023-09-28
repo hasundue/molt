@@ -20,10 +20,14 @@ export interface DependencyUpdate extends Omit<Dependency, "version"> {
     to: SemVerString;
   };
   /** The code of the dependency. */
-  code: {
+  code?: {
     /** The original specifier of the dependency appeared in the code. */
     specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
+  };
+  type?: {
+    specifier: string;
+    span: NonNullable<DependencyJson["type"]>["span"];
   };
   /** The specifier of the module that imports the dependency. */
   referrer: URI<"file">;
@@ -101,19 +105,19 @@ export async function _create(
     importMap?: ImportMap;
   },
 ): Promise<DependencyUpdate | undefined> {
-  if (!dependency?.code?.specifier) {
-    console.warn(
-      `The dependency ${dependency.specifier} has no resolved specifier.`,
+  if (!dependency?.code?.specifier && !dependency?.type?.specifier) {
+    throw new Error(
+      `The dependency ${dependency.specifier} in ${
+        URI.relative(referrer)
+      } has no resolved specifier.`,
     );
-    return;
   }
-  const newSemVer = await Dependency.resolveLatestSemVer(
-    new URL(dependency.code.specifier),
-  );
+  const specifier = dependency.code?.specifier ?? dependency.type?.specifier!;
+  const newSemVer = await Dependency.resolveLatestSemVer(new URL(specifier));
   if (!newSemVer) {
     return;
   }
-  const props = Dependency.parseProps(new URL(dependency.code.specifier));
+  const props = Dependency.parseProps(new URL(specifier));
   if (!props) {
     return;
   }
@@ -124,13 +128,16 @@ export async function _create(
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: URI.ensure("http", "https", "npm")(
-      dependency.code.specifier,
-    ),
-    code: {
+    specifier: URI.ensure("http", "https", "npm")(specifier),
+    code: dependency.code && {
       // We prefer to put the original specifier here.
       specifier: dependency.specifier,
       span: dependency.code.span,
+    },
+    type: dependency.type && {
+      // We prefer to put the original specifier here.
+      specifier: dependency.specifier,
+      span: dependency.type.span,
     },
     version: {
       from: props.version as SemVerString,
@@ -153,22 +160,23 @@ function applyToModule(
   /** Content of the module to update. */
   content: string,
 ): string {
-  if (update.code.span.start.line !== update.code.span.end.line) {
+  const span = update.code?.span ?? update.type?.span!;
+  if (span.start.line !== span.end.line) {
     throw new Error(
       `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
     );
   }
-  const line = update.code.span.start.line;
+  const line = span.start.line;
   const lines = content.split("\n");
 
-  lines[line] = lines[line].slice(0, update.code.span.start.character) +
+  lines[line] = lines[line].slice(0, span.start.character) +
     `"${
       update.specifier.replace(
         update.version.from,
         update.version.to,
       )
     }"` +
-    lines[line].slice(update.code.span.end.character);
+    lines[line].slice(span.end.character);
 
   return lines.join("\n");
 }

@@ -24,6 +24,8 @@ export const ImportMap = {
   readFromJson,
 };
 
+// This implementation is ridiculously inefficient, but we prefer not to reimplement the whole
+// import_map module. Maybe we should rathre patch rust code of the import_map module.
 async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
   const specifier = URI.from(path);
   // Instead of validate the json by ourself, let the import_map module do it.
@@ -41,8 +43,7 @@ async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
     specifier,
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
-      // Find which key is used for the resolution. This is ridiculously inefficient,
-      // but we prefer not to reimplement the whole import_map module.
+      // Find which key is used for the resolution.
       const replacement = maxBy(
         Object.entries(json.imports)
           .map(([from, to]) => ({ from, to }))

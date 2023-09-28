@@ -2,8 +2,8 @@ import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { colors, Command, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
-import { DependencyUpdate } from "./mod.ts";
-import { commitDependencyUpdateAll } from "./git/mod.ts";
+import { FileUpdate, DependencyUpdate } from "./mod.ts";
+import { commitAll } from "./git/mod.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -18,7 +18,7 @@ async function checkAction(
   entrypoints: string[],
 ) {
   console.log("🔎 Checking for updates...");
-  const updates = await collectDependencyUpdateAll(entrypoints, {
+  const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
   });
   if (!updates.length) {
@@ -65,7 +65,7 @@ async function updateAction(
   entrypoints: string[],
 ) {
   console.log("🔎 Checking for updates...");
-  const updates = await collectDependencyUpdateAll(entrypoints, {
+  const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
   });
   if (!updates.length) {
@@ -111,8 +111,8 @@ function _print(updates: DependencyUpdate[]) {
 function _write(updates: DependencyUpdate[]) {
   console.log();
   console.log("💾 Writing changes...");
-  const results = execDependencyUpdateAll(updates);
-  writeModuleContentUpdateAll(results, {
+  const results = FileUpdate.collect(updates);
+  FileUpdate.writeAll(results, {
     onWrite: (module) =>
       console.log(`  ${URI.relative(module.specifier)}`),
   });
@@ -121,7 +121,7 @@ function _write(updates: DependencyUpdate[]) {
 function _commit(updates: DependencyUpdate[]) {
   console.log();
   console.log("📝 Committing changes...");
-  commitDependencyUpdateAll(updates, {
+  commitAll(updates, {
     groupBy: (dependency) => dependency.name,
     onCommit: (commit) => console.log(`  ${commit.message}`),
   });
