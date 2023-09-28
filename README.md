@@ -1,6 +1,6 @@
 # 🦕 Molt
 
-> **Warning**\
+> [!Warning]\
 > This project is still in early development. Expect inconveniences and breaking
 > changes.
 
@@ -27,15 +27,9 @@ registry.
 
 #### API Reference (WIP)
 
-[Main module]
-
-Sub-modules:
-
-- [Git]
-
-Library:
-
-- [URI]
+- [mod.ts](https://deno.land/x/molt/mod.ts) - Main module
+- [git/mod.ts](https://deno.land/x/molt/git/mod.ts) - Sub-module for Git operations 
+- [lib/uri.ts](https://deno.land/x/molt/lib/uri.ts) - Library for handling URIs
 
 #### Examples
 
@@ -110,7 +104,7 @@ deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
 https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ```
 
-> **Note**\
+> [!Note]\
 > Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc`
 > if available.\
 > You can't, however, use import maps as an entrypoint.
@@ -218,7 +212,4 @@ and of full respect to the authors of these works.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
-[Main module]: https://deno.land/x/molt/mod.ts
-[Git]: https://deno.land/x/molt/git/mod.ts
-[URI]: https://deno.land/x/molt/lib/uri.ts
 [issues]: https://github.com/hasundue/molt/issues
