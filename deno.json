@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "lock": "deno cache --lock=deno.lock --lock-write ./*.ts git/*.ts",
+    "lock": "deno cache --lock=deno.lock --lock-write ./*.ts src/*.ts git/*.ts",
     "fmt": "deno fmt",
     "lint": "deno lint",
     "test": "deno test -A --no-check",

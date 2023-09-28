@@ -7,16 +7,15 @@ import {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import {
-  assertArrayIncludes,
-  assertEquals,
-} from "https://deno.land/std@0.202.0/assert/mod.ts";
-import { Stub, stub } from "https://deno.land/std@0.202.0/testing/mock.ts";
-import { collectDependencyUpdateAll, DependencyUpdate } from "../mod.ts";
-import { commitDependencyUpdateAll } from "./mod.ts";
+  type Stub,
+  stub,
+} from "../lib/std/testing.ts";
+import { assertArrayIncludes, assertEquals } from "../lib/std/assert.ts";
+import { URI } from "../lib/uri.ts";
+import { DependencyUpdate } from "../mod.ts";
+import { commitAll } from "./mod.ts";
 
-const OriginalDenoCommand = Deno.Command;
+const DenoCommandOriginal = Deno.Command;
 const readTextFileSyncOriginal = Deno.readTextFileSync;
 
 class DenoCommandStub {
@@ -34,28 +33,29 @@ class DenoCommandStub {
   }
 }
 
-describe("commitDependencyUpdateAll()", () => {
+describe("commitAll()", () => {
   let output: { path: string; content: string }[] = [];
   let updates: DependencyUpdate[];
   let writeTextFileSyncStub: Stub;
   let readTextFileSyncStub: Stub;
 
   beforeAll(async () => {
-    updates = await collectDependencyUpdateAll(
-      "./src/fixtures/mod.ts",
-    );
+    updates = await DependencyUpdate.collect("src/fixtures/mod.ts");
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",
       (path, data) => {
-        output.push({ path: path.toString(), content: data.toString() });
+        output.push({
+          path: path.toString(),
+          content: data.toString(),
+        });
       },
     );
     readTextFileSyncStub = stub(
       Deno,
       "readTextFileSync",
       (path) => {
-        const file = output.findLast((file) => file.path === path);
+        const file = output.findLast((file) => file.path === path.toString());
         return file!.content;
       },
     );
@@ -65,13 +65,13 @@ describe("commitDependencyUpdateAll()", () => {
   afterAll(() => {
     writeTextFileSyncStub.restore();
     readTextFileSyncStub.restore();
-    Deno.Command = OriginalDenoCommand;
+    Deno.Command = DenoCommandOriginal;
   });
 
   beforeEach(() => {
     for (const file of ["src/fixtures/mod.ts", "src/fixtures/lib.ts"]) {
       const content = readTextFileSyncOriginal(file);
-      Deno.writeTextFileSync(file, content);
+      Deno.writeTextFileSync(new URL(URI.from(file)), content);
     }
   });
 
@@ -81,7 +81,7 @@ describe("commitDependencyUpdateAll()", () => {
   });
 
   it("no grouping", () => {
-    commitDependencyUpdateAll(updates);
+    commitAll(updates);
     assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -93,7 +93,7 @@ describe("commitDependencyUpdateAll()", () => {
   });
 
   it("group by dependency name", () => {
-    commitDependencyUpdateAll(updates, {
+    commitAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -112,8 +112,8 @@ describe("commitDependencyUpdateAll()", () => {
   });
 
   it("group by module (file) name", () => {
-    commitDependencyUpdateAll(updates, {
-      groupBy: (update) => update.referrer,
+    commitAll(updates, {
+      groupBy: (update) => URI.relative(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
     assertEquals(DenoCommandStub.commands.length, 4);

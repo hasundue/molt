@@ -1,12 +1,32 @@
 // Copyright 2023 Chiezo (Shun Ueda). All rights reserved. MIT license.
 
-import {
-  type DependencyUpdate,
-  execDependencyUpdateAll,
-  type ModuleContentUpdate,
-  writeModuleContentUpdateAll,
-} from "../mod.ts";
+/**
+ * A sub module of molt for git operations.
+ *
+ * ### Example
+ *
+ * To update all dependencies in a module and commit the changes to git:
+ *
+ * ```ts
+ * import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ *
+ * const updates = await DependencyUpdate.collect("./mod.ts");
+ *
+ * commitAll(updates, {
+ *   groupBy: (dependency) => dependency.name,
+ *   composeCommitMessage: ({ group, version }) =>
+ *     `build(deps): bump ${group} to ${version!.to}`,
+ * });
+ * ```
+ *
+ * @module
+ */
+
+import { DependencyUpdate } from "../src/update.ts";
+import { FileUpdate } from "../src/file.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
+import { URI } from "../lib/uri.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -15,13 +35,13 @@ export interface CommitProps {
 }
 
 export interface CommitOptions {
-  groupBy: (dependency: DependencyUpdate) => string;
-  composeCommitMessage: (props: CommitProps) => string;
-  gitAddOptions: string[];
-  gitCommitOptions: string[];
+  groupBy?: (dependency: DependencyUpdate) => string;
+  composeCommitMessage?: (props: CommitProps) => string;
+  gitAddOptions?: string[];
+  gitCommitOptions?: string[];
 }
 
-export const defaultCommitOptions: CommitOptions = {
+export const defaultCommitOptions = {
   groupBy: () => "dependencies",
   composeCommitMessage: ({ group, version }) => {
     let message = `build(deps): update ${group}`;
@@ -35,12 +55,18 @@ export const defaultCommitOptions: CommitOptions = {
   },
   gitAddOptions: [],
   gitCommitOptions: [],
-};
+} satisfies CommitOptions;
 
 export interface GitCommit {
   message: string;
   updates: DependencyUpdate[];
 }
+
+export const GitCommit = {
+  sequence: createGitCommitSequence,
+  exec: execGitCommit,
+  execAll: execGitCommitSequence,
+};
 
 export interface GitCommitSequence {
   commits: GitCommit[];
@@ -51,9 +77,9 @@ export interface ExecGitCommitSequenceOptions {
   onCommit?: (commit: GitCommit) => void;
 }
 
-export function commitDependencyUpdateAll(
+export function commitAll(
   updates: DependencyUpdate[],
-  options?: Partial<CommitOptions> & ExecGitCommitSequenceOptions,
+  options?: CommitOptions & ExecGitCommitSequenceOptions,
 ): void {
   execGitCommitSequence(
     createGitCommitSequence(updates, options),
@@ -61,7 +87,7 @@ export function commitDependencyUpdateAll(
   );
 }
 
-export function createGitCommitSequence(
+function createGitCommitSequence(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
 ): GitCommitSequence {
@@ -86,31 +112,31 @@ export function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-export function execGitCommitSequence(
+function execGitCommitSequence(
   sequence: GitCommitSequence,
-  options: ExecGitCommitSequenceOptions = {},
+  options?: ExecGitCommitSequenceOptions,
 ) {
-  sequence.commits.forEach((it) => {
-    execGitCommit(it, sequence.options);
-    options.onCommit?.(it);
-  });
+  for (const commit of sequence.commits) {
+    execGitCommit(commit, sequence.options);
+    options?.onCommit?.(commit);
+  }
 }
 
-export function execGitCommit(
+function execGitCommit(
   commit: GitCommit,
-  options: CommitOptions,
+  options?: CommitOptions,
 ) {
-  const results = execDependencyUpdateAll(commit.updates);
-  writeModuleContentUpdateAll(results);
-  _add(results, options.gitAddOptions);
-  _commit(commit.message, options.gitCommitOptions);
+  const results = FileUpdate.collect(commit.updates);
+  FileUpdate.writeAll(results);
+  _add(results, options?.gitAddOptions ?? []);
+  _commit(commit.message, options?.gitCommitOptions ?? []);
 }
 
 function _add(
-  results: ModuleContentUpdate[],
+  results: FileUpdate[],
   options: string[],
 ) {
-  const files = results.map((result) => result.specifier);
+  const files = results.map((result) => URI.relative(result.specifier));
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });
