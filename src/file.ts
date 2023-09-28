@@ -31,7 +31,7 @@ function collect(
     const content = dependency.map
       ? DependencyUpdate.applyToImportMap(dependency, current.content)
       : DependencyUpdate.applyToModule(dependency, current.content);
-    results.set(dependency.referrer, {
+    results.set(referrer, {
       specifier: current.specifier,
       content,
       dependencies: current.dependencies.concat(dependency),

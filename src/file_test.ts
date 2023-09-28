@@ -30,9 +30,8 @@ describe("collect", () => {
         { importMap: "src/fixtures/_deno.json" },
       ),
     );
-    assertEquals(results.length, 2);
+    assertEquals(results.length, 1);
     assertNotEquals(results[0].content, original);
-    assertNotEquals(results[1].content, original);
   });
 });
 
