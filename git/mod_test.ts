@@ -22,7 +22,9 @@ class DenoCommandStub {
   static commands: string[] = [];
   constructor(cmd: string, options: { args: string[] }) {
     let command = cmd;
-    options.args.forEach((arg) => command += " " + arg);
+    options.args.forEach((arg) => {
+      command += arg.includes(" ") ? ` "${arg}"` : ` ${arg}`;
+    });
     DenoCommandStub.commands.push(command);
   }
   outputSync() {
