@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/hasundue/deno-molt/compare/0.2.0...0.2.1) (2023-09-28)
+
+
+### Bug Fixes
+
+* **cli:** parse multiple entrypoints correctly ([aa99b14](https://github.com/hasundue/deno-molt/commit/aa99b14475a8a0ccee7988a64095db4aa29f64b1))
+
 ## [0.2.0](https://github.com/hasundue/deno-molt/compare/0.1.1...0.2.0) (2023-09-28)
 
 
