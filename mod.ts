@@ -5,22 +5,22 @@
  *
  * ### Example
  *
- * To update all dependencies in a module and commit the changes to git:
+ * To update all dependencies in a module and write the changes to local files:
  *
  * ```ts
- * import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import { GitCommit } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ * import { 
+ *   DependencyUpdate,
+ *   FileUpdate,
+ * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
  *
  * const updates = await DependencyUpdate.collect("./mod.ts");
- * console.log(updates);
  *
- * // Commit all changes to git
- * const commits = GitCommit.sequence(updates, {
+ * const results = FileUpdate.collect(updates, {
  *   groupBy: (dependency) => dependency.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
  * });
- * GitCommit.execAll(commits);
+ * FileUpdate.writeAll(results);
  * ```
  *
  * @module

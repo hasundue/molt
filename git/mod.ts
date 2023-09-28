@@ -1,5 +1,28 @@
 // Copyright 2023 Chiezo (Shun Ueda). All rights reserved. MIT license.
 
+/**
+ * A sub module of molt for git operations.
+ *
+ * ### Example
+ *
+ * To update all dependencies in a module and commit the changes to git:
+ *
+ * ```ts
+ * import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { Git } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ *
+ * const updates = await DependencyUpdate.collect("./mod.ts");
+ *
+ * Git.commitAll(updates, {
+ *   groupBy: (dependency) => dependency.name,
+ *   composeCommitMessage: ({ group, version }) =>
+ *     `build(deps): bump ${group} to ${version!.to}`,
+ * });
+ * ```
+ *
+ * @module
+ */
+
 import { DependencyUpdate } from "../src/update.ts";
 import { FileUpdate } from "../src/file.ts";
 import { createVersionProp, type VersionProp } from "../src/versions.ts";
@@ -64,7 +87,8 @@ export function createGitCommitSequence(
 ): GitCommitSequence {
   const _options = { ...defaultCommitOptions, ...options };
   const groups = new Map<string, DependencyUpdate[]>();
-  for (const u of updates) {
+  for (const update of updates) {
+    const u = DependencyUpdate.withRelativePath(update);
     const key = _options.groupBy(u);
     if (!groups.has(key)) {
       groups.set(key, []);
@@ -107,7 +131,7 @@ function _add(
   results: FileUpdate[],
   options: string[],
 ) {
-  const files = results.map((result) => URI.toRelativePath(result.specifier));
+  const files = results.map((result) => URI.relative(result.specifier));
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });

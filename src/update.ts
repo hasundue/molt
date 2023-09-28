@@ -3,7 +3,7 @@ import {
   init as initDenoGraph,
   type ModuleJson,
 } from "../lib/x/deno_graph.ts";
-import { URI } from "../lib/uri.ts";
+import { RelativePath, URI } from "../lib/uri.ts";
 import type { SemVerString } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
 import { Dependency } from "./dependency.ts";
@@ -40,9 +40,9 @@ export interface DependencyUpdate extends Omit<Dependency, "version"> {
 
 export const DependencyUpdate = {
   collect,
-  create,
   applyToModule,
   applyToImportMap,
+  withRelativePath,
 };
 
 class DenoGraph {
@@ -82,7 +82,7 @@ export async function collect(
   await Promise.all(
     graph.modules.flatMap((module) =>
       module.dependencies?.map(async (dependency) => {
-        const update = await create(
+        const update = await _create(
           dependency,
           URI.from(module.specifier),
           { importMap },
@@ -94,7 +94,7 @@ export async function collect(
   return updates;
 }
 
-async function create(
+export async function _create(
   dependency: DependencyJson,
   referrer: URI<"file">,
   options?: {
@@ -185,4 +185,37 @@ export function applyToImportMap(
     update.version.to,
   );
   return JSON.stringify(json, null, 2);
+}
+
+export type DependencyUpdateWithRelativePath =
+  & Omit<DependencyUpdate, "specifier" | "map">
+  & {
+    specifier: RelativePath;
+    map?: {
+      source: RelativePath | URI<"http" | "https" | "npm">;
+      from: string;
+      to: URI<"http" | "https" | "npm">;
+    };
+  };
+
+/**
+ * Convert specifiers in the dependency update to relative paths for subsequent operations.
+ */
+function withRelativePath(
+  update: DependencyUpdate,
+): DependencyUpdateWithRelativePath {
+  return {
+    ...update,
+    specifier: _relativeIfFile(update.specifier),
+    map: update.map && {
+      ...update.map,
+      source: URI.relative(update.map.source),
+    },
+  } as DependencyUpdateWithRelativePath;
+}
+
+function _relativeIfFile(
+  specifier: URI<"file" | "http" | "https" | "npm">,
+) {
+  return URI.is(specifier, "file") ? URI.relative(specifier) : specifier;
 }

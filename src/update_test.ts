@@ -6,13 +6,12 @@ import {
   assertObjectMatch,
 } from "../lib/std/assert.ts";
 import { URI } from "../lib/uri.ts";
-import { error } from "../lib/error.ts";
-import { DependencyUpdate } from "./update.ts";
+import { _create, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
 
-describe("create", () => {
+describe("_create", () => {
   it("https://deno.land/std", async () => {
-    const update = await DependencyUpdate.create({
+    const update = await _create({
       specifier: "https://deno.land/std@0.1.0/version.ts",
       code: {
         specifier: "https://deno.land/std@0.1.0/version.ts",
@@ -22,7 +21,7 @@ describe("create", () => {
     assertExists(update);
   });
   it("https://deno.land/std - no semver", async () => {
-    const update = await DependencyUpdate.create({
+    const update = await _create({
       specifier: "https://deno.land/std/version.ts",
       code: {
         specifier: "https://deno.land/std/version.ts",
@@ -32,7 +31,7 @@ describe("create", () => {
     assertEquals(update, undefined);
   });
   it("https://deno.land/x/deno_graph", async () => {
-    const update = await DependencyUpdate.create({
+    const update = await _create({
       specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
       code: {
         specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
@@ -42,7 +41,7 @@ describe("create", () => {
     assertExists(update);
   });
   it("npm:node-emoji", async () => {
-    const update = await DependencyUpdate.create({
+    const update = await _create({
       specifier: "npm:node-emoji@1.0.0",
       code: {
         specifier: "npm:node-emoji@1.0.0",
@@ -53,14 +52,13 @@ describe("create", () => {
   });
 });
 
-describe("create - with import map", () => {
+describe("_create - with import map", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
-    importMap = await ImportMap.readFromJson("src/fixtures/_deno.json") ??
-      error();
+    importMap = (await ImportMap.readFromJson("src/fixtures/_deno.json"))!;
   });
   it("std/version.ts", async () => {
-    const update = await DependencyUpdate.create(
+    const update = await _create(
       {
         specifier: "std/version.ts",
         code: {

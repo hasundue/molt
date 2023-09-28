@@ -1,4 +1,5 @@
 import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
+import { Brand } from "./types.ts";
 
 export type DefaultProtocol<Scheme extends string> = Scheme extends
   "http" | "https" ? `${Scheme}://`
@@ -9,6 +10,9 @@ export type URI<
   Scheme extends string = string,
   Protocol extends string = DefaultProtocol<Scheme>,
 > = `${Protocol}${string}`;
+
+export type RelativePath = Brand<string, "RelativePath">;
+export type AbsolutePath = Brand<string, "AbsolutePath">;
 
 export const URI = {
   from(path: string): URI<"file"> {
@@ -25,11 +29,11 @@ export const URI = {
     }
     return url.href as URI<"file">;
   },
-  toRelativePath(uri: URI<"file">): string {
-    return relative(Deno.cwd(), new URL(uri).pathname);
+  relative(uri: URI<"file">): RelativePath {
+    return relative(Deno.cwd(), new URL(uri).pathname) as RelativePath;
   },
-  toAbsolutePath(uri: URI<"file">): string {
-    return resolve(new URL(uri).pathname);
+  absolute(uri: URI<"file">): AbsolutePath {
+    return resolve(new URL(uri).pathname) as AbsolutePath;
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {
@@ -44,5 +48,13 @@ export const URI = {
       }
       throw new TypeError(`Unexpected URI protocol: ${url.protocol}`);
     };
+  },
+  is<S extends string>(uri: string, scheme: S): uri is URI<S> {
+    try {
+      const url = new URL(uri);
+      return url.protocol.split(":")[0] === scheme;
+    } catch {
+      return false;
+    }
   },
 };

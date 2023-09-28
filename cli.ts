@@ -2,12 +2,7 @@ import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { colors, Command, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
-import {
-  collectDependencyUpdateAll,
-  type DependencyUpdate,
-  execDependencyUpdateAll,
-  writeModuleContentUpdateAll,
-} from "./mod.ts";
+import { DependencyUpdate } from "./mod.ts";
 import { commitDependencyUpdateAll } from "./git/mod.ts";
 
 const { gray, yellow, bold } = colors;
@@ -105,7 +100,7 @@ function _print(updates: DependencyUpdate[]) {
     );
     distinct(
       list.map((u) => {
-        const source = URI.toRelativePath(u.map?.source ?? u.referrer);
+        const source = URI.relative(u.map?.source ?? u.referrer);
         return `  ${source} ` + gray(u.version.from);
       }),
     ).forEach((line) => console.log(line));
@@ -119,7 +114,7 @@ function _write(updates: DependencyUpdate[]) {
   const results = execDependencyUpdateAll(updates);
   writeModuleContentUpdateAll(results, {
     onWrite: (module) =>
-      console.log(`  ${URI.toRelativePath(module.specifier)}`),
+      console.log(`  ${URI.relative(module.specifier)}`),
   });
 }
 
