@@ -13,7 +13,7 @@ import {
 import { assertArrayIncludes, assertEquals } from "../lib/std/assert.ts";
 import { URI } from "../lib/uri.ts";
 import { DependencyUpdate } from "../mod.ts";
-import { commitDependencyUpdateAll } from "./mod.ts";
+import { commitAll } from "./mod.ts";
 
 const DenoCommandOriginal = Deno.Command;
 const readTextFileSyncOriginal = Deno.readTextFileSync;
@@ -55,9 +55,7 @@ describe("commitAll()", () => {
       Deno,
       "readTextFileSync",
       (path) => {
-        const file = output.findLast((file) =>
-          file.path === path.toString()
-        );
+        const file = output.findLast((file) => file.path === path.toString());
         return file!.content;
       },
     );
@@ -83,7 +81,7 @@ describe("commitAll()", () => {
   });
 
   it("no grouping", () => {
-    commitDependencyUpdateAll(updates);
+    commitAll(updates);
     assertEquals(DenoCommandStub.commands.length, 2);
     assertArrayIncludes(
       DenoCommandStub.commands,
@@ -95,7 +93,7 @@ describe("commitAll()", () => {
   });
 
   it("group by dependency name", () => {
-    commitDependencyUpdateAll(updates, {
+    commitAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -114,7 +112,7 @@ describe("commitAll()", () => {
   });
 
   it("group by module (file) name", () => {
-    commitDependencyUpdateAll(updates, {
+    commitAll(updates, {
       groupBy: (update) => URI.relative(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });

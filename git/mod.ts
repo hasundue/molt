@@ -9,11 +9,11 @@
  *
  * ```ts
  * import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import { Git } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+ * import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
  *
  * const updates = await DependencyUpdate.collect("./mod.ts");
  *
- * Git.commitAll(updates, {
+ * commitAll(updates, {
  *   groupBy: (dependency) => dependency.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
@@ -35,13 +35,13 @@ export interface CommitProps {
 }
 
 export interface CommitOptions {
-  groupBy: (dependency: DependencyUpdate) => string;
-  composeCommitMessage: (props: CommitProps) => string;
-  gitAddOptions: string[];
-  gitCommitOptions: string[];
+  groupBy?: (dependency: DependencyUpdate) => string;
+  composeCommitMessage?: (props: CommitProps) => string;
+  gitAddOptions?: string[];
+  gitCommitOptions?: string[];
 }
 
-export const defaultCommitOptions: CommitOptions = {
+export const defaultCommitOptions = {
   groupBy: () => "dependencies",
   composeCommitMessage: ({ group, version }) => {
     let message = `build(deps): update ${group}`;
@@ -55,12 +55,18 @@ export const defaultCommitOptions: CommitOptions = {
   },
   gitAddOptions: [],
   gitCommitOptions: [],
-};
+} satisfies CommitOptions;
 
 export interface GitCommit {
   message: string;
   updates: DependencyUpdate[];
 }
+
+export const GitCommit = {
+  sequence: createGitCommitSequence,
+  exec: execGitCommit,
+  execAll: execGitCommitSequence,
+};
 
 export interface GitCommitSequence {
   commits: GitCommit[];
@@ -71,9 +77,9 @@ export interface ExecGitCommitSequenceOptions {
   onCommit?: (commit: GitCommit) => void;
 }
 
-export function commitDependencyUpdateAll(
+export function commitAll(
   updates: DependencyUpdate[],
-  options?: Partial<CommitOptions> & ExecGitCommitSequenceOptions,
+  options?: CommitOptions & ExecGitCommitSequenceOptions,
 ): void {
   execGitCommitSequence(
     createGitCommitSequence(updates, options),
@@ -81,14 +87,13 @@ export function commitDependencyUpdateAll(
   );
 }
 
-export function createGitCommitSequence(
+function createGitCommitSequence(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
 ): GitCommitSequence {
   const _options = { ...defaultCommitOptions, ...options };
   const groups = new Map<string, DependencyUpdate[]>();
-  for (const update of updates) {
-    const u = DependencyUpdate.withRelativePath(update);
+  for (const u of updates) {
     const key = _options.groupBy(u);
     if (!groups.has(key)) {
       groups.set(key, []);
@@ -107,24 +112,24 @@ export function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-export function execGitCommitSequence(
+function execGitCommitSequence(
   sequence: GitCommitSequence,
-  options: ExecGitCommitSequenceOptions = {},
+  options?: ExecGitCommitSequenceOptions,
 ) {
   for (const commit of sequence.commits) {
     execGitCommit(commit, sequence.options);
-    options.onCommit?.(commit);
+    options?.onCommit?.(commit);
   }
 }
 
-export function execGitCommit(
+function execGitCommit(
   commit: GitCommit,
-  options: CommitOptions,
+  options?: CommitOptions,
 ) {
   const results = FileUpdate.collect(commit.updates);
   FileUpdate.writeAll(results);
-  _add(results, options.gitAddOptions);
-  _commit(commit.message, options.gitCommitOptions);
+  _add(results, options?.gitAddOptions ?? []);
+  _commit(commit.message, options?.gitCommitOptions ?? []);
 }
 
 function _add(
