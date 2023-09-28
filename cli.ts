@@ -8,16 +8,17 @@ import { commitAll } from "./git/mod.ts";
 const { gray, yellow, bold } = colors;
 
 const checkCommand = new Command()
-  .arguments("<entrypoints...:string[]>")
   .description("Check for the latest version of dependencies")
   .option("--import-map <file:string>", "Specify import map file")
+  .arguments("<entrypoints...:string>")
   .action(checkAction);
 
 async function checkAction(
   options: { importMap?: string },
-  entrypoints: string[],
+  ...entrypoints: string[]
 ) {
   console.log("🔎 Checking for updates...");
+  console.debug(entrypoints);
   const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
   });
@@ -54,15 +55,15 @@ async function checkAction(
 }
 
 const updateCommand = new Command()
-  .arguments("<entrypoints...:string[]>")
   .description("Update dependencies to the latest version")
   .option("--commit", "Commit changes to git")
   .option("--import-map <file:string>", "Specify import map file")
+  .arguments("<entrypoints...:string>")
   .action(updateAction);
 
 async function updateAction(
   options: { commit?: boolean; importMap?: string },
-  entrypoints: string[],
+  ...entrypoints: string[]
 ) {
   console.log("🔎 Checking for updates...");
   const updates = await DependencyUpdate.collect(entrypoints, {
