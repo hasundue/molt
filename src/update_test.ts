@@ -1,8 +1,4 @@
-import {
-  beforeAll,
-  describe,
-  it,
-} from "../lib/std/testing.ts";
+import { beforeAll, describe, it } from "../lib/std/testing.ts";
 import {
   assertEquals,
   assertExists,

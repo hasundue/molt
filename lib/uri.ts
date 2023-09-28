@@ -1,7 +1,7 @@
-import { toFileUrl, isAbsolute, relative, resolve } from "./std/path.ts";
+import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
 
-export type DefaultProtocol<Scheme extends string> = Scheme extends "http" | "https"
-  ? `${Scheme}://`
+export type DefaultProtocol<Scheme extends string> = Scheme extends
+  "http" | "https" ? `${Scheme}://`
   : Scheme extends "file" ? `${Scheme}:///`
   : `${Scheme}:`;
 

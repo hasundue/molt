@@ -1,6 +1,6 @@
 import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
-import { Command, colors, Select } from "./lib/x/cliffy.ts";
+import { colors, Command, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import {
   collectDependencyUpdateAll,

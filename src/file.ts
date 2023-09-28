@@ -14,7 +14,7 @@ export const FileUpdate = {
   collect,
   write,
   writeAll,
-}
+};
 
 function collect(
   dependencies: DependencyUpdate[],
@@ -57,4 +57,3 @@ export function write(
 ): void {
   Deno.writeTextFileSync(new URL(result.specifier), result.content);
 }
-
