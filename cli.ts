@@ -2,7 +2,7 @@ import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { colors, Command, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
-import { FileUpdate, DependencyUpdate } from "./mod.ts";
+import { DependencyUpdate, FileUpdate } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
 
 const { gray, yellow, bold } = colors;
@@ -113,8 +113,7 @@ function _write(updates: DependencyUpdate[]) {
   console.log("💾 Writing changes...");
   const results = FileUpdate.collect(updates);
   FileUpdate.writeAll(results, {
-    onWrite: (module) =>
-      console.log(`  ${URI.relative(module.specifier)}`),
+    onWrite: (module) => console.log(`  ${URI.relative(module.specifier)}`),
   });
 }
 

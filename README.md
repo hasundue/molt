@@ -1,10 +1,10 @@
 # 🦕 Molt
 
-> **Warning**\
+> _Warning_*\
 > This project is still in early development. Expect inconveniences and breaking
 > changes.
 
-Molt is a [Deno] module to bump semvers in import specifiers focused on
+Molt is a [Deno] module to bump semvers in import specifiers, focused on
 consistency and maintainability. It uses [deno_graph] for dependency resolution,
 which enables us to avoid implementing custom logic or regex for each module
 registry.
@@ -25,7 +25,50 @@ registry.
 
 ### Deno Module
 
-[API reference] (WIP)
+#### API Reference (WIP)
+
+[Main module]
+
+Sub-modules:
+
+- [Git]
+
+Library:
+
+- [URI]
+
+#### Examples
+
+##### Update all dependencies in a module and write the changes to local files
+
+```ts
+import {
+  DependencyUpdate,
+  FileUpdate,
+} from "https://deno.land/x/molt@{VERSION}/mod.ts";
+
+const updates = await DependencyUpdate.collect("./mod.ts", {
+  importMap: "./deno.json",
+});
+
+const results = FileUpdate.collect(updates);
+FileUpdate.writeAll(results);
+```
+
+##### Update all dependencies in a module and commit the changes to local git repository
+
+```ts
+import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+
+const updates = await DependencyUpdate.collect("./mod.ts");
+
+commitAll(updates, {
+  groupBy: (dependency) => dependency.name,
+  composeCommitMessage: ({ group, version }) =>
+    `build(deps): bump ${group} to ${version!.to}`,
+});
+```
 
 ### CLI
 
@@ -67,8 +110,9 @@ deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
 https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ```
 
-> **Note**\
-> Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc` if available.\
+> _Note_*\
+> Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc`
+> if available.\
 > You can't, however, use import maps as an entrypoint.
 
 ##### Example: Just check
@@ -174,5 +218,7 @@ and of full respect to the authors of these works.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
-[API reference]: https://deno.land/x/molt
+[Main module]: https://deno.land/x/molt/mod.ts
+[Git]: https://deno.land/x/molt/git/mod.ts
+[URI]: https://deno.land/x/molt/lib/uri.ts
 [issues]: https://github.com/hasundue/molt/issues

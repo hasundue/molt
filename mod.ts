@@ -8,7 +8,7 @@
  * To update all dependencies in a module and write the changes to local files:
  *
  * ```ts
- * import { 
+ * import {
  *   DependencyUpdate,
  *   FileUpdate,
  * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
@@ -17,12 +17,7 @@
  *   importMap: "./deno.json",
  * });
  *
- * const results = FileUpdate.collect(updates, {
- *   groupBy: (dependency) => dependency.name,
- *   composeCommitMessage: ({ group, version }) =>
- *     `build(deps): bump ${group} to ${version!.to}`,
- * });
- *
+ * const results = FileUpdate.collect(updates);
  * FileUpdate.writeAll(results);
  * ```
  *
