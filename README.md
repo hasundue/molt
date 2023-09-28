@@ -1,6 +1,6 @@
 # 🦕 Molt
 
-> _Warning_*\
+> **Warning**\
 > This project is still in early development. Expect inconveniences and breaking
 > changes.
 
@@ -110,7 +110,7 @@ deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
 https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ```
 
-> _Note_*\
+> **Note**\
 > Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc`
 > if available.\
 > You can't, however, use import maps as an entrypoint.
