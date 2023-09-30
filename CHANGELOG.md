@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/hasundue/deno-molt/compare/0.2.2...0.3.0) (2023-09-30)
+
+
+### Features
+
+* **cli:** add an option to CLI for running tests on each commit ([188f8ef](https://github.com/hasundue/deno-molt/commit/188f8ef92fd0a0ef781cd2615b720f972aa12ae5))
+
 ## [0.2.2](https://github.com/hasundue/deno-molt/compare/0.2.1...0.2.2) (2023-09-28)
 
 
