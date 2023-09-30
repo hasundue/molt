@@ -18,7 +18,7 @@ async function checkAction(
   options: { importMap?: string },
   ...entrypoints: string[]
 ) {
-  _ensureFiles(entrypoints);
+  _ensureJsFiles(entrypoints);
   console.log("🔎 Checking for updates...");
   const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
@@ -182,9 +182,14 @@ function _task(task: string): void {
   }
 }
 
-function _ensureFiles(paths: string[]) {
+function _ensureJsFiles(paths: string[]) {
   let errors = 0;
   for (const path of paths) {
+    if (!path.endsWith(".js") && !path.endsWith(".ts")) {
+      console.error(`❌ file must be javascript or typescript: "${path}"`);
+      errors += 1;
+      continue;
+    }
     try {
       if (!Deno.statSync(path).isFile) {
         console.error(`❌ not a file: "${path}"`);
