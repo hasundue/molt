@@ -144,9 +144,9 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 
 ? Choose an action › Write changes to local files
 
-💾 Writing changes...
-  src/fixtures/mod.ts
-  src/fixtures/lib.ts
+Writing changes...
+💾 src/fixtures/mod.ts
+💾 src/fixtures/lib.ts
 
 >
 ```
@@ -161,11 +161,12 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
     ...
 
 ? Choose an action › Commit changes to git
+? Run `deno task test` before each commit? › No
 
-📝 Committing changes...
-  build(deps): update deno.land/std from 0.200.0 to 0.202.0
-  build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
-  build(deps): update node-emoji from 1.0.0 to 2.1.0
+Committing changes...
+📝 build(deps): update deno.land/std from 0.200.0 to 0.202.0
+📝 build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
+📝 build(deps): update node-emoji from 1.0.0 to 2.1.0
 
 >
 ```
