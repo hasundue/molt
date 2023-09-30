@@ -1,6 +1,7 @@
 import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
-import { colors, Command, Select } from "./lib/x/cliffy.ts";
+import { parse as parseJsonc } from "./lib/std/jsonc.ts";
+import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate, FileUpdate } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
@@ -40,14 +41,23 @@ async function checkAction(
     case "write":
       return _write(updates);
     case "commit": {
-      const test = await Select.prompt({
-        message: "Run `deno task test` before each commit?",
-        options: [
-          { name: "Yes", value: true },
-          { name: "No", value: false },
-        ],
-      });
-      return _commit(updates, { test });
+      const suggestions = _getTasks();
+      if (!suggestions.length) {
+        return _commit(updates);
+      }
+      const preCommit = await List.prompt(
+        {
+          message: "Tasks to run before each commit (comma separated)",
+          suggestions,
+        },
+      );
+      const postCommit = await List.prompt(
+        {
+          message: "Tasks to run after each commit (comma separated)",
+          suggestions,
+        },
+      );
+      return _commit(updates, { preCommit, postCommit });
     }
   }
 }
@@ -56,14 +66,22 @@ const updateCommand = new Command()
   .description("Update dependencies to the latest version")
   .option("--import-map <file:string>", "Specify import map file")
   .option("--commit", "Commit changes to git")
-  .option("--test", "Run `deno task test` before each commit", {
+  .option("--pre-commit <tasks...:string>", "Run tasks before each commit", {
+    depends: ["commit"],
+  })
+  .option("--post-commit <tasks...:string>", "Run tasks after each commit", {
     depends: ["commit"],
   })
   .arguments("<entrypoints...:string>")
   .action(updateAction);
 
 async function updateAction(
-  options: { commit?: boolean; importMap?: string; test?: boolean },
+  options: {
+    commit?: boolean;
+    importMap?: string;
+    preCommit?: string[];
+    postCommit?: string[];
+  },
   ...entrypoints: string[]
 ) {
   console.log("🔎 Checking for updates...");
@@ -86,8 +104,22 @@ function _findImportMap(): string | undefined {
     .find((path) => existsSync(path));
 }
 
+function _getTasks(): string[] {
+  const path = ["./deno.json", "./deno.jsonc"].find((path) => existsSync(path));
+  if (!path) {
+    return [];
+  }
+  try {
+    // deno-lint-ignore no-explicit-any
+    const json = parseJsonc(Deno.readTextFileSync(path)) as any;
+    return Object.keys(json.tasks ?? {});
+  } catch {
+    return [];
+  }
+}
+
 function _list(updates: DependencyUpdate[]) {
-  console.log("💡 Found updates:");
+  console.log(`💡 Found ${updates.length > 1 ? "updates" : "an update"}:`);
   const dependencies = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
     const list = dependencies.get(u.name) ?? [];
@@ -121,41 +153,38 @@ function _write(updates: DependencyUpdate[]) {
 
 function _commit(
   updates: DependencyUpdate[],
-  options?: { test?: boolean },
+  options?: {
+    preCommit?: string[];
+    postCommit?: string[];
+  },
 ) {
-  console.log();
-  console.log("Committing changes...");
+  console.log("\nCommitting changes...");
   commitAll(updates, {
     groupBy: (dependency) => dependency.name,
-    preCommit: options?.test
-      ? (commit) => {
-        const { group, version } = commit;
-        const target = group + (version ? `@${version!.to}` : "");
-        _print(`\n🧪 Running tests for ${target}...`);
-        const { code, stderr } = new Deno.Command(Deno.execPath(), {
-          args: ["task", "test"],
-        }).outputSync();
-        if (code !== 0) {
-          console.error(stderr);
-          Deno.exit(1);
-        }
-        console.log("OK");
-      }
-      : undefined,
+    preCommit: () => {
+      options?.preCommit?.forEach((task) => _task(task));
+    },
     postCommit: (commit) => {
       console.log(`📝 ${commit.message}`);
+      options?.postCommit?.forEach((task) => _task(task));
     },
   });
 }
 
-function _print(text: string): void {
-  Deno.stdout.writeSync(new TextEncoder().encode(text));
+function _task(task: string): void {
+  const { code, stderr } = new Deno.Command(Deno.execPath(), {
+    args: ["task", task],
+  }).outputSync();
+  if (code !== 0) {
+    console.error(new TextDecoder().decode(stderr));
+    Deno.exit(1);
+  }
 }
 
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
-  .version("0.2.0")
+  .version("0.4.0")
   .command("check", checkCommand)
   .command("update", updateCommand);
 
