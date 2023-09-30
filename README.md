@@ -161,7 +161,8 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
     ...
 
 ? Choose an action › Commit changes to git
-? Run `deno task test` before each commit? › No
+? Tasks to run before each commit (comma separated) › lock, test
+? Tasks to run after each commit (comma separated) › 
 
 Committing changes...
 📝 build(deps): update deno.land/std from 0.200.0 to 0.202.0
