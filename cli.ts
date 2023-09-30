@@ -184,6 +184,9 @@ function _task(task: string): void {
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
+  .action(function () {
+    this.showHelp();
+  })
   .version("0.4.0")
   .command("check", checkCommand)
   .command("update", updateCommand);
