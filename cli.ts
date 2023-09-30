@@ -185,7 +185,9 @@ function _task(task: string): void {
 function _ensureJsFiles(paths: string[]) {
   let errors = 0;
   for (const path of paths) {
-    if (!path.endsWith(".js") && !path.endsWith(".ts")) {
+    if (
+      path.includes(".") && !(path.endsWith(".js") || path.endsWith(".ts"))
+    ) {
       console.error(`❌ file must be javascript or typescript: "${path}"`);
       errors += 1;
       continue;
