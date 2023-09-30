@@ -1,10 +1,7 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { describe, it } from "https://deno.land/std@0.202.0/testing/bdd.ts";
-import {
-  assertEquals,
-  assertThrows,
-} from "https://deno.land/std@0.202.0/assert/mod.ts";
+import { describe, it } from "../lib/std/testing.ts";
+import { assertEquals, assertThrows } from "../lib/std/assert.ts";
 import { createVersionProp } from "../src/versions.ts";
 
 describe("createVersionProps()", () => {
