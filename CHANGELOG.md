@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/hasundue/deno-molt/compare/0.3.0...0.4.0) (2023-09-30)
+
+
+### Features
+
+* **cli:** add pre-commit and post-commit options and prompts to run tasks ([9ce9655](https://github.com/hasundue/deno-molt/commit/9ce965541003f4edbd58816265d4fdf46a5d6508))
+
 ## [0.3.0](https://github.com/hasundue/deno-molt/compare/0.2.2...0.3.0) (2023-09-30)
 
 
