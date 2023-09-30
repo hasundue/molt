@@ -187,11 +187,11 @@ function _ensureFiles(paths: string[]) {
   for (const path of paths) {
     try {
       if (!Deno.statSync(path).isFile) {
-        console.error(`error: not a file: "${path}"`);
+        console.error(`❌ not a file: "${path}"`);
         errors += 1;
       }
     } catch {
-      console.error(`error: path does not exist: "${path}"`);
+      console.error(`❌ path does not exist: "${path}"`);
       errors += 1;
     }
   }
