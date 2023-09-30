@@ -18,6 +18,7 @@ async function checkAction(
   options: { importMap?: string },
   ...entrypoints: string[]
 ) {
+  _ensureFiles(entrypoints);
   console.log("🔎 Checking for updates...");
   const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
@@ -179,6 +180,22 @@ function _task(task: string): void {
     console.error(new TextDecoder().decode(stderr));
     Deno.exit(1);
   }
+}
+
+function _ensureFiles(paths: string[]) {
+  let errors = 0;
+  for (const path of paths) {
+    try {
+      if (!Deno.statSync(path).isFile) {
+        console.error(`error: not a file: "${path}"`);
+        errors += 1;
+      }
+    } catch {
+      console.error(`error: path does not exist: "${path}"`);
+      errors += 1;
+    }
+  }
+  if (errors != 0) Deno.exit(1);
 }
 
 const main = new Command()
