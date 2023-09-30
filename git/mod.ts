@@ -57,7 +57,7 @@ export const defaultCommitOptions = {
   gitCommitOptions: [],
 } satisfies CommitOptions;
 
-export interface GitCommit {
+export interface GitCommit extends CommitProps {
   message: string;
   updates: DependencyUpdate[];
 }
@@ -74,7 +74,8 @@ export interface GitCommitSequence {
 }
 
 export interface ExecGitCommitSequenceOptions {
-  onCommit?: (commit: GitCommit) => void;
+  preCommit?: (commit: GitCommit) => void;
+  postCommit?: (commit: GitCommit) => void;
 }
 
 export function commitAll(
@@ -100,13 +101,13 @@ function createGitCommitSequence(
     }
     groups.get(key)!.push(u);
   }
+  const version = createVersionProp(updates);
   const commits: GitCommit[] = Array.from(groups.entries()).map((
     [group, updates],
   ) => ({
-    message: _options.composeCommitMessage({
-      group,
-      version: createVersionProp(updates),
-    }),
+    group,
+    version,
+    message: _options.composeCommitMessage({ group, version }),
     updates,
   }));
   return { commits, options: _options };
@@ -117,8 +118,9 @@ function execGitCommitSequence(
   options?: ExecGitCommitSequenceOptions,
 ) {
   for (const commit of sequence.commits) {
+    options?.preCommit?.(commit);
     execGitCommit(commit, sequence.options);
-    options?.onCommit?.(commit);
+    options?.postCommit?.(commit);
   }
 }
 
