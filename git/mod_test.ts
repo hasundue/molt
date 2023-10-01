@@ -42,7 +42,9 @@ describe("commitAll()", () => {
   let readTextFileSyncStub: Stub;
 
   beforeAll(async () => {
-    updates = await DependencyUpdate.collect("./tests/direct-import/mod.ts");
+    updates = await DependencyUpdate.collect([{
+      entrypoint: "./tests/direct-import/mod.ts",
+    }]);
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",

@@ -18,7 +18,9 @@ import { URI } from "../lib/uri.ts";
 describe("collect", () => {
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./tests/direct-import/mod.ts"),
+      await DependencyUpdate.collect([{
+        entrypoint: "./tests/direct-import/mod.ts",
+      }]),
     );
     assertEquals(results.length, 2);
   });
@@ -26,8 +28,10 @@ describe("collect", () => {
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/import_map.json" },
+        [{
+          entrypoint: "./tests/import-map/mod.ts",
+          options: { importMap: "./tests/import-map/import_map.json" },
+        }],
       ),
     );
     assertEquals(results.length, 2);
@@ -44,8 +48,12 @@ describe("collect", () => {
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/import_map.json" },
+        [{
+          entrypoint: "./tests/import-map-no-resolve/mod.ts",
+          options: {
+            importMap: "./tests/import-map-no-resolve/import_map.json",
+          },
+        }],
       ),
     );
     assertEquals(results.length, 1);
@@ -75,7 +83,11 @@ describe("writeAll", () => {
 
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./tests/direct-import/mod.ts"),
+      await DependencyUpdate.collect(
+        [{
+          entrypoint: "./tests/direct-import/mod.ts",
+        }],
+      ),
     );
     FileUpdate.writeAll(results);
     assertExists(output.get(URI.from("tests/direct-import/mod.ts")));
@@ -85,8 +97,12 @@ describe("writeAll", () => {
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/import_map.json" },
+        [{
+          entrypoint: "./tests/import-map/mod.ts",
+          options: {
+            importMap: "./tests/import-map/import_map.json",
+          },
+        }],
       ),
     );
     FileUpdate.writeAll(results);
@@ -96,8 +112,12 @@ describe("writeAll", () => {
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/import_map.json" },
+        [{
+          entrypoint: "./tests/import-map-no-resolve/mod.ts",
+          options: {
+            importMap: "./tests/import-map-no-resolve/import_map.json",
+          },
+        }],
       ),
     );
     FileUpdate.writeAll(results);
