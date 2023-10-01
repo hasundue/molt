@@ -11,14 +11,12 @@ const { gray, yellow, bold } = colors;
 
 const checkCommand = new Command()
   .description("Check for the latest version of dependencies")
-  //FIXME: maybe we should just remove this option until somone actually want to add it
   .option("--import-map <file:string>", "Specify import map file")
   .arguments("<entrypoints...:string>")
   .action(checkAction);
 
 async function checkAction(
-  //FIXME: maybe we should just remove this option until somone actually want to add it
-  _options: { importMap?: string },
+  options: { importMap?: string },
   ...entrypoints: string[]
 ) {
   _ensureJsFiles(entrypoints);
@@ -27,7 +25,11 @@ async function checkAction(
     entrypoints.map((entrypoint) => {
       return {
         entrypoint,
-        options: { importMap: _findImportMap(entrypoint) },
+        options: {
+          importMap: options.importMap
+            ? options.importMap
+            : _findImportMap(entrypoint),
+        },
       };
     }),
   );
@@ -98,7 +100,11 @@ async function updateAction(
     entrypoints.map((entrypoint) => {
       return {
         entrypoint,
-        options: { importMap: _findImportMap(entrypoint) },
+        options: {
+          importMap: options.importMap
+            ? options.importMap
+            : _findImportMap(entrypoint),
+        },
       };
     }),
   );
