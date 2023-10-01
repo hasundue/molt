@@ -5,6 +5,7 @@ import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate, FileUpdate } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
+import { extname } from "./lib/std/path.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -185,8 +186,10 @@ function _task(task: string): void {
 function _ensureJsFiles(paths: string[]) {
   let errors = 0;
   for (const path of paths) {
+    const ext = extname(path);
     if (
-      path.includes(".") && !(path.endsWith(".js") || path.endsWith(".ts"))
+      !(ext === "" || ext === ".js" || ext === ".ts" || ext === ".jsx" ||
+        ext === ".tsx")
     ) {
       console.error(`❌ file must be javascript or typescript: "${path}"`);
       errors += 1;
