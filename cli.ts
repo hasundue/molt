@@ -31,9 +31,6 @@ async function checkAction(
       };
     }),
   );
-  // , {
-  //   importMap: options.importMap ?? _findImportMap(),
-  // });
   if (!updates.length) {
     console.log("🍵 No updates found");
     return;
