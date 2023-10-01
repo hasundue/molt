@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/hasundue/deno-molt/compare/0.4.0...0.4.1) (2023-10-01)
+
+
+### Bug Fixes
+
+* **cli:** show help when invoked with no args ([#16](https://github.com/hasundue/deno-molt/issues/16)) ([d9d507d](https://github.com/hasundue/deno-molt/commit/d9d507d6af228de4b57bc875b3c289e182b43cb0))
+* **import_map:** fix TypeError on unmapped url imports ([#22](https://github.com/hasundue/deno-molt/issues/22)) ([2b1c8f3](https://github.com/hasundue/deno-molt/commit/2b1c8f32ac7c21c15ff9e20771fda40c3eab1c11))
+
 ## [0.4.0](https://github.com/hasundue/deno-molt/compare/0.3.0...0.4.0) (2023-09-30)
 
 
