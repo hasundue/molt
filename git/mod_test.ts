@@ -42,7 +42,7 @@ describe("commitAll()", () => {
   let readTextFileSyncStub: Stub;
 
   beforeAll(async () => {
-    updates = await DependencyUpdate.collect("src/fixtures/mod.ts");
+    updates = await DependencyUpdate.collect("./tests/direct-import/mod.ts");
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",
@@ -71,7 +71,12 @@ describe("commitAll()", () => {
   });
 
   beforeEach(() => {
-    for (const file of ["src/fixtures/mod.ts", "src/fixtures/lib.ts"]) {
+    for (
+      const file of [
+        "./tests/direct-import/mod.ts",
+        "./tests/direct-import/lib.ts",
+      ]
+    ) {
       const content = readTextFileSyncOriginal(file);
       Deno.writeTextFileSync(new URL(URI.from(file)), content);
     }
@@ -103,11 +108,11 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add src/fixtures/mod.ts",
+        "git add tests/direct-import/mod.ts",
         'git commit -m "build(deps): update node-emoji"',
-        "git add src/fixtures/mod.ts",
+        "git add tests/direct-import/mod.ts",
         'git commit -m "build(deps): update deno.land/x/deno_graph"',
-        // "git add src/fixtures/lib.ts src/fixtures/mod.ts",
+        // "git add tests/direct-import/mod.ts tests/direct-import/lib.ts",
         'git commit -m "build(deps): update deno.land/std"',
       ],
     );
@@ -122,10 +127,10 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add src/fixtures/mod.ts",
-        'git commit -m "build(deps): update src/fixtures/mod.ts"',
-        "git add src/fixtures/lib.ts",
-        'git commit -m "build(deps): update src/fixtures/lib.ts"',
+        "git add tests/direct-import/mod.ts",
+        'git commit -m "build(deps): update tests/direct-import/mod.ts"',
+        "git add tests/direct-import/lib.ts",
+        'git commit -m "build(deps): update tests/direct-import/lib.ts"',
       ],
     );
   });

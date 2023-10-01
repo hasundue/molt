@@ -11,6 +11,6 @@
     "exclude": ["CHANGELOG.md"]
   },
   "lint": {
-    "exclude": ["src/fixtures/*"]
+    "exclude": ["tests/"]
   }
 }
