@@ -43,6 +43,10 @@ async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
     specifier,
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
+      if (resolved === specifier) {
+        // The specifier is not resolved by the import map.
+        return undefined;
+      }
       // Find which key is used for the resolution.
       const replacement = maxBy(
         Object.entries(json.imports)

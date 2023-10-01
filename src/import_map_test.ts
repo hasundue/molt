@@ -4,21 +4,21 @@ import { URI } from "../lib/uri.ts";
 import { ImportMap } from "./import_map.ts";
 
 describe("readFromJson()", () => {
-  it("src/fixtures/_deno.json", async () => {
-    const importMap = await ImportMap.readFromJson("src/fixtures/_deno.json");
+  it("tests/import-map/import_map.json", async () => {
+    const importMap = await ImportMap.readFromJson(
+      "./tests/import-map/import_map.json",
+    );
     assertExists(importMap);
   });
 });
 
 describe("resolve()", () => {
-  let importMap: ImportMap;
-  beforeAll(async () => {
-    const maybe = await ImportMap.readFromJson("src/fixtures/_deno.json");
-    assertExists(maybe);
-    importMap = maybe;
-  });
-  it("resolve an absolute path", () => {
-    const referrer = URI.from("src/fixtures/mod.ts");
+  it("resolve specifiers in import maps", async () => {
+    const importMap = await ImportMap.readFromJson(
+      "tests/import-map/import_map.json",
+    );
+    assertExists(importMap);
+    const referrer = URI.from("tests/import-map/mod.ts");
     assertEquals(
       importMap.resolve("std/version.ts", referrer),
       {
@@ -46,8 +46,22 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("/lib.ts", referrer),
       {
-        specifier: URI.from("src/fixtures/lib.ts"),
+        specifier: URI.from("tests/import-map/lib.ts"),
       },
+    );
+  });
+  it("do not resolve an url", async () => {
+    const importMap = await ImportMap.readFromJson(
+      "tests/import-map-no-resolve/import_map.json",
+    );
+    assertExists(importMap);
+    const referrer = URI.from("tests/import-map-no-resolve/deps.ts");
+    assertEquals(
+      importMap.resolve(
+        "https://deno.land/std@0.171.0/testing/asserts.ts",
+        referrer,
+      ),
+      undefined,
     );
   });
 });
@@ -55,14 +69,16 @@ describe("resolve()", () => {
 describe("resolveSimple()", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
-    const maybe = await ImportMap.readFromJson("src/fixtures/_deno.json");
+    const maybe = await ImportMap.readFromJson(
+      "tests/import-map/import_map.json",
+    );
     assertExists(maybe);
     importMap = maybe;
   });
   it("resolve an absolute path", () => {
     assertEquals(
-      importMap.resolveSimple("/lib.ts", URI.from("src/fixtures/mod.ts")),
-      URI.from("src/fixtures/lib.ts"),
+      importMap.resolveSimple("/lib.ts", URI.from("tests/import-map/mod.ts")),
+      URI.from("tests/import-map/lib.ts"),
     );
   });
 });

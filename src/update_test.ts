@@ -17,7 +17,7 @@ describe("_create", () => {
         specifier: "https://deno.land/std@0.1.0/version.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, URI.from("src/fixtures/mod.ts"));
+    }, URI.from("tests/direct-import/mod.ts"));
     assertExists(update);
   });
   it("https://deno.land/std - no semver", async () => {
@@ -27,7 +27,7 @@ describe("_create", () => {
         specifier: "https://deno.land/std/version.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, URI.from("src/fixtures/mod.ts"));
+    }, URI.from("tests/direct-import/mod.ts"));
     assertEquals(update, undefined);
   });
   it("https://deno.land/x/deno_graph", async () => {
@@ -37,7 +37,7 @@ describe("_create", () => {
         specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, URI.from("src/fixtures/mod.ts"));
+    }, URI.from("tests/direct-import/mod.ts"));
     assertExists(update);
   });
   it("npm:node-emoji", async () => {
@@ -47,7 +47,7 @@ describe("_create", () => {
         specifier: "npm:node-emoji@1.0.0",
         // deno-lint-ignore no-explicit-any
       } as any,
-    }, URI.from("src/fixtures/mod.ts"));
+    }, URI.from("tests/direct-import/mod.ts"));
     assertExists(update);
   });
 });
@@ -55,7 +55,8 @@ describe("_create", () => {
 describe("_create - with import map", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
-    importMap = (await ImportMap.readFromJson("src/fixtures/_deno.json"))!;
+    importMap =
+      (await ImportMap.readFromJson("tests/import-map/import_map.json"))!;
   });
   it("std/version.ts", async () => {
     const update = await _create(
@@ -66,7 +67,7 @@ describe("_create - with import map", () => {
           // deno-lint-ignore no-explicit-any
         } as any,
       },
-      URI.from("src/fixtures/import_maps.ts"),
+      URI.from("tests/import-map/mod.ts"),
       { importMap },
     );
     assertExists(update);
@@ -79,9 +80,9 @@ describe("_create - with import map", () => {
       path: "/version.ts",
       specifier: "https://deno.land/std@0.200.0/version.ts",
       code: { specifier: "std/version.ts" },
-      referrer: URI.from("src/fixtures/import_maps.ts"),
+      referrer: URI.from("tests/import-map/mod.ts"),
       map: {
-        source: URI.from("src/fixtures/_deno.json"),
+        source: URI.from("tests/import-map/import_map.json"),
         from: "std/",
         to: "https://deno.land/std@0.200.0/",
       },
@@ -90,17 +91,17 @@ describe("_create - with import map", () => {
 });
 
 describe("collect", () => {
-  it("src/fixtures/mod.ts", async () => {
+  it("direct import", async () => {
     const updates = await DependencyUpdate.collect(
-      "./src/fixtures/mod.ts",
+      "./tests/direct-import/mod.ts",
     );
     assertEquals(updates.length, 4);
   });
-  it("src/fixtures/import_maps.ts", async () => {
+  it("import map", async () => {
     const updates = await DependencyUpdate.collect(
-      "./src/fixtures/import_maps.ts",
+      "./tests/import-map/mod.ts",
       {
-        importMap: "src/fixtures/_deno.json",
+        importMap: "tests/import-map/import_map.json",
       },
     );
     assertEquals(updates.length, 4);
@@ -112,9 +113,9 @@ describe("applyToModule", () => {
   let content: string;
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
-      "./src/fixtures/mod.ts",
+      "./tests/direct-import/mod.ts",
     );
-    content = Deno.readTextFileSync("./src/fixtures/mod.ts");
+    content = Deno.readTextFileSync("./tests/direct-import/mod.ts");
   });
   it("https://deno.land/x/deno_graph", () => {
     const update = updates.find((update) =>
@@ -145,14 +146,14 @@ describe("applyToImportMap", () => {
   let content: string;
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
-      "./src/fixtures/import_maps.ts",
-      { importMap: "src/fixtures/_deno.json" },
+      "./tests/import-map/mod.ts",
+      { importMap: "tests/import-map/import_map.json" },
     );
-    content = await Deno.readTextFile("src/fixtures/_deno.json");
+    content = await Deno.readTextFile("tests/import-map/import_map.json");
   });
   it("deno_graph", () => {
     const update = updates.find((update) =>
-      update.code.specifier === "deno_graph"
+      update.code?.specifier === "deno_graph"
     )!;
     const result = DependencyUpdate.applyToImportMap(
       update,
