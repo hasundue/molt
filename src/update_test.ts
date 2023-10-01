@@ -115,7 +115,7 @@ describe("applyToModule", () => {
     updates = await DependencyUpdate.collect(
       "./tests/direct-import/mod.ts",
     );
-    content = Deno.readTextFileSync("./tests/direct-import/mod.ts");
+    content = await Deno.readTextFile("./tests/direct-import/mod.ts");
   });
   it("https://deno.land/x/deno_graph", () => {
     const update = updates.find((update) =>

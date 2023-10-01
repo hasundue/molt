@@ -32,7 +32,7 @@ async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
   const inner = await parseFromJson(
     specifier,
     // deno-lint-ignore no-explicit-any
-    parseJsonc(Deno.readTextFileSync(path)) as any,
+    parseJsonc(await Deno.readTextFile(path)) as any,
   );
   const json = JSON.parse(inner.toJSON()) as ImportMapJson;
   if (!json.imports) {
