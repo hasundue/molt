@@ -65,12 +65,12 @@ export async function collect(
   entrypoints: { entrypoint: string; options: { importMap?: string } }[],
 ): Promise<DependencyUpdate[]> {
   let totalUpdates: DependencyUpdate[] = [];
+  // Ensure the deno_graph WASM module is initialized.
+  await DenoGraph.ensureInit();
+
   for (const entrypoint of entrypoints) {
     // This could throw if the entrypoints are not valid URIs.
     const specifiers = URI.from(entrypoint.entrypoint);
-
-    // Ensure the deno_graph WASM module is initialized.
-    await DenoGraph.ensureInit();
 
     const importMap = entrypoint.options.importMap
       ? await ImportMap.readFromJson(entrypoint.options.importMap)
