@@ -5,6 +5,7 @@ import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate, FileUpdate } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
+import { extname } from "./lib/std/path.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -18,6 +19,7 @@ async function checkAction(
   options: { importMap?: string },
   ...entrypoints: string[]
 ) {
+  _ensureJsFiles(entrypoints);
   console.log("🔎 Checking for updates...");
   const updates = await DependencyUpdate.collect(entrypoints, {
     importMap: options.importMap ?? _findImportMap(),
@@ -179,6 +181,31 @@ function _task(task: string): void {
     console.error(new TextDecoder().decode(stderr));
     Deno.exit(1);
   }
+}
+
+function _ensureJsFiles(paths: string[]) {
+  let errors = 0;
+  for (const path of paths) {
+    const ext = extname(path);
+    if (
+      !(ext === "" || ext === ".js" || ext === ".ts" || ext === ".jsx" ||
+        ext === ".tsx")
+    ) {
+      console.error(`❌ file must be javascript or typescript: "${path}"`);
+      errors += 1;
+      continue;
+    }
+    try {
+      if (!Deno.statSync(path).isFile) {
+        console.error(`❌ not a file: "${path}"`);
+        errors += 1;
+      }
+    } catch {
+      console.error(`❌ path does not exist: "${path}"`);
+      errors += 1;
+    }
+  }
+  if (errors != 0) Deno.exit(1);
 }
 
 const main = new Command()
