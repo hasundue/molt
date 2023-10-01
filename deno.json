@@ -2,8 +2,8 @@
   "tasks": {
     "run": "deno run --allow-env --allow-read --allow-net=deno.land --allow-write=.",
     "lock": "rm deno.lock && deno cache --lock=deno.lock --lock-write ./*.ts src/*.ts git/*.ts && git add deno.lock",
-    "test": "deno test -A",
-    "test:fast": "deno test -A --no-check",
+    "test": "deno test -A --parallel",
+    "test:fast": "deno task test --no-check",
     "dev": "deno fmt && deno lint && deno task lock && deno task test",
     "update": "deno task -q run --allow-run ./cli.ts check lib/**/*.ts",
     "install": "deno install -f -A --name molt cli.ts"
