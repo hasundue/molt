@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.2](https://github.com/hasundue/deno-molt/compare/0.4.1...0.4.2) (2023-10-01)
+
+
+### Bug Fixes
+
+* **cli:** exit with error on invalid usage ([#17](https://github.com/hasundue/deno-molt/issues/17)) ([a7d678e](https://github.com/hasundue/deno-molt/commit/a7d678efc137195c719a9bd5f52dca5820933a17))
+
 ## [0.4.1](https://github.com/hasundue/deno-molt/compare/0.4.0...0.4.1) (2023-10-01)
 
 
