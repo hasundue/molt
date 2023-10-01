@@ -214,7 +214,7 @@ const main = new Command()
   .action(function () {
     this.showHelp();
   })
-  .version("0.4.0")
+  .version("0.4.2")
   .command("check", checkCommand)
   .command("update", updateCommand);
 
