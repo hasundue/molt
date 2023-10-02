@@ -5,7 +5,7 @@ import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate, FileUpdate } from "./mod.ts";
 import { commitAll } from "./git/mod.ts";
-import { extname } from "./lib/std/path.ts";
+import { dirname, extname, join } from "./lib/std/path.ts";
 
 const { gray, yellow, bold } = colors;
 
@@ -21,9 +21,13 @@ async function checkAction(
 ) {
   _ensureJsFiles(entrypoints);
   console.log("🔎 Checking for updates...");
-  const updates = await DependencyUpdate.collect(entrypoints, {
-    importMap: options.importMap ?? _findImportMap(),
-  });
+  const updates = await Promise.all(
+    entrypoints.map(async (entrypoint) =>
+      await DependencyUpdate.collect(entrypoint, {
+        importMap: options.importMap ?? _findImportMap(entrypoint),
+      })
+    ),
+  ).then((results) => results.flat());
   if (!updates.length) {
     console.log("🍵 No updates found");
     return;
@@ -87,9 +91,13 @@ async function updateAction(
   ...entrypoints: string[]
 ) {
   console.log("🔎 Checking for updates...");
-  const updates = await DependencyUpdate.collect(entrypoints, {
-    importMap: options.importMap ?? _findImportMap(),
-  });
+  const updates = await Promise.all(
+    entrypoints.map(async (entrypoint) =>
+      await DependencyUpdate.collect(entrypoint, {
+        importMap: options.importMap ?? _findImportMap(entrypoint),
+      })
+    ),
+  ).then((results) => results.flat());
   if (!updates.length) {
     console.log("🍵 No updates found");
     return;
@@ -101,9 +109,14 @@ async function updateAction(
   return _write(updates);
 }
 
-function _findImportMap(): string | undefined {
-  return ["./import_map.json", "./deno.json", "./deno.jsonc"]
-    .find((path) => existsSync(path));
+function _findImportMap(entrypoint: string): string | undefined {
+  const map = [
+    _findFileUp(entrypoint, "deno.json"),
+    _findFileUp(entrypoint, "deno.jsonc"),
+  ].flat();
+
+  if (map.length === 0) return;
+  return map[0];
 }
 
 function _getTasks(): string[] {
@@ -206,6 +219,34 @@ function _ensureJsFiles(paths: string[]) {
     }
   }
   if (errors != 0) Deno.exit(1);
+}
+
+/**
+ * Recursively searches for a file with the specified name in parent directories
+ * starting from the given entrypoint directory.
+ *
+ * @param entrypoint - The file to start the search from its parent dir.
+ * @param root - The name of the file to search for.
+ * @returns An array of matching file paths found
+ */
+function _findFileUp(entrypoint: string, root: string) {
+  let path = dirname(entrypoint);
+  const hits = [];
+
+  upLoop:
+  while (true) {
+    for (const dirEntry of Deno.readDirSync(path)) {
+      if (dirEntry.name === root) hits.push(join(path, dirEntry.name));
+    }
+    const newPath = dirname(path);
+    if (newPath === path) {
+      // reached the end of the up loop
+      break upLoop;
+    }
+    path = newPath;
+  }
+
+  return hits;
 }
 
 const main = new Command()
