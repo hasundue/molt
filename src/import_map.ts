@@ -1,6 +1,7 @@
 import { maxBy } from "../lib/std/collections.ts";
 import { parse as parseJsonc } from "../lib/std/jsonc.ts";
 import { type ImportMapJson, parseFromJson } from "../lib/x/import_map.ts";
+import { is } from "../lib/x/unknownutil.ts";
 import type { Maybe } from "../lib/types.ts";
 import { URI } from "../lib/uri.ts";
 import { URIScheme } from "./types.ts";
@@ -15,6 +16,7 @@ export interface ImportMapResolveResult {
 }
 
 export interface ImportMap {
+  // TODO: Accept a remote URL
   specifier: URI<"file">;
   resolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
   resolveSimple(specifier: string, referrer: string): string;
@@ -24,23 +26,29 @@ export const ImportMap = {
   readFromJson,
 };
 
+const isImportMapJson = is.ObjectOf({
+  imports: is.RecordOf(is.String),
+});
+
+const isImportMapReferrer = is.ObjectOf({
+  importMap: is.String,
+});
+
 // This implementation is ridiculously inefficient, but we prefer not to reimplement the whole
 // import_map module. Maybe we should rathre patch rust code of the import_map module.
-async function readFromJson(path: string): Promise<Maybe<ImportMap>> {
-  const specifier = URI.from(path);
-  // Instead of validate the json by ourself, let the import_map module do it.
-  const inner = await parseFromJson(
-    specifier,
-    // deno-lint-ignore no-explicit-any
-    parseJsonc(await Deno.readTextFile(path)) as any,
-  );
-  const json = JSON.parse(inner.toJSON()) as ImportMapJson;
-  if (!json.imports) {
-    // The import map is empty
+async function readFromJson(url: URL): Promise<Maybe<ImportMap>> {
+  const json = parseJsonc(await Deno.readTextFile(url.pathname));
+  if (isImportMapReferrer(json)) {
+    // The json seems to be deno.json or deno.jsonc referencing an import map.
+    return readFromJson(new URL(json.importMap, url));
+  }
+  if (!isImportMapJson(json)) {
+    // The json does not include an import map.
     return undefined;
   }
+  const inner = await parseFromJson(url, json);
   return {
-    specifier,
+    specifier: URI.from(url.href),
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
       if (resolved === specifier) {
