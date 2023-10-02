@@ -24,7 +24,7 @@ async function checkAction(
   const updates = await Promise.all(
     entrypoints.map(async (entrypoint) =>
       await DependencyUpdate.collect(entrypoint, {
-        importMap: options.importMap ?? _findImportMap(entrypoint),
+        importMap: options.importMap ?? await _findImportMap(entrypoint),
       })
     ),
   ).then((results) => results.flat());
@@ -94,7 +94,7 @@ async function updateAction(
   const updates = await Promise.all(
     entrypoints.map(async (entrypoint) =>
       await DependencyUpdate.collect(entrypoint, {
-        importMap: options.importMap ?? _findImportMap(entrypoint),
+        importMap: options.importMap ?? await _findImportMap(entrypoint),
       })
     ),
   ).then((results) => results.flat());
@@ -109,10 +109,10 @@ async function updateAction(
   return _write(updates);
 }
 
-function _findImportMap(entrypoint: string): string | undefined {
+async function _findImportMap(entrypoint: string): Promise<string | undefined> {
   const map = [
-    _findFileUp(entrypoint, "deno.json"),
-    _findFileUp(entrypoint, "deno.jsonc"),
+    await _findFileUp(entrypoint, "deno.json"),
+    await _findFileUp(entrypoint, "deno.jsonc"),
   ].flat();
 
   if (map.length === 0) return;
@@ -229,13 +229,13 @@ function _ensureJsFiles(paths: string[]) {
  * @param root - The name of the file to search for.
  * @returns An array of matching file paths found
  */
-function _findFileUp(entrypoint: string, root: string) {
+async function _findFileUp(entrypoint: string, root: string) {
   let path = dirname(entrypoint);
   const hits = [];
 
   upLoop:
   while (true) {
-    for (const dirEntry of Deno.readDirSync(path)) {
+    for await (const dirEntry of Deno.readDir(path)) {
       if (dirEntry.name === root) hits.push(join(path, dirEntry.name));
     }
     const newPath = dirname(path);
