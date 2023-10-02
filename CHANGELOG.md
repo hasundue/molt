@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.3](https://github.com/hasundue/deno-molt/compare/0.4.2...0.4.3) (2023-10-02)
+
+
+### Bug Fixes
+
+* **cli:** look for deno.json relative to entrypoints ([#24](https://github.com/hasundue/deno-molt/issues/24)) ([d7301fc](https://github.com/hasundue/deno-molt/commit/d7301fc0696d239490e17f96490380903ed6e1a2))
+
 ## [0.4.2](https://github.com/hasundue/deno-molt/compare/0.4.1...0.4.2) (2023-10-01)
 
 
