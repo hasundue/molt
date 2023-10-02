@@ -10,6 +10,16 @@ describe("readFromJson()", () => {
     );
     assertExists(importMap);
   });
+  it("tests/import-map-reffered/import_map.json", async () => {
+    const importMap = await ImportMap.readFromJson(
+      "./tests/import-map-reffered/deno.json",
+    );
+    assertExists(importMap);
+    assertEquals(
+      importMap.specifier,
+      URI.from("https://deno.land/x/deno_graph/import_map.json"),
+    );
+  });
 });
 
 describe("resolve()", () => {
@@ -62,6 +72,21 @@ describe("resolve()", () => {
         referrer,
       ),
       undefined,
+    );
+  });
+  it("resolve specifiers in a reffered import map", async () => {
+    const importMap = await ImportMap.readFromJson(
+      "tests/import-map-reffered/deno.json",
+    );
+    assertExists(importMap);
+    const referrer = URI.from("tests/import-map-reffered/mod.ts");
+    assertEquals(
+      importMap.resolve("dax", referrer),
+      {
+        specifier: "https://deno.land/x/dax@0.17.0/mod.ts",
+        from: "dax",
+        to: "https://deno.land/x/dax",
+      },
     );
   });
 });
