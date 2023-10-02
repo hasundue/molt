@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.4](https://github.com/hasundue/deno-molt/compare/0.4.3...0.4.4) (2023-10-02)
+
+
+### Performance Improvements
+
+* **cli:** make findImportMap async ([#30](https://github.com/hasundue/deno-molt/issues/30)) ([6c1a47c](https://github.com/hasundue/deno-molt/commit/6c1a47c15572452f4252b90830e5578677d4b1e2))
+
 ## [0.4.3](https://github.com/hasundue/deno-molt/compare/0.4.2...0.4.3) (2023-10-02)
 
 
