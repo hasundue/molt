@@ -55,8 +55,9 @@ describe("_create", () => {
 describe("_create - with import map", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
-    importMap =
-      (await ImportMap.readFromJson("tests/import-map/import_map.json"))!;
+    importMap = (await ImportMap.readFromJson(
+      new URL("../tests/import-map/deno.json", import.meta.url),
+    ))!;
   });
   it("std/version.ts", async () => {
     const update = await _create(
@@ -82,7 +83,7 @@ describe("_create - with import map", () => {
       code: { specifier: "std/version.ts" },
       referrer: URI.from("tests/import-map/mod.ts"),
       map: {
-        source: URI.from("tests/import-map/import_map.json"),
+        source: URI.from("tests/import-map/deno.json"),
         from: "std/",
         to: "https://deno.land/std@0.200.0/",
       },
@@ -101,7 +102,7 @@ describe("collect", () => {
     const updates = await DependencyUpdate.collect(
       "./tests/import-map/mod.ts",
       {
-        importMap: "tests/import-map/import_map.json",
+        importMap: "./tests/import-map/deno.json",
       },
     );
     assertEquals(updates.length, 4);
@@ -147,9 +148,9 @@ describe("applyToImportMap", () => {
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
       "./tests/import-map/mod.ts",
-      { importMap: "tests/import-map/import_map.json" },
+      { importMap: "tests/import-map/deno.json" },
     );
-    content = await Deno.readTextFile("tests/import-map/import_map.json");
+    content = await Deno.readTextFile("tests/import-map/deno.json");
   });
   it("deno_graph", () => {
     const update = updates.find((update) =>

@@ -27,7 +27,7 @@ describe("collect", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
         "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/import_map.json" },
+        { importMap: "./tests/import-map/deno.json" },
       ),
     );
     assertEquals(results.length, 2);
@@ -45,7 +45,7 @@ describe("collect", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
         "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/import_map.json" },
+        { importMap: "./tests/import-map-no-resolve/deno.json" },
       ),
     );
     assertEquals(results.length, 1);
@@ -86,18 +86,18 @@ describe("writeAll", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
         "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/import_map.json" },
+        { importMap: "./tests/import-map/deno.json" },
       ),
     );
     FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("tests/import-map/import_map.json")));
+    assertExists(output.get(URI.from("tests/import-map/deno.json")));
   });
 
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
         "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/import_map.json" },
+        { importMap: "./tests/import-map-no-resolve/deno.json" },
       ),
     );
     FileUpdate.writeAll(results);

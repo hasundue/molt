@@ -25,7 +25,7 @@ export const URI = {
       ).href as URI<"file">;
     }
     if (url.protocol !== "file:") {
-      throw new TypeError();
+      throw new TypeError(`Invalid protocol: ${url.protocol} in ${path}`);
     }
     return url.href as URI<"file">;
   },

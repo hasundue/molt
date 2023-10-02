@@ -74,7 +74,7 @@ export async function collect(
   await DenoGraph.ensureInit();
 
   const importMap = options.importMap
-    ? await ImportMap.readFromJson(options.importMap)
+    ? await ImportMap.readFromJson(new URL(URI.from(options.importMap)))
     : undefined;
 
   const graph = await createGraph(specifiers, {
