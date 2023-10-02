@@ -93,20 +93,16 @@ describe("_create - with import map", () => {
 describe("collect", () => {
   it("direct import", async () => {
     const updates = await DependencyUpdate.collect(
-      [{
-        entrypoint: "./tests/direct-import/mod.ts",
-      }],
+      "./tests/direct-import/mod.ts",
     );
     assertEquals(updates.length, 4);
   });
   it("import map", async () => {
     const updates = await DependencyUpdate.collect(
-      [{
-        entrypoint: "./tests/import-map/mod.ts",
-        options: {
-          importMap: "tests/import-map/import_map.json",
-        },
-      }],
+      "./tests/import-map/mod.ts",
+      {
+        importMap: "tests/import-map/import_map.json",
+      },
     );
     assertEquals(updates.length, 4);
   });
@@ -117,9 +113,7 @@ describe("applyToModule", () => {
   let content: string;
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
-      [{
-        entrypoint: "./tests/direct-import/mod.ts",
-      }],
+      "./tests/direct-import/mod.ts",
     );
     content = Deno.readTextFileSync("./tests/direct-import/mod.ts");
   });
@@ -152,12 +146,8 @@ describe("applyToImportMap", () => {
   let content: string;
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
-      [{
-        entrypoint: "./tests/import-map/mod.ts",
-        options: {
-          importMap: "tests/import-map/import_map.json",
-        },
-      }],
+      "./tests/import-map/mod.ts",
+      { importMap: "tests/import-map/import_map.json" },
     );
     content = await Deno.readTextFile("tests/import-map/import_map.json");
   });

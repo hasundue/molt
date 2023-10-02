@@ -62,44 +62,40 @@ class DenoGraph {
 }
 
 export async function collect(
-  entrypoints: {
-    entrypoint: string;
-    options?: { importMap?: string };
-  }[],
+  entrypoints: string | string[],
+  options: {
+    importMap?: string;
+  } = {},
 ): Promise<DependencyUpdate[]> {
-  let totalUpdates: DependencyUpdate[] = [];
+  // This could throw if the entrypoints are not valid URIs.
+  const specifiers = [entrypoints].flat().map((path) => URI.from(path));
+
   // Ensure the deno_graph WASM module is initialized.
   await DenoGraph.ensureInit();
 
-  for (const entrypoint of entrypoints) {
-    // This could throw if the entrypoints are not valid URIs.
-    const specifiers = URI.from(entrypoint.entrypoint);
+  const importMap = options.importMap
+    ? await ImportMap.readFromJson(options.importMap)
+    : undefined;
 
-    const importMap = entrypoint.options?.importMap
-      ? await ImportMap.readFromJson(entrypoint.options.importMap)
-      : undefined;
+  const graph = await createGraph(specifiers, {
+    load,
+    resolve: importMap ? importMap.resolveSimple : undefined,
+  });
 
-    const graph = await createGraph(specifiers, {
-      load,
-      resolve: importMap ? importMap.resolveSimple : undefined,
-    });
-
-    const updates: DependencyUpdate[] = [];
-    await Promise.all(
-      graph.modules.flatMap((module) =>
-        module.dependencies?.map(async (dependency) => {
-          const update = await _create(
-            dependency,
-            URI.from(module.specifier),
-            { importMap },
-          );
-          return update ? updates.push(update) : undefined;
-        })
-      ),
-    );
-    totalUpdates = totalUpdates.concat(updates);
-  }
-  return totalUpdates;
+  const updates: DependencyUpdate[] = [];
+  await Promise.all(
+    graph.modules.flatMap((module) =>
+      module.dependencies?.map(async (dependency) => {
+        const update = await _create(
+          dependency,
+          URI.from(module.specifier),
+          { importMap },
+        );
+        return update ? updates.push(update) : undefined;
+      })
+    ),
+  );
+  return updates;
 }
 
 export async function _create(
