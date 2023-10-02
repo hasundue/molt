@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.5](https://github.com/hasundue/deno-molt/compare/0.4.4...0.4.5) (2023-10-02)
+
+
+### Bug Fixes
+
+* support import maps refereed from deno.json  ([#32](https://github.com/hasundue/deno-molt/issues/32)) ([ef1a1a3](https://github.com/hasundue/deno-molt/commit/ef1a1a335bb7dd63e5f75224e28884ce65808aef))
+
 ## [0.4.4](https://github.com/hasundue/deno-molt/compare/0.4.3...0.4.4) (2023-10-02)
 
 
