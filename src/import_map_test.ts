@@ -10,14 +10,14 @@ describe("readFromJson()", () => {
     );
     assertExists(importMap);
   });
-  it("tests/import-map-reffered/import_map.json", async () => {
+  it("tests/import-map-referred/import_map.json", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map-reffered/deno.json", import.meta.url),
+      new URL("../tests/import-map-referred/deno.json", import.meta.url),
     );
     assertExists(importMap);
     assertEquals(
       importMap.specifier,
-      URI.from("./tests/import-map-reffered/import_map.json"),
+      URI.from("./tests/import-map-referred/import_map.json"),
     );
   });
 });
@@ -77,12 +77,12 @@ describe("resolve()", () => {
       undefined,
     );
   });
-  it("resolve specifiers in a reffered import map", async () => {
+  it("resolve specifiers in a referred import map", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map-reffered/deno.json", import.meta.url),
+      new URL("../tests/import-map-referred/deno.json", import.meta.url),
     );
     assertExists(importMap);
-    const referrer = URI.from("tests/import-map-reffered/mod.ts");
+    const referrer = URI.from("tests/import-map-referred/mod.ts");
     assertEquals(
       importMap.resolve("dax", referrer),
       {
