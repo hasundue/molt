@@ -4,6 +4,11 @@ import { URI } from "../lib/uri.ts";
 import { ImportMap } from "./import_map.ts";
 
 describe("readFromJson()", () => {
+  it("empty deno.json", async () => {
+    const f = await Deno.makeTempFile();
+    const importMap = await ImportMap.readFromJson(new URL(f, import.meta.url));
+    assertEquals(importMap, undefined);
+  });
   it("tests/import-map/deno.json", async () => {
     const importMap = await ImportMap.readFromJson(
       new URL("../tests/import-map/deno.json", import.meta.url),
