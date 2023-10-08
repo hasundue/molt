@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.6](https://github.com/hasundue/deno-molt/compare/0.4.5...0.4.6) (2023-10-08)
+
+
+### Bug Fixes
+
+* **import_map:** don't crash on empty deno.json ([#34](https://github.com/hasundue/deno-molt/issues/34)) ([451c04e](https://github.com/hasundue/deno-molt/commit/451c04e74e2997b3a0bcc4ccfb5a4ddd2e444d5a))
+
 ## [0.4.5](https://github.com/hasundue/deno-molt/compare/0.4.4...0.4.5) (2023-10-02)
 
 
