@@ -1,9 +1,5 @@
 # 🦕 Molt
 
-> [!Warning]\
-> This project is still in early development. Expect inconveniences and breaking
-> changes.
-
 Molt is a [Deno] module to bump semvers in import specifiers, focused on
 consistency and maintainability. It uses [deno_graph] for dependency resolution,
 which enables us to avoid implementing custom logic or regex for each module
