@@ -37,6 +37,8 @@ export interface CommitProps {
 export interface CommitOptions {
   groupBy?: (dependency: DependencyUpdate) => string;
   composeCommitMessage?: (props: CommitProps) => string;
+  preCommit?: (commit: GitCommit) => void;
+  postCommit?: (commit: GitCommit) => void;
   gitAddOptions?: string[];
   gitCommitOptions?: string[];
 }
@@ -73,18 +75,12 @@ export interface GitCommitSequence {
   options: CommitOptions;
 }
 
-export interface ExecGitCommitSequenceOptions {
-  preCommit?: (commit: GitCommit) => void;
-  postCommit?: (commit: GitCommit) => void;
-}
-
 export function commitAll(
   updates: DependencyUpdate[],
-  options?: CommitOptions & ExecGitCommitSequenceOptions,
+  options?: CommitOptions,
 ): void {
   execGitCommitSequence(
     createGitCommitSequence(updates, options),
-    options,
   );
 }
 
@@ -115,12 +111,9 @@ function createGitCommitSequence(
 
 function execGitCommitSequence(
   sequence: GitCommitSequence,
-  options?: ExecGitCommitSequenceOptions,
 ) {
   for (const commit of sequence.commits) {
-    options?.preCommit?.(commit);
     execGitCommit(commit, sequence.options);
-    options?.postCommit?.(commit);
   }
 }
 
@@ -130,8 +123,10 @@ function execGitCommit(
 ) {
   const results = FileUpdate.collect(commit.updates);
   FileUpdate.writeAll(results);
+  options?.preCommit?.(commit);
   _add(results, options?.gitAddOptions ?? []);
   _commit(commit.message, options?.gitCommitOptions ?? []);
+  options?.postCommit?.(commit);
 }
 
 function _add(
