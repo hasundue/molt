@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.5.0](https://github.com/hasundue/deno-molt/compare/0.4.6...0.5.0) (2023-10-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* **git:** ExecGitCommitSequenceOptions are merged into CommitOptions
+
+### Bug Fixes
+
+* **git:** invoke pre-commit hook after changes are written correctly ([#38](https://github.com/hasundue/deno-molt/issues/38)) ([50c4515](https://github.com/hasundue/deno-molt/commit/50c45159ff50e61f0c4668c2e784d0e52f9544da))
+
+
+### Code Refactoring
+
+* **git:** ExecGitCommitSequenceOptions are merged into CommitOptions ([50c4515](https://github.com/hasundue/deno-molt/commit/50c45159ff50e61f0c4668c2e784d0e52f9544da))
+
 ## [0.4.6](https://github.com/hasundue/deno-molt/compare/0.4.5...0.4.6) (2023-10-08)
 
 
