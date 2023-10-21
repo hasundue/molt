@@ -55,7 +55,10 @@ export function commitAll(
   options?: CommitOptions,
 ): void {
   execGitCommitSequence(
-    createGitCommitSequence(updates, options),
+    createGitCommitSequence(updates, {
+      ...defaultCommitOptions,
+      ...options,
+    }),
   );
 }
 
