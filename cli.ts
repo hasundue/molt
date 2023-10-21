@@ -1,11 +1,11 @@
 import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
+import { dirname, extname, join } from "./lib/std/path.ts";
 import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate, FileUpdate } from "./mod.ts";
-import { commitAll } from "./git/mod.ts";
-import { dirname, extname, join } from "./lib/std/path.ts";
+import { commitAll } from "./git.ts";
 
 const { gray, yellow, bold } = colors;
 

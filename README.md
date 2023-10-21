@@ -24,8 +24,7 @@ registry.
 #### API Reference (WIP)
 
 - [mod.ts](https://deno.land/x/molt/mod.ts) - Main module
-- [git/mod.ts](https://deno.land/x/molt/git/mod.ts) - Sub-module for Git
-  operations
+- [git.ts](https://deno.land/x/molt/git/mod.ts) - Sub-module for Git operations
 - [lib/uri.ts](https://deno.land/x/molt/lib/uri.ts) - Library for handling URIs
 
 #### Examples
@@ -50,7 +49,7 @@ FileUpdate.writeAll(results);
 
 ```ts
 import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
-import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
+import { commitAll } from "https://deno.land/x/molt@{VERSION}/git.ts";
 
 const updates = await DependencyUpdate.collect("./mod.ts");
 

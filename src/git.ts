@@ -1,31 +1,6 @@
-// Copyright 2023 Chiezo (Shun Ueda). All rights reserved. MIT license.
-
-/**
- * A sub module of molt for git operations.
- *
- * ### Example
- *
- * To update all dependencies in a module and commit the changes to git:
- *
- * ```ts
- * import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
- * import { commitAll } from "https://deno.land/x/molt@{VERSION}/git/mod.ts";
- *
- * const updates = await DependencyUpdate.collect("./mod.ts");
- *
- * commitAll(updates, {
- *   groupBy: (dependency) => dependency.name,
- *   composeCommitMessage: ({ group, version }) =>
- *     `build(deps): bump ${group} to ${version!.to}`,
- * });
- * ```
- *
- * @module
- */
-
-import { DependencyUpdate } from "../src/update.ts";
-import { FileUpdate } from "../src/file.ts";
-import { createVersionProp, type VersionProp } from "../src/versions.ts";
+import { DependencyUpdate } from "./update.ts";
+import { FileUpdate } from "./file.ts";
+import { createVersionProp, type VersionProp } from "./versions.ts";
 import { URI } from "../lib/uri.ts";
 
 export interface CommitProps {
@@ -43,7 +18,7 @@ export interface CommitOptions {
   gitCommitOptions?: string[];
 }
 
-export const defaultCommitOptions = {
+const defaultCommitOptions = {
   groupBy: () => "dependencies",
   composeCommitMessage: ({ group, version }) => {
     let message = `build(deps): update ${group}`;

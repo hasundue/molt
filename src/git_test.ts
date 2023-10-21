@@ -12,8 +12,8 @@ import {
 } from "../lib/std/testing.ts";
 import { assertArrayIncludes, assertEquals } from "../lib/std/assert.ts";
 import { URI } from "../lib/uri.ts";
-import { DependencyUpdate } from "../mod.ts";
-import { commitAll } from "./mod.ts";
+import { DependencyUpdate } from "./update.ts";
+import { commitAll } from "./git.ts";
 
 const DenoCommandOriginal = Deno.Command;
 const readTextFileSyncOriginal = Deno.readTextFileSync;
