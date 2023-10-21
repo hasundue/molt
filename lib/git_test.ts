@@ -41,7 +41,9 @@ describe("commitAll()", () => {
   let readTextFileSyncStub: Stub;
 
   beforeAll(async () => {
-    updates = await DependencyUpdate.collect("./tests/direct-import/mod.ts");
+    updates = await DependencyUpdate.collect(
+      "./test/fixtures/direct-import/mod.ts",
+    );
     writeTextFileSyncStub = stub(
       Deno,
       "writeTextFileSync",
@@ -72,8 +74,8 @@ describe("commitAll()", () => {
   beforeEach(() => {
     for (
       const file of [
-        "./tests/direct-import/mod.ts",
-        "./tests/direct-import/lib.ts",
+        "./test/fixtures/direct-import/mod.ts",
+        "./test/fixtures/direct-import/lib.ts",
       ]
     ) {
       const content = readTextFileSyncOriginal(file);
@@ -107,11 +109,11 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add tests/direct-import/mod.ts",
+        "git add test/fixtures/direct-import/mod.ts",
         'git commit -m "build(deps): update node-emoji"',
-        "git add tests/direct-import/mod.ts",
+        "git add test/fixtures/direct-import/mod.ts",
         'git commit -m "build(deps): update deno.land/x/deno_graph"',
-        // "git add tests/direct-import/mod.ts tests/direct-import/lib.ts",
+        // "git add test/fixtures/direct-import/mod.ts test/fixtures/direct-import/lib.ts",
         'git commit -m "build(deps): update deno.land/std"',
       ],
     );
@@ -126,10 +128,10 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add tests/direct-import/mod.ts",
-        'git commit -m "build(deps): update tests/direct-import/mod.ts"',
-        "git add tests/direct-import/lib.ts",
-        'git commit -m "build(deps): update tests/direct-import/lib.ts"',
+        "git add test/fixtures/direct-import/mod.ts",
+        'git commit -m "build(deps): update test/fixtures/direct-import/mod.ts"',
+        "git add test/fixtures/direct-import/lib.ts",
+        'git commit -m "build(deps): update test/fixtures/direct-import/lib.ts"',
       ],
     );
   });

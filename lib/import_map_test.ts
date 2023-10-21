@@ -15,20 +15,23 @@ describe("readFromJson()", () => {
     assertEquals(importMap, undefined);
     await Deno.remove(f);
   });
-  it("tests/import-map/deno.json", async () => {
+  it("test/fixtures/import-map/deno.json", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map/deno.json", import.meta.url),
+      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(importMap);
   });
-  it("tests/import-map-referred/import_map.json", async () => {
+  it("test/fixtures/import-map-referred/import_map.json", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map-referred/deno.json", import.meta.url),
+      new URL(
+        "../test/fixtures/import-map-referred/deno.json",
+        import.meta.url,
+      ),
     );
     assertExists(importMap);
     assertEquals(
       importMap.specifier,
-      URI.from("./tests/import-map-referred/import_map.json"),
+      URI.from("./test/fixtures/import-map-referred/import_map.json"),
     );
   });
 });
@@ -36,10 +39,10 @@ describe("readFromJson()", () => {
 describe("resolve()", () => {
   it("resolve specifiers in import maps", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map/deno.json", import.meta.url),
+      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(importMap);
-    const referrer = URI.from("tests/import-map/mod.ts");
+    const referrer = URI.from("test/fixtures/import-map/mod.ts");
     assertEquals(
       importMap.resolve("std/version.ts", referrer),
       {
@@ -67,19 +70,19 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("/lib.ts", referrer),
       {
-        specifier: URI.from("tests/import-map/lib.ts"),
+        specifier: URI.from("test/fixtures/import-map/lib.ts"),
       },
     );
   });
   it("do not resolve an url", async () => {
     const importMap = await ImportMap.readFromJson(
       new URL(
-        "../tests/import-map-no-resolve/deno.json",
+        "../test/fixtures/import-map-no-resolve/deno.json",
         import.meta.url,
       ),
     );
     assertExists(importMap);
-    const referrer = URI.from("tests/import-map-no-resolve/deps.ts");
+    const referrer = URI.from("test/fixtures/import-map-no-resolve/deps.ts");
     assertEquals(
       importMap.resolve(
         "https://deno.land/std@0.171.0/testing/asserts.ts",
@@ -90,10 +93,13 @@ describe("resolve()", () => {
   });
   it("resolve specifiers in a referred import map", async () => {
     const importMap = await ImportMap.readFromJson(
-      new URL("../tests/import-map-referred/deno.json", import.meta.url),
+      new URL(
+        "../test/fixtures/import-map-referred/deno.json",
+        import.meta.url,
+      ),
     );
     assertExists(importMap);
-    const referrer = URI.from("tests/import-map-referred/mod.ts");
+    const referrer = URI.from("test/fixtures/import-map-referred/mod.ts");
     assertEquals(
       importMap.resolve("dax", referrer),
       {
@@ -109,15 +115,18 @@ describe("resolveSimple()", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
     const maybe = await ImportMap.readFromJson(
-      new URL("../tests/import-map/deno.json", import.meta.url),
+      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(maybe);
     importMap = maybe;
   });
   it("resolve an absolute path", () => {
     assertEquals(
-      importMap.resolveSimple("/lib.ts", URI.from("tests/import-map/mod.ts")),
-      URI.from("tests/import-map/lib.ts"),
+      importMap.resolveSimple(
+        "/lib.ts",
+        URI.from("test/fixtures/import-map/mod.ts"),
+      ),
+      URI.from("test/fixtures/import-map/lib.ts"),
     );
   });
 });

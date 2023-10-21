@@ -12,7 +12,7 @@
     "exclude": ["CHANGELOG.md"]
   },
   "lint": {
-    "exclude": ["tests/"],
+    "exclude": ["test/"],
     "rules": {
       "include": [
         "no-sync-fn-in-async-fn"
