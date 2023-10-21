@@ -1,7 +1,7 @@
 {
   "tasks": {
     "run": "deno run --allow-env --allow-read --allow-net=deno.land --allow-write=.",
-    "lock": "rm deno.lock && deno cache --lock=deno.lock --lock-write ./*.ts src/*.ts git/*.ts && git add deno.lock",
+    "lock": "deno cache --lock=deno.lock --lock-write ./lib/**/*.ts && git add deno.lock",
     "test": "deno test -A",
     "test:fast": "deno task test --no-check",
     "dev": "deno fmt && deno lint && deno task lock && deno task test",
