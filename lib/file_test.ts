@@ -18,7 +18,7 @@ import { URI } from "./uri.ts";
 describe("collect", () => {
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./tests/direct-import/mod.ts"),
+      await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
     assertEquals(results.length, 2);
   });
@@ -26,8 +26,8 @@ describe("collect", () => {
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/deno.json" },
+        "./test/fixtures/import-map/mod.ts",
+        { importMap: "./test/fixtures/import-map/deno.json" },
       ),
     );
     assertEquals(results.length, 2);
@@ -44,8 +44,8 @@ describe("collect", () => {
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/deno.json" },
+        "./test/fixtures/import-map-no-resolve/mod.ts",
+        { importMap: "./test/fixtures/import-map-no-resolve/deno.json" },
       ),
     );
     assertEquals(results.length, 1);
@@ -75,32 +75,34 @@ describe("writeAll", () => {
 
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./tests/direct-import/mod.ts"),
+      await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
     FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("tests/direct-import/mod.ts")));
-    assertExists(output.get(URI.from("tests/direct-import/lib.ts")));
+    assertExists(output.get(URI.from("test/fixtures/direct-import/mod.ts")));
+    assertExists(output.get(URI.from("test/fixtures/direct-import/lib.ts")));
   });
 
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map/mod.ts",
-        { importMap: "./tests/import-map/deno.json" },
+        "./test/fixtures/import-map/mod.ts",
+        { importMap: "./test/fixtures/import-map/deno.json" },
       ),
     );
     FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("tests/import-map/deno.json")));
+    assertExists(output.get(URI.from("test/fixtures/import-map/deno.json")));
   });
 
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./tests/import-map-no-resolve/mod.ts",
-        { importMap: "./tests/import-map-no-resolve/deno.json" },
+        "./test/fixtures/import-map-no-resolve/mod.ts",
+        { importMap: "./test/fixtures/import-map-no-resolve/deno.json" },
       ),
     );
     FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("tests/import-map-no-resolve/mod.ts")));
+    assertExists(
+      output.get(URI.from("test/fixtures/import-map-no-resolve/mod.ts")),
+    );
   });
 });
