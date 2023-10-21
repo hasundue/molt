@@ -1,9 +1,9 @@
-import { maxBy } from "../lib/std/collections.ts";
-import { parse as parseJsonc } from "../lib/std/jsonc.ts";
-import { type ImportMapJson, parseFromJson } from "../lib/x/import_map.ts";
-import { is } from "../lib/x/unknownutil.ts";
-import type { Maybe } from "../lib/types.ts";
-import { URI } from "../lib/uri.ts";
+import { maxBy } from "./std/collections.ts";
+import { parse as parseJsonc } from "./std/jsonc.ts";
+import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
+import { is } from "./x/unknownutil.ts";
+import type { Maybe } from "./types.ts";
+import { URI } from "./uri.ts";
 import { URIScheme } from "./types.ts";
 
 export type { ImportMapJson };

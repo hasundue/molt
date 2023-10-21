@@ -1,5 +1,4 @@
 // deno-lint-ignore-file no-explicit-any
-
 import {
   afterAll,
   afterEach,
@@ -9,9 +8,9 @@ import {
   it,
   type Stub,
   stub,
-} from "../lib/std/testing.ts";
-import { assertArrayIncludes, assertEquals } from "../lib/std/assert.ts";
-import { URI } from "../lib/uri.ts";
+} from "./std/testing.ts";
+import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
+import { URI } from "./uri.ts";
 import { DependencyUpdate } from "./update.ts";
 import { commitAll } from "./git.ts";
 

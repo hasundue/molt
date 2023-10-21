@@ -1,8 +1,8 @@
 // deno-lint-ignore-file no-explicit-any
 
-import { describe, it } from "../lib/std/testing.ts";
-import { assertEquals, assertThrows } from "../lib/std/assert.ts";
-import { createVersionProp } from "../src/versions.ts";
+import { describe, it } from "./std/testing.ts";
+import { assertEquals, assertThrows } from "./std/assert.ts";
+import { createVersionProp } from "./versions.ts";
 
 describe("createVersionProps()", () => {
   it("single version", () => {

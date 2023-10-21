@@ -1,11 +1,11 @@
-import { beforeAll, describe, it } from "../lib/std/testing.ts";
+import { beforeAll, describe, it } from "./std/testing.ts";
 import {
   assertEquals,
   assertExists,
   assertNotEquals,
   assertObjectMatch,
-} from "../lib/std/assert.ts";
-import { URI } from "../lib/uri.ts";
+} from "./std/assert.ts";
+import { URI } from "./uri.ts";
 import { _create, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
 

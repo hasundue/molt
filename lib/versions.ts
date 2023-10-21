@@ -1,8 +1,8 @@
 // Copyright 2023 Shun Ueda. All rights reserved. MIT license.
 
-import type { Maybe } from "../lib/types.ts";
-import { distinct } from "../lib/std/collections.ts";
-import { DependencyUpdate } from "../mod.ts";
+import type { Maybe } from "./types.ts";
+import { distinct } from "./std/collections.ts";
+import { DependencyUpdate } from "./update.ts";
 
 export type VersionProp = {
   from?: string;

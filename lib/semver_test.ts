@@ -1,5 +1,5 @@
-import { describe, it } from "../lib/std/testing.ts";
-import { assertEquals } from "../lib/std/assert.ts";
+import { describe, it } from "./std/testing.ts";
+import { assertEquals } from "./std/assert.ts";
 import { parseSemVer } from "./semver.ts";
 
 describe("parseSemVer", () => {

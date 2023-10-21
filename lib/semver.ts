@@ -1,5 +1,4 @@
-import type { Maybe } from "../lib/types.ts";
-import type { SemVerString } from "./types.ts";
+import type { Maybe, SemVerString } from "./types.ts";
 
 // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 const SEMVER_REGEXP =

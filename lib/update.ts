@@ -2,8 +2,8 @@ import {
   createGraph,
   init as initDenoGraph,
   type ModuleJson,
-} from "../lib/x/deno_graph.ts";
-import { RelativePath, URI } from "../lib/uri.ts";
+} from "./x/deno_graph.ts";
+import { RelativePath, URI } from "./uri.ts";
 import type { SemVerString } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
 import { Dependency } from "./dependency.ts";

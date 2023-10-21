@@ -1,7 +1,7 @@
 import {
   type CreateGraphOptions,
   load as defaultLoad,
-} from "../lib/x/deno_graph.ts";
+} from "./x/deno_graph.ts";
 
 export const load: NonNullable<CreateGraphOptions["load"]> = async (
   specifier,
