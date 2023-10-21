@@ -1,6 +1,7 @@
 {
   "version": "3",
   "remote": {
+    "https://deno.land/std@0.186.0/async/deferred.ts": "42790112f36a75a57db4a96d33974a936deb7b04d25c6084a9fa8a49f135def8",
     "https://deno.land/std@0.196.0/_util/os.ts": "d932f56d41e4f6a6093d56044e29ce637f8dcc43c5a90af43504a889cf1775e3",
     "https://deno.land/std@0.196.0/assert/assert.ts": "9a97dad6d98c238938e7540736b826440ad8c1c1e54430ca4c4e623e585607ee",
     "https://deno.land/std@0.196.0/assert/assertion_error.ts": "4d0bde9b374dfbcbe8ac23f54f567b77024fb67dbb1906a852d67fe050d42f56",
@@ -59,6 +60,7 @@
     "https://deno.land/std@0.203.0/testing/_test_suite.ts": "30f018feeb3835f12ab198d8a518f9089b1bcb2e8c838a8b615ab10d5005465c",
     "https://deno.land/std@0.203.0/testing/bdd.ts": "3f446df5ef8e856a869e8eec54c8482590415741ff0b6358a00c43486cc15769",
     "https://deno.land/std@0.203.0/testing/mock.ts": "6576b4aa55ee20b1990d656a78fff83599e190948c00e9f25a7f3ac5e9d6492d",
+    "https://deno.land/x/async@v2.0.2/mutex.ts": "312dcad7468c82f84fd018be157df451361ed19bdc12fd59af8d12b2e6c3ae28",
     "https://deno.land/x/cliffy@v1.0.0-rc.3/_utils/distance.ts": "02af166952c7c358ac83beae397aa2fbca4ad630aecfcd38d92edb1ea429f004",
     "https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/ansi_escapes.ts": "193b3c3a4e520274bd8322ca4cab1c3ce38070bed1898cb2ade12a585dddd7c9",
     "https://deno.land/x/cliffy@v1.0.0-rc.3/ansi/chain.ts": "eca61b1b64cad7b9799490c12c7aa5538d0f63ac65a73ddb6acac8b35f0a5323",
