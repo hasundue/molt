@@ -4,8 +4,9 @@ import { parse as parseJsonc } from "./lib/std/jsonc.ts";
 import { dirname, extname, join } from "./lib/std/path.ts";
 import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
 import { URI } from "./lib/uri.ts";
-import { DependencyUpdate, FileUpdate } from "./mod.ts";
-import { commitAll } from "./git.ts";
+import { DependencyUpdate } from "./lib/update.ts";
+import { FileUpdate } from "./lib/file.ts";
+import { commitAll } from "./lib/git.ts";
 
 const { gray, yellow, bold } = colors;
 

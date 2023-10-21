@@ -1,8 +1,7 @@
-import type { Maybe } from "../lib/types.ts";
-import { Mutex } from "../lib/x/async.ts";
-import type { Path, SemVerString } from "./types.ts";
+import { assertExists } from "./std/assert.ts";
+import { Mutex } from "./x/async.ts";
+import type { Maybe, Path, SemVerString } from "./types.ts";
 import { parseSemVer } from "./semver.ts";
-import { assertExists } from "../lib/std/assert.ts";
 
 export interface Dependency {
   name: string;

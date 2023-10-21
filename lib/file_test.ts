@@ -5,15 +5,15 @@ import {
   it,
   type Stub,
   stub,
-} from "../lib/std/testing.ts";
+} from "./std/testing.ts";
 import {
   assertArrayIncludes,
   assertEquals,
   assertExists,
-} from "../lib/std/assert.ts";
+} from "./std/assert.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
-import { URI } from "../lib/uri.ts";
+import { URI } from "./uri.ts";
 
 describe("collect", () => {
   it("direct import", async () => {

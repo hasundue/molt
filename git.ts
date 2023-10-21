@@ -23,4 +23,4 @@
  * @module
  */
 
-export * from "./src/git.ts";
+export * from "./lib/git.ts";

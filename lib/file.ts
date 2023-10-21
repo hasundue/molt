@@ -1,5 +1,5 @@
 import { DependencyUpdate } from "./update.ts";
-import { URI } from "../lib/uri.ts";
+import { URI } from "./uri.ts";
 
 export interface FileUpdate {
   /** The specifier of the updated dependency (a remote module.) */

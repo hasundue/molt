@@ -1,6 +1,6 @@
-import { beforeAll, describe, it } from "../lib/std/testing.ts";
-import { assertEquals, assertExists } from "../lib/std/assert.ts";
-import { URI } from "../lib/uri.ts";
+import { beforeAll, describe, it } from "./std/testing.ts";
+import { assertEquals, assertExists } from "./std/assert.ts";
+import { URI } from "./uri.ts";
 import { ImportMap } from "./import_map.ts";
 
 describe("readFromJson()", () => {

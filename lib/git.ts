@@ -1,7 +1,7 @@
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
 import { createVersionProp, type VersionProp } from "./versions.ts";
-import { URI } from "../lib/uri.ts";
+import { URI } from "./uri.ts";
 
 export interface CommitProps {
   /** The name of the module group */
