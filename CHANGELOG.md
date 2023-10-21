@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.6.0](https://github.com/hasundue/deno-molt/compare/0.5.0...0.6.0) (2023-10-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **git:** mv git/mod.ts to src/git.ts and create git.ts
+
+### Bug Fixes
+
+* **git:** respect default CommitOptions correctly ([68d8ffb](https://github.com/hasundue/deno-molt/commit/68d8ffbbb5380cb60f1a68521cd96f8d29250d70))
+
+
+### Performance Improvements
+
+* cache latest semvers resolved from remote ([#42](https://github.com/hasundue/deno-molt/issues/42)) ([27300ac](https://github.com/hasundue/deno-molt/commit/27300ac3e03d27b8a2803658b119d00303a8a54d))
+
+
+### Code Refactoring
+
+* **git:** mv git/mod.ts to src/git.ts and create git.ts ([ffc5df4](https://github.com/hasundue/deno-molt/commit/ffc5df4514066f81cac8aedcaddc97133ea35c86))
+
 ## [0.5.0](https://github.com/hasundue/deno-molt/compare/0.4.6...0.5.0) (2023-10-16)
 
 
