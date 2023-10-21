@@ -24,7 +24,7 @@ registry.
 #### API Reference (WIP)
 
 - [mod.ts](https://deno.land/x/molt/mod.ts) - Main module
-- [git.ts](https://deno.land/x/molt/git/mod.ts) - Sub-module for Git operations
+- [git.ts](https://deno.land/x/molt/git.ts) - Sub-module for Git operations
 - [lib/uri.ts](https://deno.land/x/molt/lib/uri.ts) - Library for handling URIs
 
 #### Examples
