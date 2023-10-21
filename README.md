@@ -64,20 +64,20 @@ commitAll(updates, {
 ### CLI
 
 Although it is recommended to write your own scripts with the module, a
-pre-built CLI is also provided as `cli.ts` for convenience, which is supposed to
-cover most of the use cases.
+pre-built CLI tool is also provided as `cli.ts` for convenience or a reference
+implementation, which is supposed to cover most of the use cases.
 
 #### Installation (optional)
 
-The molt CLI can be installed globally with the following command:
+The molt CLI can be installed globally with the following command, for example:
 
 ```sh
-deno install --allow-env --allow-read --allow-net --allow-write --allow-run=git\
+deno install --allow-env --allow-read --allow-write=. --allow-net --allow-run\
 --name=molt https://deno.land/x/molt/cli.ts
 ```
 
-However, it is recommended to run the remote script directly through `deno task`
-for more precise control on permissions. Here's an example `deno.json`:
+Alternatively, you may prefer to run the remote script directly through
+`deno task` for reproducibility:
 
 ```sh
 {
@@ -90,21 +90,19 @@ for more precise control on permissions. Here's an example `deno.json`:
 }
 ```
 
-Of course, you may use `--allow-all` instead at your own risk.
-
 #### Update dependencies interactively
 
 The most interactive interface is provided as `check` sub-command of `cli.ts`.
 
 ```sh
-deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
+deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run\
 https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ```
 
 > [!Note]\
 > Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc`
 > if available.\
-> You can't, however, use import maps as an entrypoint.
+> You can't, however, use import maps as entrypoints.
 
 ##### Example: Just check
 
@@ -197,7 +195,7 @@ The following limitations are imposed by the design of Molt:
 
 See [issues] for other known limitations.
 
-## Acknowledgments
+## References
 
 Molt is inspired by prior works such as
 
@@ -205,7 +203,7 @@ Molt is inspired by prior works such as
 - [dmm](https://github.com/drashland/dmm)
 - [update](https://github.com/deaddeno/update)
 
-and of full respect to the authors of these works.
+and of full respect to the authors.
 
 <!-- Links -->
 
