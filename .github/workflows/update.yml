@@ -18,13 +18,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
       - name: Configure Git
         run: |
           git config --global user.name '${{ github.actor }}'
           git config --global user.email '${{ github.actor }}@users.noreply.github.com'
 
       - name: Run Molt
-        run: deno task update --commit --pre-commit test --summary title.txt --report body.txt
+        run: deno task update:commit
 
       - name: Push changes
         run: git push
