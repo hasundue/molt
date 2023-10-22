@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.3](https://github.com/hasundue/deno-molt/compare/0.7.2...0.7.3) (2023-10-22)
+
+
+### Bug Fixes
+
+* **cli:** normalize prefix to always include a single whitespace ([39c5121](https://github.com/hasundue/deno-molt/commit/39c5121559b1016afae0ac939f22acfbaa1159b5))
+* **cli:** require an equals sign for --pre-commit and --post-commit ([8d1a8d2](https://github.com/hasundue/deno-molt/commit/8d1a8d27b027e736e26235f9b7c01dfbef68d805))
+
 ## [0.7.2](https://github.com/hasundue/deno-molt/compare/0.7.1...0.7.2) (2023-10-22)
 
 
