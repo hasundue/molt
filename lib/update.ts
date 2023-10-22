@@ -168,16 +168,7 @@ function applyToModule(
   }
   const line = span.start.line;
   const lines = content.split("\n");
-
-  lines[line] = lines[line].slice(0, span.start.character) +
-    `"${
-      update.specifier.replace(
-        update.version.from,
-        update.version.to,
-      )
-    }"` +
-    lines[line].slice(span.end.character);
-
+  lines[line] = lines[line].replace(update.version.from, update.version.to);
   return lines.join("\n");
 }
 
