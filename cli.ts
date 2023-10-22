@@ -311,7 +311,9 @@ function _summary(
   }
   const groups = sequence.commits.map((commit) => commit.group).join(", ");
   const full = _formatPrefix(options.prefix) + `Update ${groups}`;
-  return (full.length <= 50) ? full : _formatPrefix(options.prefix) + "Update dependencies";
+  return (full.length <= 50)
+    ? full
+    : _formatPrefix(options.prefix) + "Update dependencies";
 }
 
 function _report(sequence: GitCommitSequence): string {
