@@ -24,5 +24,5 @@
  * @module
  */
 
-export { DependencyUpdate } from "./src/update.ts";
-export { FileUpdate } from "./src/file.ts";
+export { DependencyUpdate } from "./lib/update.ts";
+export { FileUpdate } from "./lib/file.ts";
