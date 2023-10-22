@@ -15,25 +15,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - name: Configure Git
+        run: |
+          git config --global user.name '${{ github.actor }}'
+          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
 
-      - name: Configure Git
-        run: |
-          git config --global user.name '${{ github.actor }}'
-          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Cache dependencies
+        run: deno task cache
 
       - name: Run Molt
         run: deno task update:commit
 
+      - name: Check result
+        id: result
+        uses: andstor/file-existence-action@v2
+        with:
+          files: "title.txt, body.md"
+
       - name: Push changes
+        if: steps.result.outputs.files_exists == 'true'
         run: git push
 
       - name: Create Pull Request
+        if: steps.result.outputs.files_exists == 'true'
         run: |
           gh pr create --title "$(cat title.txt)" --body "$(cat body.txt)"
+        env:
+          GH_TOKEN: ${{ github.token }}

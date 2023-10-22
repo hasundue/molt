@@ -1,12 +1,13 @@
 {
   "tasks": {
     "run": "deno run --allow-env --allow-read --allow-write --allow-run --allow-net=deno.land",
-    "lock": "deno cache --lock=deno.lock --lock-write ./lib/**/*.ts && git add deno.lock",
+    "cache": "deno cache ./lib/**/*.ts --lock",
+    "lock": "deno task -q cache --lock-write && git add deno.lock",
     "test": "deno test -A",
-    "test:fast": "deno task test --no-check",
+    "test:fast": "deno task -q test --no-check",
     "dev": "deno fmt && deno lint && deno task lock && deno task test",
     "update": "deno task -q run ./cli.ts check lib/**/*.ts",
-    "update:commit": "deno task -q run ./cli.ts update lib/**/*.ts --commit --summary title.txt --report body.txt --pre-commit lock test",
+    "update:commit": "deno task -q run ./cli.ts update lib/**/*.ts --commit --summary title.txt --report body.md --pre-commit lock test",
     "install": "deno install -f -A --name molt cli.ts"
   },
   "fmt": {
