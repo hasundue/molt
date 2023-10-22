@@ -219,14 +219,12 @@ async function _commit(
         }
       }
       : undefined,
-    postCommit: options?.postCommit
-      ? async (commit) => {
-        console.log(`📝 ${commit.message}`);
-        for (const task of options?.postCommit ?? []) {
-          await _task(task);
-        }
+    postCommit: async (commit) => {
+      console.log(`📝 ${commit.message}`);
+      for (const task of options?.postCommit ?? []) {
+        await _task(task);
       }
-      : undefined,
+    },
   });
   await GitCommitSequence.exec(commits);
   console.log();
