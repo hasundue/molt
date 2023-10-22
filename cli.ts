@@ -2,7 +2,7 @@ import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
 import { dirname, extname, join } from "./lib/std/path.ts";
-import { colors, Command, List, Select, Input } from "./lib/x/cliffy.ts";
+import { colors, Command, Input, List, Select } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
@@ -38,9 +38,13 @@ async function checkAction(
     case "write":
       return _write(updates);
     case "commit": {
+      const prefix = await Input.prompt({
+        message: "Prefix for commit messages",
+        default: "build(deps): ",
+      });
       const suggestions = _getTasks();
       if (!suggestions.length) {
-        return _commit(updates);
+        return _commit(updates, { prefix });
       }
       const preCommit = await List.prompt(
         {
@@ -54,10 +58,6 @@ async function checkAction(
           suggestions,
         },
       );
-      const prefix = await Input.prompt({
-        message: "Prefix for commit messages",
-        default: "build(deps): ",
-      });
       return _commit(updates, { preCommit, postCommit, prefix });
     }
   }
@@ -211,19 +211,22 @@ async function _commit(
       `${options?.prefix}bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
       (version?.to ? ` to ${version?.to}` : ""),
-    preCommit: (commit) => {
-      return $.progress(`Committing 📝 ${commit.message}`).with(async () => {
-        for (const task in options?.preCommit ?? []) {
-          await $.progress(`Running task ${cyan(task)}`).with(() => _task(task));
+    preCommit: options?.preCommit
+      ? async (commit) => {
+        console.log(`\n📝 Commiting "${commit.message}"...`);
+        for (const task of options?.preCommit ?? []) {
+          await _task(task);
         }
-      });
-    },
-    postCommit: async (commit) => {
-      console.log(`📝 ${commit.message}`);
-      for (const task in options?.postCommit ?? []) {
-        await $.progress(`Running task ${cyan(task)}`).with(() => _task(task));
       }
-    },
+      : undefined,
+    postCommit: options?.postCommit
+      ? async (commit) => {
+        console.log(`📝 ${commit.message}`);
+        for (const task of options?.postCommit ?? []) {
+          await _task(task);
+        }
+      }
+      : undefined,
   });
   await GitCommitSequence.exec(commits);
   console.log();
@@ -238,9 +241,10 @@ async function _commit(
 }
 
 async function _task(task: string) {
-  const { code, stderr } = await $`deno task ${task}`;
-  if (code !== 0) {
-    console.error(`❌ task "${task}" failed`, stderr);
+  console.log(`\n🔨 Running task ${cyan(task)}...`);
+  try {
+    await $`deno task -q ${task}`;
+  } catch {
     Deno.exit(1);
   }
 }

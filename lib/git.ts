@@ -78,15 +78,17 @@ function createGitCommitSequence(
     }
     groups.get(key)!.push(u);
   }
-  const version = createVersionProp(updates);
   const commits: GitCommit[] = Array.from(groups.entries()).map((
     [group, updates],
-  ) => ({
-    group,
-    version,
-    message: _options.composeCommitMessage({ group, version }),
-    updates,
-  }));
+  ) => {
+    const version = createVersionProp(updates);
+    return ({
+      group,
+      version,
+      message: _options.composeCommitMessage({ group, version }),
+      updates,
+    });
+  });
   return { commits, options: _options };
 }
 
