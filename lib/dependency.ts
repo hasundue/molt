@@ -91,16 +91,15 @@ async function _resolve(
         LatestSemverCache.set(props.name, null);
         return;
       }
-      const specifierWithLatestSemVer = response.url;
-      if (specifierWithLatestSemVer === url.href) {
-        // The dependency is up to date
+      const latestSemVer = parseSemVer(response.url);
+      if (
+        !latestSemVer || // The host redirected to a url without semver
+        latestSemVer === props.version // The dependency is already up to date
+      ) {
         LatestSemverCache.set(props.name, null);
         return;
       }
-      return LatestSemverCache.set(
-        props.name,
-        parseSemVer(specifierWithLatestSemVer) as SemVerString,
-      );
+      return LatestSemverCache.set(props.name, latestSemVer);
     }
     case "node:":
     case "file:":
