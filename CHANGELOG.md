@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.2](https://github.com/hasundue/deno-molt/compare/0.7.1...0.7.2) (2023-10-22)
+
+
+### Bug Fixes
+
+* **cli:** always print post-commit messages ([0ca8789](https://github.com/hasundue/deno-molt/commit/0ca878912c975e302a00761364a7f9067f75ef44))
+
 ## [0.7.1](https://github.com/hasundue/deno-molt/compare/0.7.0...0.7.1) (2023-10-22)
 
 
