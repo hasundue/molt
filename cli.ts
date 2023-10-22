@@ -40,7 +40,7 @@ async function checkAction(
     case "commit": {
       const prefix = await Input.prompt({
         message: "Prefix for commit messages",
-        default: "build(deps): ",
+        default: "build(deps):",
       });
       const suggestions = _getTasks();
       if (!suggestions.length) {
@@ -75,7 +75,6 @@ const updateCommand = new Command()
   })
   .option("--prefix <prefix:string>", "Prefix for commit messages", {
     depends: ["commit"],
-    default: "build(deps): ",
   })
   .option("--summary <file:string>", "Write a summary of changes to file")
   .option("--report <file:string>", "Write a report of changes to file")
@@ -88,7 +87,7 @@ async function updateAction(
     importMap?: string;
     preCommit?: string[];
     postCommit?: string[];
-    prefix: string;
+    prefix?: string;
     summary?: string;
     report?: string;
   },
@@ -197,10 +196,10 @@ async function _write(
 
 async function _commit(
   updates: DependencyUpdate[],
-  options?: {
+  options: {
     preCommit?: string[];
     postCommit?: string[];
-    prefix: string;
+    prefix?: string;
     summary?: string;
     report?: string;
   },
@@ -208,7 +207,7 @@ async function _commit(
   const commits = GitCommitSequence.from(updates, {
     groupBy: (dependency) => dependency.name,
     composeCommitMessage: ({ group, version }) =>
-      `${options?.prefix}bump ${group}` +
+      _formatPrefix(options.prefix) + `bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
       (version?.to ? ` to ${version?.to}` : ""),
     preCommit: options?.preCommit
@@ -229,7 +228,7 @@ async function _commit(
   await GitCommitSequence.exec(commits);
   console.log();
   if (options?.summary) {
-    await Deno.writeTextFile(options.summary, _summary(commits));
+    await Deno.writeTextFile(options.summary, _summary(commits, options));
     console.log(`📄 ${options.summary}`);
   }
   if (options?.report) {
@@ -300,7 +299,10 @@ async function _findFileUp(entrypoint: string, root: string) {
   return hits;
 }
 
-function _summary(sequence: GitCommitSequence): string {
+function _summary(
+  sequence: GitCommitSequence,
+  options: { prefix?: string },
+): string {
   if (sequence.commits.length === 0) {
     return "No updates";
   }
@@ -308,12 +310,16 @@ function _summary(sequence: GitCommitSequence): string {
     return sequence.commits[0].message;
   }
   const groups = sequence.commits.map((commit) => commit.group).join(", ");
-  const full = `Updated ${groups}`;
-  return (full.length <= 50) ? full : "Updated dependencies";
+  const full = _formatPrefix(options.prefix) + `Update ${groups}`;
+  return (full.length <= 50) ? full : _formatPrefix(options.prefix) + "Update dependencies";
 }
 
 function _report(sequence: GitCommitSequence): string {
   return sequence.commits.map((commit) => `- ${commit.message}`).join("\n");
+}
+
+function _formatPrefix(prefix: string | undefined) {
+  return prefix ? prefix.trimEnd() + " " : "";
 }
 
 const main = new Command()
@@ -322,7 +328,7 @@ const main = new Command()
   .action(function () {
     this.showHelp();
   })
-  .version("0.4.5")
+  .version("0.7.3")
   .command("check", checkCommand)
   .command("update", updateCommand);
 
