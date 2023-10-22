@@ -168,7 +168,8 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 #### Update dependencies non-interactively
 
 The `update` sub-command of `cli.ts` is designed to be used in non-interactive
-environments, such as CI/CD pipelines. Run `molt update --help` for more details.
+environments, such as CI/CD pipelines. Run `molt update --help` for more
+details.
 
 ##### Example: Update dependencies and write changes to files
 
