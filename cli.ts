@@ -67,10 +67,10 @@ const updateCommand = new Command()
   .description("Update dependencies to the latest version")
   .option("--import-map <file:string>", "Specify import map file")
   .option("--commit", "Commit changes to git")
-  .option("--pre-commit <tasks...:string>", "Run tasks before each commit", {
+  .option("--pre-commit=<tasks:string[]>", "Run tasks before each commit", {
     depends: ["commit"],
   })
-  .option("--post-commit <tasks...:string>", "Run tasks after each commit", {
+  .option("--post-commit=<tasks:string[]>", "Run tasks after each commit", {
     depends: ["commit"],
   })
   .option("--prefix <prefix:string>", "Prefix for commit messages", {
