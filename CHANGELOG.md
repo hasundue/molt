@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.1](https://github.com/hasundue/deno-molt/compare/0.7.0...0.7.1) (2023-10-22)
+
+
+### Bug Fixes
+
+* **mod/update:** prevent adding extra characters after import specifiers ([abd521f](https://github.com/hasundue/deno-molt/commit/abd521ff02bfe778f9de88b4c3cd1a736fd033e1))
+* **mod:** parse semvers in redirected urls to check updates ([a3771dd](https://github.com/hasundue/deno-molt/commit/a3771dd6fd7e77fbc3767acd23c667247dc01cde))
+
 ## [0.7.0](https://github.com/hasundue/deno-molt/compare/0.6.0...0.7.0) (2023-10-22)
 
 
