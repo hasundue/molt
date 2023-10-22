@@ -41,8 +41,8 @@ const updates = await DependencyUpdate.collect("./mod.ts", {
   importMap: "./deno.json",
 });
 
-const results = FileUpdate.collect(updates);
-FileUpdate.writeAll(results);
+const results = await FileUpdate.collect(updates);
+await FileUpdate.writeAll(results);
 ```
 
 ##### Update all dependencies in a module and commit the changes to local git repository
@@ -53,7 +53,7 @@ import { commitAll } from "https://deno.land/x/molt@{VERSION}/git.ts";
 
 const updates = await DependencyUpdate.collect("./mod.ts");
 
-commitAll(updates, {
+await commitAll(updates, {
   groupBy: (dependency) => dependency.name,
   composeCommitMessage: ({ group, version }) =>
     `build(deps): bump ${group} to ${version!.to}`,
@@ -88,6 +88,10 @@ Alternatively, you may prefer to run the remote script directly through
   },
 }
 ```
+
+#### Usage
+
+Run `molt --help` or `molt <sub-command> --help` for the usage.
 
 #### Update dependencies interactively
 

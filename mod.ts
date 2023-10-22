@@ -17,8 +17,8 @@
  *   importMap: "./deno.json",
  * });
  *
- * const results = FileUpdate.collect(updates);
- * FileUpdate.writeAll(results);
+ * const results = await FileUpdate.collect(updates);
+ * await FileUpdate.writeAll(results);
  * ```
  *
  * @module

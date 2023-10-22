@@ -13,7 +13,7 @@
  *
  * const updates = await DependencyUpdate.collect("./mod.ts");
  *
- * commitAll(updates, {
+ * await commitAll(updates, {
  *   groupBy: (dependency) => dependency.name,
  *   composeCommitMessage: ({ group, version }) =>
  *     `build(deps): bump ${group} to ${version!.to}`,
