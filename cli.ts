@@ -2,13 +2,14 @@ import { existsSync } from "./lib/std/fs.ts";
 import { distinct } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
 import { dirname, extname, join } from "./lib/std/path.ts";
-import { colors, Command, List, Select } from "./lib/x/cliffy.ts";
+import { colors, Command, Input, List, Select } from "./lib/x/cliffy.ts";
+import { $ } from "./lib/x/dax.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
-import { commitAll } from "./lib/git.ts";
+import { GitCommitSequence } from "./lib/git.ts";
 
-const { gray, yellow, bold } = colors;
+const { gray, yellow, bold, cyan } = colors;
 
 const checkCommand = new Command()
   .description("Check for the latest version of dependencies")
@@ -21,18 +22,7 @@ async function checkAction(
   ...entrypoints: string[]
 ) {
   _ensureJsFiles(entrypoints);
-  console.log("🔎 Checking for updates...");
-  const updates = await Promise.all(
-    entrypoints.map(async (entrypoint) =>
-      await DependencyUpdate.collect(entrypoint, {
-        importMap: options.importMap ?? await _findImportMap(entrypoint),
-      })
-    ),
-  ).then((results) => results.flat());
-  if (!updates.length) {
-    console.log("🍵 No updates found");
-    return;
-  }
+  const updates = await _collect(entrypoints, options);
   _list(updates);
   const action = await Select.prompt({
     message: "Choose an action",
@@ -48,9 +38,13 @@ async function checkAction(
     case "write":
       return _write(updates);
     case "commit": {
+      const prefix = await Input.prompt({
+        message: "Prefix for commit messages",
+        default: "build(deps): ",
+      });
       const suggestions = _getTasks();
       if (!suggestions.length) {
-        return _commit(updates);
+        return _commit(updates, { prefix });
       }
       const preCommit = await List.prompt(
         {
@@ -64,7 +58,7 @@ async function checkAction(
           suggestions,
         },
       );
-      return _commit(updates, { preCommit, postCommit });
+      return _commit(updates, { preCommit, postCommit, prefix });
     }
   }
 }
@@ -79,6 +73,12 @@ const updateCommand = new Command()
   .option("--post-commit <tasks...:string>", "Run tasks after each commit", {
     depends: ["commit"],
   })
+  .option("--prefix <prefix:string>", "Prefix for commit messages", {
+    depends: ["commit"],
+    default: "build(deps): ",
+  })
+  .option("--summary <file:string>", "Write a summary of changes to file")
+  .option("--report <file:string>", "Write a report of changes to file")
   .arguments("<entrypoints...:string>")
   .action(updateAction);
 
@@ -88,26 +88,38 @@ async function updateAction(
     importMap?: string;
     preCommit?: string[];
     postCommit?: string[];
+    prefix: string;
+    summary?: string;
+    report?: string;
   },
   ...entrypoints: string[]
 ) {
-  console.log("🔎 Checking for updates...");
-  const updates = await Promise.all(
-    entrypoints.map(async (entrypoint) =>
-      await DependencyUpdate.collect(entrypoint, {
-        importMap: options.importMap ?? await _findImportMap(entrypoint),
-      })
-    ),
-  ).then((results) => results.flat());
-  if (!updates.length) {
-    console.log("🍵 No updates found");
-    return;
-  }
+  const updates = await _collect(entrypoints, options);
   _list(updates);
   if (options.commit) {
     return _commit(updates, options);
   }
-  return _write(updates);
+  return _write(updates, options);
+}
+
+async function _collect(
+  entrypoints: string[],
+  options: { importMap?: string },
+): Promise<DependencyUpdate[]> {
+  return await $.progress("Checking for updates").with(async () => {
+    const updates = await Promise.all(
+      entrypoints.map(async (entrypoint) =>
+        await DependencyUpdate.collect(entrypoint, {
+          importMap: options.importMap ?? await _findImportMap(entrypoint),
+        })
+      ),
+    ).then((results) => results.flat());
+    if (!updates.length) {
+      console.log("🍵 No updates found");
+      Deno.exit(0);
+    }
+    return updates;
+  });
 }
 
 async function _findImportMap(entrypoint: string): Promise<string | undefined> {
@@ -158,41 +170,81 @@ function _list(updates: DependencyUpdate[]) {
   console.log();
 }
 
-function _write(updates: DependencyUpdate[]) {
-  console.log();
-  console.log("Writing changes...");
-  const results = FileUpdate.collect(updates);
-  FileUpdate.writeAll(results, {
-    onWrite: (module) => console.log(`  💾 ${URI.relative(module.specifier)}`),
+async function _write(
+  updates: DependencyUpdate[],
+  options?: {
+    summary?: string;
+    report?: string;
+  },
+) {
+  const results = await FileUpdate.collect(updates);
+  await FileUpdate.writeAll(results, {
+    onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
   });
+  console.log();
+  if (options?.summary) {
+    await Deno.writeTextFile(options.summary, "Update dependencies");
+    console.log(`📄 ${options.summary}`);
+  }
+  if (options?.report) {
+    const content = distinct(
+      updates.map((u) => `- ${u.name} ${u.version.from} => ${u.version.to}`),
+    ).join("\n");
+    await Deno.writeTextFile(options.report, content);
+    console.log(`📄 ${options.report}`);
+  }
 }
 
-function _commit(
+async function _commit(
   updates: DependencyUpdate[],
   options?: {
     preCommit?: string[];
     postCommit?: string[];
+    prefix: string;
+    summary?: string;
+    report?: string;
   },
 ) {
-  console.log("\nCommitting changes...");
-  commitAll(updates, {
+  const commits = GitCommitSequence.from(updates, {
     groupBy: (dependency) => dependency.name,
-    preCommit: () => {
-      options?.preCommit?.forEach((task) => _task(task));
-    },
-    postCommit: (commit) => {
-      console.log(`📝 ${commit.message}`);
-      options?.postCommit?.forEach((task) => _task(task));
-    },
+    composeCommitMessage: ({ group, version }) =>
+      `${options?.prefix}bump ${group}` +
+      (version?.from ? ` from ${version?.from}` : "") +
+      (version?.to ? ` to ${version?.to}` : ""),
+    preCommit: options?.preCommit
+      ? async (commit) => {
+        console.log(`\n📝 Commiting "${commit.message}"...`);
+        for (const task of options?.preCommit ?? []) {
+          await _task(task);
+        }
+      }
+      : undefined,
+    postCommit: options?.postCommit
+      ? async (commit) => {
+        console.log(`📝 ${commit.message}`);
+        for (const task of options?.postCommit ?? []) {
+          await _task(task);
+        }
+      }
+      : undefined,
   });
+  await GitCommitSequence.exec(commits);
+  console.log();
+  if (options?.summary) {
+    await Deno.writeTextFile(options.summary, _summary(commits));
+    console.log(`📄 ${options.summary}`);
+  }
+  if (options?.report) {
+    await Deno.writeTextFile(options.report, _report(commits));
+    console.log(`📄 ${options.report}`);
+  }
 }
 
-function _task(task: string): void {
-  const { code, stderr } = new Deno.Command(Deno.execPath(), {
-    args: ["task", task],
-  }).outputSync();
-  if (code !== 0) {
-    console.error(new TextDecoder().decode(stderr));
+async function _task(task: string) {
+  console.log(`\n🔨 Running task ${cyan(task)}...`);
+  try {
+    await $`deno task -q ${task}`;
+  } catch {
     Deno.exit(1);
   }
 }
@@ -248,6 +300,22 @@ async function _findFileUp(entrypoint: string, root: string) {
   }
 
   return hits;
+}
+
+function _summary(sequence: GitCommitSequence): string {
+  if (sequence.commits.length === 0) {
+    return "No updates";
+  }
+  if (sequence.commits.length === 1) {
+    return sequence.commits[0].message;
+  }
+  const groups = sequence.commits.map((commit) => commit.group).join(", ");
+  const full = `Updated ${groups}`;
+  return (full.length <= 50) ? full : "Updated dependencies";
+}
+
+function _report(sequence: GitCommitSequence): string {
+  return sequence.commits.map((commit) => `- ${commit.message}`).join("\n");
 }
 
 const main = new Command()

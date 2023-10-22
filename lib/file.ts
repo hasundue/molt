@@ -16,16 +16,16 @@ export const FileUpdate = {
   writeAll,
 };
 
-function collect(
+async function collect(
   dependencies: DependencyUpdate[],
-): FileUpdate[] {
+): Promise<FileUpdate[]> {
   /** A map of module specifiers to the module content updates. */
   const results = new Map<URI<"file">, FileUpdate>();
   for (const dependency of dependencies) {
     const referrer = dependency.map?.source ?? dependency.referrer;
     const current = results.get(referrer) ?? {
       specifier: referrer,
-      content: Deno.readTextFileSync(new URL(referrer)),
+      content: await Deno.readTextFile(new URL(referrer)),
       dependencies: [],
     } satisfies FileUpdate;
     const content = dependency.map
@@ -40,20 +40,20 @@ function collect(
   return Array.from(results.values());
 }
 
-export function writeAll(
+export async function writeAll(
   updates: FileUpdate[],
   options?: {
-    onWrite?: (result: FileUpdate) => void;
+    onWrite?: (result: FileUpdate) => void | Promise<void>;
   },
-): void {
-  updates.forEach((it) => {
-    write(it);
-    options?.onWrite?.(it);
-  });
+) {
+  for (const update of updates) {
+    await write(update);
+    await options?.onWrite?.(update);
+  }
 }
 
-export function write(
+export async function write(
   result: FileUpdate,
-): void {
-  Deno.writeTextFileSync(new URL(result.specifier), result.content);
+) {
+  await Deno.writeTextFile(new URL(result.specifier), result.content);
 }
