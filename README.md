@@ -71,8 +71,8 @@ implementation, which is supposed to cover most of the use cases.
 The molt CLI can be installed globally with the following command, for example:
 
 ```sh
-deno install --allow-env --allow-read --allow-write=. --allow-net --allow-run\
---name=molt https://deno.land/x/molt/cli.ts
+deno install --allow-env --allow-read --allow-write=. --allow-net --allow-run=git,deno\
+--name molt https://deno.land/x/molt/cli.ts
 ```
 
 Alternatively, you may prefer to run the remote script directly through
@@ -81,21 +81,19 @@ Alternatively, you may prefer to run the remote script directly through
 ```sh
 {
   "tasks": {
-    "run": "deno run --allow-env --allow-read --allow-net",
-    "update": "deno task run --allow-write=. https://deno.land/x/molt/cli.ts update",
-    "update:check": "deno task run https://deno.land/x/molt/cli.ts check",
-    "update:commit": "deno task run --allow-write=. --allow-run=git https://deno.land/x/molt/cli.ts update --commit",
+    "run:molt": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno https://deno.land/x/molt@{VERSION}/cli.ts",
+    "update": "deno task -q run:molt check ./**/*.ts",
+    "update:commit": "deno task -q run:molt update --commit --pre-commit=test ./**/*.ts"",
   },
 }
 ```
 
 #### Usage
 
-Run `molt --help` or `molt <sub-command> --help` for the usage.
-
 #### Update dependencies interactively
 
 The most interactive interface is provided as `check` sub-command of `cli.ts`.
+Run `molt check --help` for more details.
 
 ```sh
 deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run\
@@ -116,7 +114,7 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 💡 Found updates:
 
 📦 node-emoji 1.0.0 => 2.1.0
-  src/fixtures/mod.ts 1.0.0
+  test/fixtures/mod.ts 1.0.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 0.55.0
   src/fixtures/mod.ts 0.50.0
@@ -141,7 +139,6 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 
 ? Choose an action › Write changes to local files
 
-Writing changes...
 💾 src/fixtures/mod.ts
 💾 src/fixtures/lib.ts
 
@@ -161,10 +158,9 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 ? Tasks to run before each commit (comma separated) › lock, test
 ? Tasks to run after each commit (comma separated) › 
 
-Committing changes...
-📝 build(deps): update deno.land/std from 0.200.0 to 0.202.0
-📝 build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
-📝 build(deps): update node-emoji from 1.0.0 to 2.1.0
+- build(deps): update deno.land/std from 0.200.0 to 0.202.0
+- build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
+- build(deps): update node-emoji from 1.0.0 to 2.1.0
 
 >
 ```
@@ -172,7 +168,7 @@ Committing changes...
 #### Update dependencies non-interactively
 
 The `update` sub-command of `cli.ts` is designed to be used in non-interactive
-environments, such as CI/CD pipelines.
+environments, such as CI/CD pipelines. Run `molt update --help` for more details.
 
 ##### Example: Update dependencies and write changes to files
 
@@ -184,8 +180,8 @@ https://deno.land/x/molt/cli.ts update <...entrypoints>
 ##### Example: Update dependencies and commit changes to git
 
 ```sh
-deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git\
-https://deno.land/x/molt/cli.ts update --commit <...entrypoints>
+deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno\
+https://deno.land/x/molt/cli.ts update --commit --pre-commit=check,test <...entrypoints>
 ```
 
 ## Limitations
