@@ -7,7 +7,7 @@
     "test:fast": "deno task -q test --no-check",
     "dev": "deno fmt && deno lint && deno task lock && deno task test",
     "update": "deno task -q run ./cli.ts check lib/**/*.ts",
-    "update:commit": "deno task -q run ./cli.ts update lib/**/*.ts --commit --summary title.txt --report body.md --pre-commit lock test",
+    "update:commit": "deno task -q run ./cli.ts update lib/**/*.ts --commit",
     "install": "deno install -f -A --name molt cli.ts"
   },
   "fmt": {

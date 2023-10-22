@@ -32,7 +32,7 @@ jobs:
         run: deno task cache
 
       - name: Run Molt
-        run: deno task update:commit
+        run: deno task update:commit --summary title.txt --report body.md --pre-commit lock test
 
       - name: Check result
         id: result
@@ -42,11 +42,12 @@ jobs:
 
       - name: Push changes
         if: steps.result.outputs.files_exists == 'true'
-        run: git push
+        run: git push -f origin HEAD:build/update-dependencies
 
       - name: Create Pull Request
         if: steps.result.outputs.files_exists == 'true'
         run: |
           gh pr create --title "$(cat title.txt)" --body "$(cat body.txt)"
+          --head build/update-dependencies
         env:
           GH_TOKEN: ${{ github.token }}
