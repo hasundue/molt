@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.7.0](https://github.com/hasundue/deno-molt/compare/0.6.0...0.7.0) (2023-10-22)
+
+
+### Features
+
+* **cli/update:** add --summary, --report, and --prefix options ([#45](https://github.com/hasundue/deno-molt/issues/45)) ([cc4d630](https://github.com/hasundue/deno-molt/commit/cc4d63025279478a89ac3d499342855ba76064ea))
+
+
+### Bug Fixes
+
+* **mod:** fix import specifiers ([54e8282](https://github.com/hasundue/deno-molt/commit/54e82821d09bebb1ff058360471cfd9dfde808c6))
+
 ## [0.6.0](https://github.com/hasundue/deno-molt/compare/0.5.0...0.6.0) (2023-10-21)
 
 
