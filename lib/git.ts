@@ -12,8 +12,8 @@ export interface CommitProps {
 export interface CommitOptions {
   groupBy?: (dependency: DependencyUpdate) => string;
   composeCommitMessage?: (props: CommitProps) => string;
-  preCommit?: (commit: GitCommit) => void;
-  postCommit?: (commit: GitCommit) => void;
+  preCommit?: (commit: GitCommit) => void | Promise<void>;
+  postCommit?: (commit: GitCommit) => void | Promise<void>;
   gitAddOptions?: string[];
   gitCommitOptions?: string[];
 }
@@ -40,9 +40,7 @@ export interface GitCommit extends CommitProps {
 }
 
 export const GitCommit = {
-  sequence: createGitCommitSequence,
   exec: execGitCommit,
-  execAll: execGitCommitSequence,
 };
 
 export interface GitCommitSequence {
@@ -50,11 +48,16 @@ export interface GitCommitSequence {
   options: CommitOptions;
 }
 
+export const GitCommitSequence = {
+  from: createGitCommitSequence,
+  exec: execGitCommitSequence,
+};
+
 export function commitAll(
   updates: DependencyUpdate[],
   options?: CommitOptions,
-): void {
-  execGitCommitSequence(
+) {
+  return execGitCommitSequence(
     createGitCommitSequence(updates, {
       ...defaultCommitOptions,
       ...options,
@@ -87,27 +90,27 @@ function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-function execGitCommitSequence(
+async function execGitCommitSequence(
   sequence: GitCommitSequence,
 ) {
   for (const commit of sequence.commits) {
-    execGitCommit(commit, sequence.options);
+    await execGitCommit(commit, sequence.options);
   }
 }
 
-function execGitCommit(
+async function execGitCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
-  const results = FileUpdate.collect(commit.updates);
-  FileUpdate.writeAll(results);
-  options?.preCommit?.(commit);
-  _add(results, options?.gitAddOptions ?? []);
-  _commit(commit.message, options?.gitCommitOptions ?? []);
-  options?.postCommit?.(commit);
+  const results = await FileUpdate.collect(commit.updates);
+  await FileUpdate.writeAll(results);
+  await options?.preCommit?.(commit);
+  await _add(results, options?.gitAddOptions ?? []);
+  await _commit(commit.message, options?.gitCommitOptions ?? []);
+  await options?.postCommit?.(commit);
 }
 
-function _add(
+async function _add(
   results: FileUpdate[],
   options: string[],
 ) {
@@ -115,20 +118,20 @@ function _add(
   const command = new Deno.Command("git", {
     args: ["add", ...options, ...files],
   });
-  const { code } = command.outputSync();
+  const { code } = await command.output();
   if (code !== 0) {
     throw new Error(`git add failed: ${code}`);
   }
 }
 
-function _commit(
+async function _commit(
   message: string,
   options: string[],
 ) {
   const command = new Deno.Command("git", {
     args: ["commit", ...options, "-m", message],
   });
-  const { code } = command.outputSync();
+  const { code } = await command.output();
   if (code !== 0) {
     throw new Error(`git commit failed: ${code}`);
   }
