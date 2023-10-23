@@ -11,10 +11,6 @@ import { GitCommitSequence } from "./lib/git.ts";
 import { parseSemVer } from "./lib/semver.ts";
 import { resolveLatestSemVer } from "./lib/dependency.ts";
 
-const VERSION = parseSemVer(import.meta.url) ??
-  await resolveLatestSemVer(new URL("https://deno.land/x/molt@0.0.0/cli.ts")) ??
-  "undefined";
-
 const { gray, yellow, bold, cyan } = colors;
 
 const checkCommand = new Command()
@@ -330,13 +326,21 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
+const _version = async () => {
+  return parseSemVer(import.meta.url) ??
+    await resolveLatestSemVer(
+      new URL("https://deno.land/x/molt@0.0.0/cli.ts"),
+    ) ??
+    "undefined";
+};
+
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
   .action(function () {
     this.showHelp();
   })
-  .version(VERSION)
+  .version(await _version())
   .command("check", checkCommand)
   .command("update", updateCommand);
 
