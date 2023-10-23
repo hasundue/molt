@@ -1,4 +1,5 @@
 import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
+import { assert, is } from "./x/unknownutil.ts";
 import { Brand } from "./types.ts";
 
 export type DefaultProtocol<Scheme extends string> = Scheme extends
@@ -15,14 +16,19 @@ export type RelativePath = Brand<string, "RelativePath">;
 export type AbsolutePath = Brand<string, "AbsolutePath">;
 
 export const URI = {
-  from(path: string): URI<"file"> {
+  /**
+   * Convert a path to a file URL. If the path is relative, it is resolved from the current
+   * working directory.
+   */
+  from(path: string | URL): URI<"file"> {
     let url: URL;
     try {
       url = new URL(path);
     } catch {
-      return toFileUrl(
+      assert(path, is.String);
+      url = toFileUrl(
         isAbsolute(path) ? path : resolve(path),
-      ).href as URI<"file">;
+      );
     }
     if (url.protocol !== "file:") {
       throw new TypeError(`Invalid protocol: ${url.protocol} in ${path}`);

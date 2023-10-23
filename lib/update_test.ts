@@ -56,7 +56,9 @@ describe("_create - with import map", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
     importMap = (await ImportMap.readFromJson(
-      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
+      URI.from(
+        new URL("../test/fixtures/import-map/deno.json", import.meta.url),
+      ),
     ))!;
   });
   it("std/version.ts", async () => {
