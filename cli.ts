@@ -240,10 +240,13 @@ async function _commit(
 
 async function _task(task: string) {
   console.log(`\n🔨 Running task ${cyan(task)}...`);
-  try {
-    await $`deno task -q ${task}`;
-  } catch {
-    Deno.exit(1);
+  const { code } = await new Deno.Command("deno", {
+    args: ["task", "-q", task],
+    stdout: "inherit",
+    stderr: "inherit",
+  }).output();
+  if (code != 0) {
+    Deno.exit(code);
   }
 }
 
@@ -343,4 +346,9 @@ const main = new Command()
   .command("check", checkCommand)
   .command("update", updateCommand);
 
-await main.parse(Deno.args);
+try {
+  await main.parse(Deno.args);
+} catch (error) {
+  console.error(error);
+  Deno.exit(1);
+}
