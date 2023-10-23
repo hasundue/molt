@@ -1,12 +1,14 @@
+// deno-lint-ignore-file no-explicit-any
 import { beforeAll, describe, it } from "./std/testing.ts";
 import {
   assertEquals,
   assertExists,
   assertNotEquals,
   assertObjectMatch,
+  assertThrows,
 } from "./std/assert.ts";
 import { URI } from "./uri.ts";
-import { _create, DependencyUpdate } from "./update.ts";
+import { _create, createVersionProp, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
 
 describe("_create", () => {
@@ -15,7 +17,6 @@ describe("_create", () => {
       specifier: "https://deno.land/std@0.1.0/version.ts",
       code: {
         specifier: "https://deno.land/std@0.1.0/version.ts",
-        // deno-lint-ignore no-explicit-any
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
@@ -25,7 +26,6 @@ describe("_create", () => {
       specifier: "https://deno.land/std/version.ts",
       code: {
         specifier: "https://deno.land/std/version.ts",
-        // deno-lint-ignore no-explicit-any
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertEquals(update, undefined);
@@ -35,7 +35,6 @@ describe("_create", () => {
       specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
       code: {
         specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
-        // deno-lint-ignore no-explicit-any
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
@@ -45,7 +44,6 @@ describe("_create", () => {
       specifier: "npm:node-emoji@1.0.0",
       code: {
         specifier: "npm:node-emoji@1.0.0",
-        // deno-lint-ignore no-explicit-any
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
@@ -65,7 +63,6 @@ describe("_create - with import map", () => {
         specifier: "std/version.ts",
         code: {
           specifier: "https://deno.land/std@0.200.0/version.ts",
-          // deno-lint-ignore no-explicit-any
         } as any,
       },
       URI.from("test/fixtures/import-map/mod.ts"),
@@ -162,5 +159,84 @@ describe("applyToImportMap", () => {
     );
     assertExists(result);
     assertNotEquals(result, content);
+  });
+});
+
+describe("createVersionProps()", () => {
+  it("single version", () => {
+    assertEquals(
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
+        },
+      ] as any),
+      {
+        from: "0.0.1",
+        to: "0.1.0",
+      },
+    );
+  });
+  it("multiple versions with different names", () => {
+    assertEquals(
+      createVersionProp([{
+        name: "deno_graph",
+        version: { from: "0.0.1", to: "0.1.0" },
+      }, {
+        name: "node-emoji",
+        version: { from: "0.0.1", to: "0.1.0" },
+      }] as any),
+      undefined,
+    );
+  });
+  it("multiple versions with different `from`s and a common `to`", () => {
+    assertEquals(
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.2", to: "0.1.0" },
+        },
+      ] as any),
+      {
+        from: undefined,
+        to: "0.1.0",
+      },
+    );
+  });
+  it("multiple versions with a common `from` and `to`", () => {
+    assertEquals(
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+      ] as any),
+      {
+        from: "0.0.1",
+        to: "0.2.0",
+      },
+    );
+  });
+  it("multiple versions with a common `from` and different `to`s", () => {
+    assertThrows(() =>
+      createVersionProp([
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.1.0" },
+        },
+        {
+          name: "deno_graph",
+          version: { from: "0.0.1", to: "0.2.0" },
+        },
+      ] as any)
+    );
   });
 });

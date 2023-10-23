@@ -8,8 +8,7 @@ import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
-import { parseSemVer } from "./lib/semver.ts";
-import { resolveLatestSemVer } from "./lib/dependency.ts";
+import { parseSemVer, resolveLatestSemVer } from "./lib/dependency.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
