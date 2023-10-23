@@ -330,7 +330,7 @@ const main = new Command()
   .action(function () {
     this.showHelp();
   })
-  .version("0.7.3")
+  .version("0.7.4")
   .command("check", checkCommand)
   .command("update", updateCommand);
 
