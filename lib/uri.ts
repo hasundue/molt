@@ -1,4 +1,5 @@
 import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
+import { assertEquals } from "./std/assert.ts";
 import { assert, is } from "./x/unknownutil.ts";
 import { Brand } from "./types.ts";
 
@@ -20,10 +21,11 @@ export const URI = {
    * Convert a path to a file URL. If the path is relative, it is resolved from the current
    * working directory.
    */
-  from(path: string | URL): URI<"file"> {
+  from(path: string | URL, base?: string): URI<"file"> {
     let url: URL;
     try {
-      url = new URL(path);
+      url = new URL(path, base);
+      assertEquals(url.protocol, "file:");
     } catch {
       assert(path, is.String);
       url = toFileUrl(

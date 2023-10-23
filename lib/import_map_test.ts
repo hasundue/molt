@@ -17,19 +17,15 @@ describe("readFromJson()", () => {
   });
   it("test/fixtures/import-map/deno.json", async () => {
     const importMap = await ImportMap.readFromJson(
-      URI.from(
-        new URL("../test/fixtures/import-map/deno.json", import.meta.url),
-      ),
+      URI.from("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(importMap);
   });
   it("test/fixtures/import-map-referred/import_map.json", async () => {
     const importMap = await ImportMap.readFromJson(
       URI.from(
-        new URL(
-          "../test/fixtures/import-map-referred/deno.json",
-          import.meta.url,
-        ),
+        "../test/fixtures/import-map-referred/deno.json",
+        import.meta.url,
       ),
     );
     assertExists(importMap);
@@ -43,9 +39,7 @@ describe("readFromJson()", () => {
 describe("resolve()", () => {
   it("resolve specifiers in import maps", async () => {
     const importMap = await ImportMap.readFromJson(
-      URI.from(
-        new URL("../test/fixtures/import-map/deno.json", import.meta.url),
-      ),
+      URI.from("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(importMap);
     const referrer = URI.from("./test/fixtures/import-map/mod.ts");
@@ -83,10 +77,8 @@ describe("resolve()", () => {
   it("do not resolve an url", async () => {
     const importMap = await ImportMap.readFromJson(
       URI.from(
-        new URL(
-          "../test/fixtures/import-map-no-resolve/deno.json",
-          import.meta.url,
-        ),
+        "../test/fixtures/import-map-no-resolve/deno.json",
+        import.meta.url,
       ),
     );
     assertExists(importMap);
@@ -102,10 +94,8 @@ describe("resolve()", () => {
   it("resolve specifiers in a referred import map", async () => {
     const importMap = await ImportMap.readFromJson(
       URI.from(
-        new URL(
-          "../test/fixtures/import-map-referred/deno.json",
-          import.meta.url,
-        ),
+        "../test/fixtures/import-map-referred/deno.json",
+        import.meta.url,
       ),
     );
     assertExists(importMap);
@@ -125,9 +115,7 @@ describe("resolveSimple()", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
     const maybe = await ImportMap.readFromJson(
-      URI.from(
-        new URL("../test/fixtures/import-map/deno.json", import.meta.url),
-      ),
+      URI.from("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(maybe);
     importMap = maybe;
