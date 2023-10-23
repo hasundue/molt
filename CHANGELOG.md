@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.4](https://github.com/hasundue/molt/compare/0.7.3...0.7.4) (2023-10-23)
+
+
+### Bug Fixes
+
+* handle Windows paths correctly ([#53](https://github.com/hasundue/molt/issues/53)) ([9233a03](https://github.com/hasundue/molt/commit/9233a03f406ca452cbe620fae9c0940505eae722))
+
 ## [0.7.3](https://github.com/hasundue/deno-molt/compare/0.7.2...0.7.3) (2023-10-22)
 
 
