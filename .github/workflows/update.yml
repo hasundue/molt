@@ -32,7 +32,7 @@ jobs:
         run: deno task cache
 
       - name: Run Molt
-        run: deno task update:commit --summary title.txt --report body.md --pre-commit lock test
+        run: deno task update:commit --summary title.txt --report body.md
 
       - name: Check result
         id: result
