@@ -37,8 +37,11 @@ export const URI = {
     }
     return url.href as URI<"file">;
   },
+  get cwd(): URI<"file"> {
+    return URI.from(Deno.cwd());
+  },
   relative(uri: URI<"file">): RelativePath {
-    return relative(Deno.cwd(), new URL(uri).pathname) as RelativePath;
+    return relative(URI.cwd, uri) as RelativePath;
   },
   absolute(uri: URI<"file">): AbsolutePath {
     return resolve(new URL(uri).pathname) as AbsolutePath;
