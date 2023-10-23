@@ -1,4 +1,6 @@
 import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
+import { assertEquals } from "./std/assert.ts";
+import { assert, is } from "./x/unknownutil.ts";
 import { Brand } from "./types.ts";
 
 export type DefaultProtocol<Scheme extends string> = Scheme extends
@@ -15,25 +17,34 @@ export type RelativePath = Brand<string, "RelativePath">;
 export type AbsolutePath = Brand<string, "AbsolutePath">;
 
 export const URI = {
-  from(path: string): URI<"file"> {
+  /**
+   * Convert a path to a file URL. If the path is relative, it is resolved from the current
+   * working directory.
+   */
+  from(path: string | URL, base?: string): URI<"file"> {
     let url: URL;
     try {
-      url = new URL(path);
+      url = new URL(path, base);
+      assertEquals(url.protocol, "file:");
     } catch {
-      return toFileUrl(
+      assert(path, is.String);
+      url = toFileUrl(
         isAbsolute(path) ? path : resolve(path),
-      ).href as URI<"file">;
+      );
     }
     if (url.protocol !== "file:") {
       throw new TypeError(`Invalid protocol: ${url.protocol} in ${path}`);
     }
     return url.href as URI<"file">;
   },
+  get cwd(): URI<"file"> {
+    return URI.from(Deno.cwd());
+  },
   relative(uri: URI<"file">): RelativePath {
-    return relative(Deno.cwd(), new URL(uri).pathname) as RelativePath;
+    return relative(URI.cwd, uri) as RelativePath;
   },
   absolute(uri: URI<"file">): AbsolutePath {
-    return resolve(new URL(uri).pathname) as AbsolutePath;
+    return new URL(uri).pathname as AbsolutePath;
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {

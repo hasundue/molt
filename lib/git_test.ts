@@ -34,6 +34,10 @@ class DenoCommandStub {
   }
 }
 
+function normalizePath(path: string) {
+  return Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
+}
+
 describe("commitAll()", () => {
   let output: { path: string; content: string }[] = [];
   let updates: DependencyUpdate[];
@@ -111,9 +115,9 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add test/fixtures/direct-import/mod.ts",
+        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
         'git commit -m "build(deps): update node-emoji"',
-        "git add test/fixtures/direct-import/mod.ts",
+        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
         'git commit -m "build(deps): update deno.land/x/deno_graph"',
         // "git add test/fixtures/direct-import/mod.ts test/fixtures/direct-import/lib.ts",
         'git commit -m "build(deps): update deno.land/std"',
@@ -134,7 +138,7 @@ describe("commitAll()", () => {
         'git commit -m "build(deps): update test/fixtures/direct-import/mod.ts"',
         "git add test/fixtures/direct-import/lib.ts",
         'git commit -m "build(deps): update test/fixtures/direct-import/lib.ts"',
-      ],
+      ].map(normalizePath),
     );
   });
 });
