@@ -1,5 +1,8 @@
 # 🦕 Molt
 
+[![CI/CD](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
+
 Molt is a [Deno] module to bump semvers in import specifiers, focused on
 consistency and maintainability. It uses [deno_graph] for dependency resolution,
 which enables us to avoid implementing custom logic or regex for each module
