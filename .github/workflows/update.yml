@@ -1,8 +1,8 @@
-name: Update
+name: Update Deno modules
 
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 23 * * *'
   workflow_dispatch:
 
 permissions:
@@ -11,43 +11,6 @@ permissions:
 
 jobs:
   update:
-    name: Update
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Configure Git
-        run: |
-          git config user.name github-actions[bot]
-          git config user.email github-actions[bot]@users.noreply.github.com
-
-      - name: Setup Deno
-        uses: denoland/setup-deno@v1
-        with:
-          deno-version: v1.x
-
-      - name: Cache dependencies
-        run: deno task cache
-
-      - name: Run Molt
-        run: deno task update:commit --summary title.txt --report body.md
-
-      - name: Check result
-        id: result
-        uses: andstor/file-existence-action@v2
-        with:
-          files: title.txt, body.md
-
-      - name: Push changes
-        if: steps.result.outputs.files_exists == 'true'
-        run: git push -f origin HEAD:build/update-dependencies
-
-      - name: Create Pull Request
-        if: steps.result.outputs.files_exists == 'true'
-        run: |
-          gh pr create --title "$(cat title.txt)" --body "$(cat body.txt)"
-          --head build/update-dependencies
-        env:
-          GH_TOKEN: ${{ secrets.PAT_UPDATE }}
+    name: Main
+    uses: hasundue/actions/.github/workflows/update-deno.yml@main
+    secrets: inherit
