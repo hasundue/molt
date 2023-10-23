@@ -1,3 +1,4 @@
+import { distinct } from "./std/collections.ts";
 import {
   createGraph,
   type CreateGraphOptions,
@@ -6,7 +7,7 @@ import {
   type ModuleJson,
 } from "./x/deno_graph.ts";
 import { RelativePath, URI } from "./uri.ts";
-import type { SemVerString } from "./types.ts";
+import type { Maybe, SemVerString } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
 import { Dependency } from "./dependency.ts";
 
@@ -47,7 +48,6 @@ export const DependencyUpdate = {
   collect,
   applyToModule,
   applyToImportMap,
-  withRelativePath,
 };
 
 class DenoGraph {
@@ -222,24 +222,28 @@ export type DependencyUpdateWithRelativePath =
     };
   };
 
-/**
- * Convert specifiers in the dependency update to relative paths for subsequent operations.
- */
-function withRelativePath(
-  update: DependencyUpdate,
-): DependencyUpdateWithRelativePath {
-  return {
-    ...update,
-    specifier: _relativeIfFile(update.specifier),
-    map: update.map && {
-      ...update.map,
-      source: URI.relative(update.map.source),
-    },
-  } as DependencyUpdateWithRelativePath;
-}
+export type VersionProp = {
+  from?: string;
+  to: string;
+};
 
-function _relativeIfFile(
-  specifier: URI<"file" | "http" | "https" | "npm">,
-) {
-  return URI.is(specifier, "file") ? URI.relative(specifier) : specifier;
+export function createVersionProp(
+  dependencies: DependencyUpdate[],
+): Maybe<VersionProp> {
+  const modules = distinct(dependencies.map((d) => d.name));
+  if (modules.length > 1) {
+    // Cannot provide a well-defined version prop
+    return;
+  }
+  const tos = distinct(dependencies.map((d) => d.version.to));
+  if (tos.length > 1) {
+    throw new Error(
+      "Multiple target versions are specified for a single module",
+    );
+  }
+  const froms = distinct(dependencies.map((d) => d.version.from));
+  return {
+    from: froms.length === 1 ? froms[0] : undefined,
+    to: tos[0],
+  };
 }

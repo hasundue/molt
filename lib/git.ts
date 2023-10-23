@@ -1,6 +1,5 @@
-import { DependencyUpdate } from "./update.ts";
+import { createVersionProp, DependencyUpdate, VersionProp } from "./update.ts";
 import { FileUpdate } from "./file.ts";
-import { createVersionProp, type VersionProp } from "./versions.ts";
 import { URI } from "./uri.ts";
 
 export interface CommitProps {
