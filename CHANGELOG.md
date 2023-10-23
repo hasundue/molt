@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.5](https://github.com/hasundue/molt/compare/0.7.4...0.7.5) (2023-10-23)
+
+
+### Bug Fixes
+
+* **cli:** run `deno` command via `Deno.Command` rather than dax ([35273d2](https://github.com/hasundue/molt/commit/35273d2a397367b80fc457293f83e3752e11c35a))
+
 ## [0.7.4](https://github.com/hasundue/molt/compare/0.7.3...0.7.4) (2023-10-23)
 
 
