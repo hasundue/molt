@@ -115,12 +115,13 @@ describe("commitAll()", () => {
     assertArrayIncludes(
       DenoCommandStub.commands,
       [
-        "git add test/fixtures/direct-import/mod.ts",
+        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
         'git commit -m "build(deps): update node-emoji"',
-        "git add test/fixtures/direct-import/mod.ts",
+        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
         'git commit -m "build(deps): update deno.land/x/deno_graph"',
+        // "git add test/fixtures/direct-import/mod.ts test/fixtures/direct-import/lib.ts",
         'git commit -m "build(deps): update deno.land/std"',
-      ].map(normalizePath),
+      ],
     );
   });
 
