@@ -116,12 +116,11 @@ async function _add(
   options: string[],
 ) {
   const files = results.map((result) => URI.relative(result.specifier));
-  const command = new Deno.Command("git", {
+  const { code, stderr } = await new Deno.Command("git", {
     args: ["add", ...options, ...files],
-  });
-  const { code } = await command.output();
+  }).output();
   if (code !== 0) {
-    throw new Error(`git add failed: ${code}`);
+    throw new Error(new TextDecoder().decode(stderr));
   }
 }
 
@@ -129,11 +128,10 @@ async function _commit(
   message: string,
   options: string[],
 ) {
-  const command = new Deno.Command("git", {
+  const { code, stderr } = await new Deno.Command("git", {
     args: ["commit", ...options, "-m", message],
-  });
-  const { code } = await command.output();
+  }).output();
   if (code !== 0) {
-    throw new Error(`git commit failed: ${code}`);
+    throw new Error(new TextDecoder().decode(stderr));
   }
 }
