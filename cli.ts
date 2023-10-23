@@ -8,6 +8,12 @@ import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
+import { parseSemVer } from "./lib/semver.ts";
+import { resolveLatestSemVer } from "./lib/dependency.ts";
+
+const VERSION = parseSemVer(import.meta.url) ??
+  await resolveLatestSemVer(new URL("https://deno.land/x/molt@0.0.0/cli.ts")) ??
+  "undefined";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -330,7 +336,7 @@ const main = new Command()
   .action(function () {
     this.showHelp();
   })
-  .version("0.7.4")
+  .version(VERSION)
   .command("check", checkCommand)
   .command("update", updateCommand);
 

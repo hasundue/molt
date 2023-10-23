@@ -29,7 +29,7 @@ function parseProps(
   return { name, version: semver, path: path as Path };
 }
 
-async function resolveLatestSemVer(
+export async function resolveLatestSemVer(
   url: URL,
 ): Promise<Maybe<SemVerString>> {
   const props = parseProps(url);
