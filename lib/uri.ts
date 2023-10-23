@@ -44,7 +44,7 @@ export const URI = {
     return relative(URI.cwd, uri) as RelativePath;
   },
   absolute(uri: URI<"file">): AbsolutePath {
-    return resolve(new URL(uri).pathname) as AbsolutePath;
+    return new URL(uri).pathname as AbsolutePath;
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {
