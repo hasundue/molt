@@ -15,18 +15,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Configure Git
         run: |
-          git config --global user.name '${{ github.actor }}'
-          git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+          git config user.name github-actions[bot]
+          git config user.email github-actions[bot]@users.noreply.github.com
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
         with:
           deno-version: v1.x
-
-      - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Cache dependencies
         run: deno task cache
@@ -38,7 +38,7 @@ jobs:
         id: result
         uses: andstor/file-existence-action@v2
         with:
-          files: "title.txt, body.md"
+          files: title.txt, body.md
 
       - name: Push changes
         if: steps.result.outputs.files_exists == 'true'
@@ -50,4 +50,4 @@ jobs:
           gh pr create --title "$(cat title.txt)" --body "$(cat body.txt)"
           --head build/update-dependencies
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.PAT_UPDATE }}
