@@ -1,24 +1,26 @@
 # 🦕 Molt
 
-[![CI/CD](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
+[![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
-Molt is a [Deno] module to bump semvers in import specifiers, focused on
-consistency and maintainability. It uses [deno_graph] for dependency resolution,
-which enables us to avoid implementing custom logic or regex for each module
-registry.
+> [!WARNING]\
+> Molt is still being developed actively. The API is not stable yet and may
+> change frequently.
 
-## Key Concepts
+Molt is a [Deno] module to bump semvers in import specifiers, like
+[udd][deno-udd], but with a few different goals:
 
-- **No regex to detect dependencies** - Import specifiers of dependencies are
-  discovered by the same parser as Deno runtime.
-- **No custom logic for each registry** - Latest versions of dependencies are
-  obtained by redirects of fetch requests by module registries.
-- **Module-first** - The core logic is provided as versatile functions in a Deno
-  module, which enables you to write the best scripts for your use cases.
-- **Git-friendly** - The operations can be easily divided into logical groups
-  for subsequent git commits. A submodule and CLI for git operations are also
-  provided.
+**Consistent** - Molt uses [deno_graph] for dependency resolution, and
+"exploits" redirects of fetch requests, to get latest semvers. This should make
+it support as many module registries as Deno runtime does, with a minimum
+maintainance cost.
+
+**Module-first** - The core logic is provided as versatile functions in a Deno
+module, which enables you to write the best scripts for your use cases.
+
+**Git-friendly** - The operations can be easily divided into logical groups for
+subsequent git commits. A submodule and CLI for git operations are also
+provided.
 
 ## Usage
 
@@ -65,33 +67,31 @@ await commitAll(updates, {
 
 ### CLI
 
-Although it is recommended to write your own scripts with the module, a
-pre-built CLI tool is also provided as `cli.ts` for convenience or a reference
-implementation, which is supposed to cover most of the use cases.
+Although we encourage you to write your own scripts, a pre-built CLI tool is
+also provided as `cli.ts` for convenience or a reference implementation, which
+is supposed to cover most of the use cases.
 
 #### Installation (optional)
 
 The molt CLI can be installed globally with the following command, for example:
 
 ```sh
-deno install --allow-env --allow-read --allow-write=. --allow-net --allow-run=git,deno\
---name molt https://deno.land/x/molt/cli.ts
+deno install --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
+--name molt https://deno.land/x/molt@{VERSION}/cli.ts
 ```
 
 Alternatively, you may prefer to run the remote script directly through
-`deno task` for reproducibility:
+`deno task` for better security or reproducibility:
 
 ```sh
 {
   "tasks": {
-    "run:molt": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno https://deno.land/x/molt@{VERSION}/cli.ts",
+    "run:molt": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land https://deno.land/x/molt@{VERSION}/cli.ts",
     "update": "deno task -q run:molt check ./**/*.ts",
     "update:commit": "deno task -q run:molt update --commit --pre-commit=test ./**/*.ts"",
   },
 }
 ```
-
-#### Usage
 
 #### Update dependencies interactively
 
@@ -99,8 +99,7 @@ The most interactive interface is provided as `check` sub-command of `cli.ts`.
 Run `molt check --help` for more details.
 
 ```sh
-deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run\
-https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
+molt check [...options] <...entrypoints>
 ```
 
 > [!Note]\
@@ -111,8 +110,7 @@ https://deno.land/x/molt/cli.ts check --import-map <file> <...entrypoints>
 ##### Example: Just check
 
 ```
-> deno run --allow-env --allow-net --allow-read\
-https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts 
+> molt check test/fixtures/direct-import/mod.ts 
 🔎 Checking for updates...
 💡 Found updates:
 
@@ -134,8 +132,7 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
 ##### Example: Write changes to files
 
 ```
-> deno run --allow-env --allow-net --allow-read --allow-write=.\
-https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts 
+> molt check test/fixtures/direct-import/mod.ts 
 🔎 Checking for updates...
 💡 Found updates:
     ...
@@ -158,12 +155,13 @@ https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts
     ...
 
 ? Choose an action › Commit changes to git
+? Prefix for commit messages (build(deps):) › build(deps):
 ? Tasks to run before each commit (comma separated) › lock, test
 ? Tasks to run after each commit (comma separated) › 
 
-- build(deps): update deno.land/std from 0.200.0 to 0.202.0
-- build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
-- build(deps): update node-emoji from 1.0.0 to 2.1.0
+📝 build(deps): update deno.land/std from 0.200.0 to 0.202.0
+📝 build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
+📝 build(deps): update node-emoji from 1.0.0 to 2.1.0
 
 >
 ```
@@ -177,15 +175,13 @@ details.
 ##### Example: Update dependencies and write changes to files
 
 ```sh
-deno run --allow-env --allow-read --allow-net --allow-write=.\
-https://deno.land/x/molt/cli.ts update <...entrypoints>
+molt update <...entrypoints>
 ```
 
 ##### Example: Update dependencies and commit changes to git
 
 ```sh
-deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno\
-https://deno.land/x/molt/cli.ts update --commit --pre-commit=check,test <...entrypoints>
+molt update --commit --pre-commit=check,test <...entrypoints>
 ```
 
 ## Limitations
@@ -212,4 +208,5 @@ and of full respect to the authors.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
+[deno-udd]: https://github.com/hayd/deno-udd
 [issues]: https://github.com/hasundue/molt/issues
