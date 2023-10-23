@@ -1,4 +1,4 @@
-name: Update Deno modules
+name: Update Deno dependencies
 
 on:
   schedule:
@@ -11,6 +11,6 @@ permissions:
 
 jobs:
   update:
-    name: Main
+    name: Update
     uses: hasundue/actions/.github/workflows/update-deno.yml@main
     secrets: inherit
