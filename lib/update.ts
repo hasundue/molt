@@ -1,13 +1,14 @@
 import {
   createGraph,
+  type CreateGraphOptions,
   init as initDenoGraph,
+  load as defaultLoad,
   type ModuleJson,
 } from "./x/deno_graph.ts";
 import { RelativePath, URI } from "./uri.ts";
 import type { SemVerString } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
 import { Dependency } from "./dependency.ts";
-import { load } from "./loader.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
@@ -60,6 +61,30 @@ class DenoGraph {
     this.#initialized = true;
   }
 }
+
+const load: NonNullable<CreateGraphOptions["load"]> = async (
+  specifier,
+) => {
+  const url = new URL(specifier); // should not throw
+  switch (url.protocol) {
+    case "node:":
+    case "npm:":
+      return {
+        kind: "external",
+        specifier,
+      };
+    case "http:":
+    case "https:":
+      return {
+        kind: "external",
+        specifier,
+      };
+    case "file:":
+      return await defaultLoad(specifier);
+    default:
+      throw new Error(`Unsupported protocol: ${url.protocol}`);
+  }
+};
 
 export async function collect(
   entrypoints: string | string[],
