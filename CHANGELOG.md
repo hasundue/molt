@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.7.6](https://github.com/hasundue/molt/compare/0.7.5...0.7.6) (2023-10-24)
+
+
+### Bug Fixes
+
+* **cli:** ensure lazy resolution of version info ([95ba03d](https://github.com/hasundue/molt/commit/95ba03dc7a29cf6345c022cb503c7680d324df9d))
+
 ## [0.7.5](https://github.com/hasundue/molt/compare/0.7.4...0.7.5) (2023-10-23)
 
 
