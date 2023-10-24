@@ -328,21 +328,25 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
-const _version = async () => {
-  return parseSemVer(import.meta.url) ??
-    await resolveLatestSemVer(
-      new URL("https://deno.land/x/molt@0.0.0/cli.ts"),
-    ) ??
-    "undefined";
-};
-
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
   .action(function () {
     this.showHelp();
   })
-  .version(await _version())
+  .versionOption(
+    "-v, --version",
+    "Print version info.",
+    async function () {
+      const version = parseSemVer(import.meta.url) ??
+        await $.progress("Fetching version info").with(() => {
+          return resolveLatestSemVer(
+            new URL("https://deno.land/x/molt@0.0.0/cli.ts"),
+          );
+        }) ?? "unknown";
+      console.log(version);
+    },
+  )
   .command("check", checkCommand)
   .command("update", updateCommand);
 
