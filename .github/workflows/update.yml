@@ -1,4 +1,4 @@
-name: Update Deno dependencies
+name: Update
 
 on:
   schedule:
