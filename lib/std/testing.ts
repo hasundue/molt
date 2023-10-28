@@ -10,7 +10,9 @@ export {
   assertSpyCall,
   assertSpyCalls,
   type ConstructorSpy,
+  type Spy,
   spy,
   type Stub,
   stub,
+  type ExpectedSpyCall,
 } from "https://pax.deno.dev/hasundue/deno_std@feat-constructor-spy/testing/mock.ts";

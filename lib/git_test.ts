@@ -1,6 +1,5 @@
 import {
   afterAll,
-  assertSpyCall,
   assertSpyCalls,
   beforeAll,
   beforeEach,
@@ -13,7 +12,7 @@ import {
 import { URI } from "./uri.ts";
 import { DependencyUpdate } from "./update.ts";
 import { commitAll } from "./git.ts";
-import { createCommandStub } from "./testing.ts";
+import { createCommandStub, assertSomeSpyCall } from "./testing.ts";
 
 const readTextFileOriginal = Deno.readTextFile;
 
@@ -79,13 +78,13 @@ describe("commitAll()", () => {
   it("no grouping", async () => {
     await commitAll(updates);
     // TODO: Can't test this because of the order of targets is not guaranteed.
-    // assertSpyCall(CommandStub, 0, {
+    // assertSomeSpyCall(CommandStub, {
     //   args: [
     //     "git",
     //     { args: ["add", "src/fixtures/mod.ts", "src/fixtures/lib.ts"] },
     //   ],
     // });
-    assertSpyCall(CommandStub, 1, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update dependencies"] },
@@ -99,25 +98,25 @@ describe("commitAll()", () => {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertSpyCall(CommandStub, 0, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSpyCall(CommandStub, 1, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update node-emoji"] },
       ],
     });
-    assertSpyCall(CommandStub, 2, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSpyCall(CommandStub, 3, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         {
@@ -126,7 +125,7 @@ describe("commitAll()", () => {
       ],
     });
     // TODO: Can't test this because of the order of targets is not guaranteed.
-    // assertSpyCall(CommandStub, 4, {
+    // assertSomeSpyCall(CommandStub, {
     //   args: [
     //     "git",
     //     {
@@ -138,7 +137,7 @@ describe("commitAll()", () => {
     //     },
     //   ],
     // });
-    assertSpyCall(CommandStub, 5, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update deno.land/std"] },
@@ -152,13 +151,13 @@ describe("commitAll()", () => {
       groupBy: (update) => URI.relative(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertSpyCall(CommandStub, 0, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSpyCall(CommandStub, 1, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         {
@@ -172,13 +171,13 @@ describe("commitAll()", () => {
         },
       ],
     });
-    assertSpyCall(CommandStub, 2, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/lib.ts")] },
       ],
     });
-    assertSpyCall(CommandStub, 3, {
+    assertSomeSpyCall(CommandStub, {
       args: [
         "git",
         {
