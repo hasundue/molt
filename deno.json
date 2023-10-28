@@ -1,6 +1,6 @@
 {
   "tasks": {
-    "cache": "deno cache ./lib/*/*.ts --lock",
+    "cache": "deno cache ./lib/*/*.ts --reload --lock",
     "lock": "deno task -q cache --lock-write && git add deno.lock",
     "check": "deno check ./*.ts ./lib/*/*.ts",
     "test": "deno test -A --no-check",

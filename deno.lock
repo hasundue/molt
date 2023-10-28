@@ -250,6 +250,6 @@
     "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/assert/assertion_error.ts": "4d0bde9b374dfbcbe8ac23f54f567b77024fb67dbb1906a852d67fe050d42f56",
     "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/assert/equal.ts": "9f1a46d5993966d2596c44e5858eec821859b45f783a5ee2f7a695dfc12d8ece",
     "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/fmt/colors.ts": "c51c4642678eb690dcf5ffee5918b675bf01a33fba82acf303701ae1a4f8c8d9",
-    "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/testing/mock.ts": "01ef776b3adc53cc04f79d85d2123a2156a49a7a0a955fdcce05ac1e2fae5629"
+    "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/testing/mock.ts": "af6fd7bafb04dc5333e9e6c571f5413449fa96f8fd8db1fdeb46dc45dd0ba7ba"
   }
 }
