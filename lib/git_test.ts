@@ -1,109 +1,75 @@
-// deno-lint-ignore-file no-explicit-any
 import {
   afterAll,
-  afterEach,
+  assertSpyCalls,
   beforeAll,
   beforeEach,
+  type ConstructorSpy,
   describe,
   it,
   type Stub,
-  stub,
 } from "./std/testing.ts";
-import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
+import {
+  assertSomeSpyCall,
+  createCommandStub,
+  createReadTextFileStub,
+  createWriteTextFileStub,
+  FileSystemFake,
+} from "./testing.ts";
 import { URI } from "./uri.ts";
 import { DependencyUpdate } from "./update.ts";
 import { commitAll } from "./git.ts";
-
-const DenoCommandOriginal = Deno.Command;
-const readTextFileOriginal = Deno.readTextFile;
-
-class DenoCommandStub {
-  static commands: string[] = [];
-  constructor(cmd: string, options: { args: string[] }) {
-    let command = cmd;
-    options.args.forEach((arg) => {
-      command += arg.includes(" ") ? ` "${arg}"` : ` ${arg}`;
-    });
-    DenoCommandStub.commands.push(command);
-  }
-  output() {
-    return { code: 0 };
-  }
-  static clear() {
-    DenoCommandStub.commands = [];
-  }
-}
 
 function normalizePath(path: string) {
   return Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
 }
 
 describe("commitAll()", () => {
-  let output: { path: string; content: string }[] = [];
   let updates: DependencyUpdate[];
+  let fileSystemFake: FileSystemFake;
   let writeTextFileStub: Stub;
   let readTextFileStub: Stub;
+  let CommandStub: ConstructorSpy;
 
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
       "./test/fixtures/direct-import/mod.ts",
     );
-    writeTextFileStub = stub(
-      Deno,
-      "writeTextFile",
-      // deno-lint-ignore require-await
-      async (path, data) => {
-        output.push({
-          path: path.toString(),
-          content: data.toString(),
-        });
-      },
-    );
-    readTextFileStub = stub(
-      Deno,
-      "readTextFile",
-      // deno-lint-ignore require-await
-      async (path) => {
-        const file = output.findLast((file) => file.path === path.toString());
-        return file!.content;
-      },
-    );
-    Deno.Command = DenoCommandStub as any;
+    fileSystemFake = new FileSystemFake();
+    readTextFileStub = createReadTextFileStub(fileSystemFake, {
+      readThrough: true,
+    });
+    writeTextFileStub = createWriteTextFileStub(fileSystemFake);
   });
 
   afterAll(() => {
     writeTextFileStub.restore();
     readTextFileStub.restore();
-    Deno.Command = DenoCommandOriginal;
+    Deno.Command = CommandStub.original;
   });
 
-  beforeEach(async () => {
-    for (
-      const file of [
-        "./test/fixtures/direct-import/mod.ts",
-        "./test/fixtures/direct-import/lib.ts",
-      ]
-    ) {
-      const content = await readTextFileOriginal(file);
-      await Deno.writeTextFile(new URL(URI.from(file)), content);
-    }
+  beforeEach(() => {
+    fileSystemFake.clear();
+    CommandStub = createCommandStub();
+    Deno.Command = CommandStub;
   });
 
-  afterEach(() => {
-    DenoCommandStub.clear();
-    output = [];
-  });
-
+  // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
   it("no grouping", async () => {
     await commitAll(updates);
-    assertEquals(DenoCommandStub.commands.length, 2);
-    assertArrayIncludes(
-      DenoCommandStub.commands,
-      [
-        // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
-        'git commit -m "build(deps): update dependencies"',
+    // TODO: Can't test this because of the order of targets is not guaranteed.
+    // assertSomeSpyCall(CommandStub, {
+    //   args: [
+    //     "git",
+    //     { args: ["add", "src/fixtures/mod.ts", "src/fixtures/lib.ts"] },
+    //   ],
+    // });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["commit", "-m", "build(deps): update dependencies"] },
       ],
-    );
+    });
+    assertSpyCalls(CommandStub, 2);
   });
 
   it("group by dependency name", async () => {
@@ -111,18 +77,52 @@ describe("commitAll()", () => {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertEquals(DenoCommandStub.commands.length, 6);
-    assertArrayIncludes(
-      DenoCommandStub.commands,
-      [
-        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
-        'git commit -m "build(deps): update node-emoji"',
-        "git add " + normalizePath("test/fixtures/direct-import/mod.ts"),
-        'git commit -m "build(deps): update deno.land/x/deno_graph"',
-        // "git add test/fixtures/direct-import/mod.ts test/fixtures/direct-import/lib.ts",
-        'git commit -m "build(deps): update deno.land/std"',
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
-    );
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["commit", "-m", "build(deps): update node-emoji"] },
+      ],
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
+      ],
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        {
+          args: ["commit", "-m", "build(deps): update deno.land/x/deno_graph"],
+        },
+      ],
+    });
+    // TODO: Can't test this because of the order of targets is not guaranteed.
+    // assertSomeSpyCall(CommandStub, {
+    //   args: [
+    //     "git",
+    //     {
+    //       args: [
+    //         "add",
+    //         normalizePath("test/fixtures/direct-import/mod.ts"),
+    //         normalizePath("test/fixtures/direct-import/lib.ts"),
+    //       ],
+    //     },
+    //   ],
+    // });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["commit", "-m", "build(deps): update deno.land/std"] },
+      ],
+    });
+    assertSpyCalls(CommandStub, 6);
   });
 
   it("group by module (file) name", async () => {
@@ -130,15 +130,46 @@ describe("commitAll()", () => {
       groupBy: (update) => URI.relative(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertEquals(DenoCommandStub.commands.length, 4);
-    assertArrayIncludes(
-      DenoCommandStub.commands,
-      [
-        "git add test/fixtures/direct-import/mod.ts",
-        'git commit -m "build(deps): update test/fixtures/direct-import/mod.ts"',
-        "git add test/fixtures/direct-import/lib.ts",
-        'git commit -m "build(deps): update test/fixtures/direct-import/lib.ts"',
-      ].map(normalizePath),
-    );
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
+      ],
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        {
+          args: [
+            "commit",
+            "-m",
+            normalizePath(
+              "build(deps): update test/fixtures/direct-import/mod.ts",
+            ),
+          ],
+        },
+      ],
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        { args: ["add", normalizePath("test/fixtures/direct-import/lib.ts")] },
+      ],
+    });
+    assertSomeSpyCall(CommandStub, {
+      args: [
+        "git",
+        {
+          args: [
+            "commit",
+            "-m",
+            normalizePath(
+              "build(deps): update test/fixtures/direct-import/lib.ts",
+            ),
+          ],
+        },
+      ],
+    });
+    assertSpyCalls(CommandStub, 4);
   });
 });
