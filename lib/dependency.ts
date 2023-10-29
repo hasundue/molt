@@ -23,25 +23,22 @@ export function parseSemVer(
   return match[0].slice(1) as SemVerString;
 }
 
-export interface Dependency {
+export interface DependencyProps {
   name: string;
-  version: SemVerString;
-  path: Path;
+  version?: SemVerString;
+  path?: Path;
 }
 
 export const Dependency = {
   parseProps,
-  resolveLatestSemVer,
+  resolveLatestURL,
 };
 
-function parseProps(
-  url: URL,
-): Maybe<Dependency> {
+function parseProps(url: URL): DependencyProps {
   const body = url.hostname + url.pathname;
   const semver = parseSemVer(url.href);
   if (!semver) {
-    // The specifier does not contain a semver.
-    return;
+    return { name: body };
   }
   const atSemver = "@" + semver;
   const name = body.split(atSemver)[0];
@@ -49,30 +46,26 @@ function parseProps(
   return { name, version: semver, path: path as Path };
 }
 
-export async function resolveLatestSemVer(
+export async function resolveLatestURL(
   url: URL,
-): Promise<Maybe<SemVerString>> {
+): Promise<Maybe<URL>> {
   const props = parseProps(url);
-  if (!props) {
-    // The specifier is does not contain a semver.
-    return;
-  }
-  await LatestSemverCache.lock(props.name);
+  await LatestUrlCache.lock(props.name);
   const result = await _resolve(url, props);
-  LatestSemverCache.unlock(props.name);
+  LatestUrlCache.unlock(props.name);
   return result;
 }
 
 async function _resolve(
   url: URL,
-  props: Dependency,
-): Promise<Maybe<SemVerString>> {
-  const cached = LatestSemverCache.get(props.name);
+  props: DependencyProps,
+): Promise<Maybe<URL>> {
+  const cached = LatestUrlCache.get(props.name);
   if (cached) {
     return cached;
   }
   if (cached === null) {
-    // The dependency is already found to be up to date.
+    // The dependency is already found to be up to date or unable to resolve.
     return;
   }
   switch (url.protocol) {
@@ -91,35 +84,36 @@ async function _resolve(
           `Could not find the latest version of ${props.name} from registry.`,
         );
       }
-      const latestSemVer: string = json["dist-tags"].latest;
+      const latestSemVer = json["dist-tags"].latest as SemVerString;
       if (latestSemVer === props.version) {
         // The dependency is up to date
-        LatestSemverCache.set(props.name, null);
+        LatestUrlCache.set(props.name, null);
         return;
       }
-      return LatestSemverCache.set(props.name, latestSemVer as SemVerString);
+      return LatestUrlCache.set(
+        props.name,
+        new URL(`npm:${props.name}@${latestSemVer}${props.path}`),
+      );
     }
     case "http:":
     case "https:": {
       const response = await fetch(
-        url.protocol + "//" + props.name + props.path,
+        url.protocol + "//" + props.name + (props.path ?? ""),
         { method: "HEAD" },
       );
       await response.arrayBuffer();
       if (!response.redirected) {
-        // The host did not redirect to a url with semver
-        LatestSemverCache.set(props.name, null);
+        // The host did not redirect
+        LatestUrlCache.set(props.name, null);
         return;
       }
-      const latestSemVer = parseSemVer(response.url);
-      if (
-        !latestSemVer || // The host redirected to a url without semver
-        latestSemVer === props.version // The dependency is already up to date
-      ) {
-        LatestSemverCache.set(props.name, null);
+      const latest = new URL(response.url);
+      if (latest === url) {
+        // The dependency is already up to date
+        LatestUrlCache.set(props.name, null);
         return;
       }
-      return LatestSemverCache.set(props.name, latestSemVer);
+      return LatestUrlCache.set(props.name, latest);
     }
     case "node:":
     case "file:":
@@ -130,9 +124,9 @@ async function _resolve(
   }
 }
 
-class LatestSemverCache {
+class LatestUrlCache {
   static #mutex = new Map<string, Mutex>();
-  static #cache = new Map<string, SemVerString | null>();
+  static #cache = new Map<string, URL | null>();
 
   static lock(name: string): Promise<void> {
     const mutex = this.#mutex.get(name) ??
@@ -146,15 +140,15 @@ class LatestSemverCache {
     mutex.release();
   }
 
-  static get(name: string): SemVerString | null | undefined {
+  static get(name: string): URL | null | undefined {
     return this.#cache.get(name);
   }
 
-  static set<T extends SemVerString | null>(
+  static set<T extends URL | null>(
     name: string,
-    semver: T,
+    url: T,
   ): T {
-    this.#cache.set(name, semver);
-    return semver;
+    this.#cache.set(name, url);
+    return url;
   }
 }

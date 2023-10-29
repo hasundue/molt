@@ -8,7 +8,7 @@ import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
-import { parseSemVer, resolveLatestSemVer } from "./lib/dependency.ts";
+import { parseSemVer, resolveLatestURL } from "./lib/dependency.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -163,7 +163,7 @@ function _list(updates: DependencyUpdate[]) {
     distinct(
       list.map((u) => {
         const source = URI.relative(u.map?.source ?? u.referrer);
-        return `  ${source} ` + gray(u.version.from);
+        return `  ${source} ` + gray(u.version.from ?? "");
       }),
     ).forEach((line) => console.log(line));
   }
@@ -328,6 +328,17 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
+async function _version() {
+  const version = parseSemVer(import.meta.url) ??
+    await $.progress("Fetching version info").with(async () => {
+      const url = await resolveLatestURL(
+        new URL("https://deno.land/x/molt/cli.ts"),
+      );
+      return url ? parseSemVer(url.href) : undefined;
+    }) ?? "unknown";
+  console.log(version);
+}
+
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
@@ -337,15 +348,7 @@ const main = new Command()
   .versionOption(
     "-v, --version",
     "Print version info.",
-    async function () {
-      const version = parseSemVer(import.meta.url) ??
-        await $.progress("Fetching version info").with(() => {
-          return resolveLatestSemVer(
-            new URL("https://deno.land/x/molt@0.0.0/cli.ts"),
-          );
-        }) ?? "unknown";
-      console.log(version);
-    },
+    _version,
   )
   .command("check", checkCommand)
   .command("update", updateCommand);

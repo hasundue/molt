@@ -1,6 +1,7 @@
 import { describe, it } from "./std/testing.ts";
 import { assertEquals } from "./std/assert.ts";
 import { Dependency, parseSemVer } from "./dependency.ts";
+import { Path, SemVerString } from "./types.ts";
 
 describe("parseSemVer", () => {
   it("https://deno.land/std", () =>
@@ -23,8 +24,8 @@ describe("parseProps()", () => {
       ),
       {
         name: "deno.land/std",
-        version: "0.1.0",
-        path: "/version.ts",
+        version: "0.1.0" as SemVerString,
+        path: "/version.ts" as Path,
       },
     ));
   it("https://deno.land/std (no semver)", () =>
@@ -32,7 +33,9 @@ describe("parseProps()", () => {
       Dependency.parseProps(
         new URL("https://deno.land/std/version.ts"),
       ),
-      undefined,
+      {
+        name: "deno.land/std/version.ts",
+      },
     ));
   it("https://deno.land/x/hono (with a leading 'v')", () =>
     assertEquals(
@@ -41,8 +44,8 @@ describe("parseProps()", () => {
       ),
       {
         name: "deno.land/x/hono",
-        version: "v0.1.0",
-        path: "",
+        version: "v0.1.0" as SemVerString,
+        path: "" as Path,
       },
     ));
   it("npm:node-emoji", () =>
@@ -52,8 +55,8 @@ describe("parseProps()", () => {
       ),
       {
         name: "node-emoji",
-        version: "1.0.0",
-        path: "",
+        version: "1.0.0" as SemVerString,
+        path: "" as Path,
       },
     ));
 });

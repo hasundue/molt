@@ -20,6 +20,10 @@ describe("readFromJson()", () => {
       URI.from("../test/fixtures/import-map/deno.json", import.meta.url),
     );
     assertExists(importMap);
+    assertEquals(
+      importMap.specifier,
+      URI.from("./test/fixtures/import-map/deno.json"),
+    );
   });
   it("test/fixtures/import-map-referred/import_map.json", async () => {
     const importMap = await ImportMap.readFromJson(

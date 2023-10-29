@@ -1,15 +1,14 @@
 import {
   afterAll,
+  assertSnapshot,
   assertSpyCalls,
   beforeAll,
   beforeEach,
-  type ConstructorSpy,
   describe,
   it,
-  type Stub,
 } from "./std/testing.ts";
 import {
-  assertSomeSpyCall,
+  assertFindSpyCall,
   createCommandStub,
   createReadTextFileStub,
   createWriteTextFileStub,
@@ -26,9 +25,9 @@ function normalizePath(path: string) {
 describe("commitAll()", () => {
   let updates: DependencyUpdate[];
   let fileSystemFake: FileSystemFake;
-  let writeTextFileStub: Stub;
-  let readTextFileStub: Stub;
-  let CommandStub: ConstructorSpy;
+  let writeTextFileStub: ReturnType<typeof createWriteTextFileStub>;
+  let readTextFileStub: ReturnType<typeof createReadTextFileStub>;
+  let CommandStub: ReturnType<typeof createCommandStub>;
 
   beforeAll(async () => {
     updates = await DependencyUpdate.collect(
@@ -54,7 +53,7 @@ describe("commitAll()", () => {
   });
 
   // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
-  it("no grouping", async () => {
+  it("no grouping", async (t) => {
     await commitAll(updates);
     // TODO: Can't test this because of the order of targets is not guaranteed.
     // assertSomeSpyCall(CommandStub, {
@@ -63,39 +62,40 @@ describe("commitAll()", () => {
     //     { args: ["add", "src/fixtures/mod.ts", "src/fixtures/lib.ts"] },
     //   ],
     // });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update dependencies"] },
       ],
     });
     assertSpyCalls(CommandStub, 2);
+    await assertSnapshot(t, fileSystemFake);
   });
 
-  it("group by dependency name", async () => {
+  it("group by dependency name", async (t) => {
     await commitAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update node-emoji"] },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         {
@@ -116,27 +116,28 @@ describe("commitAll()", () => {
     //     },
     //   ],
     // });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["commit", "-m", "build(deps): update deno.land/std"] },
       ],
     });
     assertSpyCalls(CommandStub, 6);
+    await assertSnapshot(t, fileSystemFake);
   });
 
-  it("group by module (file) name", async () => {
+  it("group by module (file) name", async (t) => {
     await commitAll(updates, {
       groupBy: (update) => URI.relative(update.referrer),
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/mod.ts")] },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         {
@@ -150,13 +151,13 @@ describe("commitAll()", () => {
         },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         { args: ["add", normalizePath("test/fixtures/direct-import/lib.ts")] },
       ],
     });
-    assertSomeSpyCall(CommandStub, {
+    assertFindSpyCall(CommandStub, {
       args: [
         "git",
         {
@@ -171,5 +172,6 @@ describe("commitAll()", () => {
       ],
     });
     assertSpyCalls(CommandStub, 4);
+    await assertSnapshot(t, fileSystemFake);
   });
 });

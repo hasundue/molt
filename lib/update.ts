@@ -6,21 +6,26 @@ import {
   load as defaultLoad,
   type ModuleJson,
 } from "./x/deno_graph.ts";
-import { RelativePath, URI } from "./uri.ts";
-import type { Maybe, SemVerString } from "./types.ts";
+import { URI } from "./uri.ts";
+import type { Maybe } from "./types.ts";
 import { ImportMap, ImportMapJson } from "./import_map.ts";
-import { Dependency } from "./dependency.ts";
+import { Dependency, type DependencyProps, parseSemVer } from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
+export type VersionProp = {
+  from?: string;
+  to: string;
+};
+
 /** Representation of a dependency update. */
-export interface DependencyUpdate extends Omit<Dependency, "version"> {
+export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
   /** The fully resolved specifier of the dependency. */
-  specifier: URI<"http" | "https" | "npm">;
-  version: {
-    from: SemVerString;
-    to: SemVerString;
+  specifier: {
+    from: URI<"http" | "https" | "npm">;
+    to: URI<"http" | "https" | "npm">;
   };
+  version: VersionProp;
   /** The code of the dependency. */
   code?: {
     /** The original specifier of the dependency appeared in the code. */
@@ -128,24 +133,22 @@ export async function _create(
   referrer: URI<"file">,
   options?: {
     importMap?: ImportMap;
+    force?: boolean;
   },
 ): Promise<DependencyUpdate | undefined> {
-  if (!dependency?.code?.specifier && !dependency?.type?.specifier) {
+  const specifier = dependency.code?.specifier ?? dependency.type?.specifier;
+  if (!specifier) {
     throw new Error(
       `The dependency ${dependency.specifier} in ${
         URI.relative(referrer)
       } has no resolved specifier.`,
     );
   }
-  const specifier = dependency.code?.specifier ?? dependency.type?.specifier!;
-  const newSemVer = await Dependency.resolveLatestSemVer(new URL(specifier));
-  if (!newSemVer) {
+  const latest = await Dependency.resolveLatestURL(new URL(specifier));
+  if (!latest) {
     return;
   }
-  const props = Dependency.parseProps(new URL(specifier));
-  if (!props) {
-    return;
-  }
+  const props = Dependency.parseProps(latest);
   const mapped = options?.importMap?.resolve(
     dependency.specifier,
     referrer,
@@ -153,7 +156,10 @@ export async function _create(
   return {
     ...props,
     // We prefer to put the fully resolved specifier here.
-    specifier: URI.ensure("http", "https", "npm")(specifier),
+    specifier: {
+      from: URI.ensure("http", "https", "npm")(specifier),
+      to: URI.ensure("http", "https", "npm")(latest.href),
+    },
     code: dependency.code && {
       // We prefer to put the original specifier here.
       specifier: dependency.specifier,
@@ -165,8 +171,8 @@ export async function _create(
       span: dependency.type.span,
     },
     version: {
-      from: props.version as SemVerString,
-      to: newSemVer as SemVerString,
+      from: parseSemVer(specifier),
+      to: props.version!, // Latest URL must have a semver
     },
     referrer,
     map: mapped
@@ -193,7 +199,7 @@ function applyToModule(
   }
   const line = span.start.line;
   const lines = content.split("\n");
-  lines[line] = lines[line].replace(update.version.from, update.version.to);
+  lines[line] = lines[line].replace(update.specifier.from, update.specifier.to);
   return lines.join("\n");
 }
 
@@ -205,27 +211,11 @@ export function applyToImportMap(
 ): string {
   const json = JSON.parse(content) as ImportMapJson;
   json.imports[update.map!.from] = update.map!.to.replace(
-    update.version.from,
-    update.version.to,
+    update.specifier.from,
+    update.specifier.to,
   );
   return JSON.stringify(json, null, 2);
 }
-
-export type DependencyUpdateWithRelativePath =
-  & Omit<DependencyUpdate, "specifier" | "map">
-  & {
-    specifier: RelativePath;
-    map?: {
-      source: RelativePath | URI<"http" | "https" | "npm">;
-      from: string;
-      to: URI<"http" | "https" | "npm">;
-    };
-  };
-
-export type VersionProp = {
-  from?: string;
-  to: string;
-};
 
 export function createVersionProp(
   dependencies: DependencyUpdate[],
