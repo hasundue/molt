@@ -1,19 +1,19 @@
 import {
-  afterAll,
-  beforeAll,
+  afterEach,
+  assertSpyCalls,
+  beforeEach,
   describe,
   it,
   type Stub,
-  stub,
 } from "./std/testing.ts";
+import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
 import {
-  assertArrayIncludes,
-  assertEquals,
-  assertExists,
-} from "./std/assert.ts";
+  assertSomeSpyCallArg,
+  createWriteTextFileStub,
+  FileSystemFake,
+} from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
-import { URI } from "./uri.ts";
 
 describe("collect", () => {
   it("direct import", async () => {
@@ -55,23 +55,16 @@ describe("collect", () => {
 });
 
 describe("writeAll", () => {
-  let output: Map<string, string>;
+  let fs: FileSystemFake;
   let writeTextFileStub: Stub;
 
-  beforeAll(() => {
-    output = new Map<string, string>();
-    writeTextFileStub = stub(
-      Deno,
-      "writeTextFile",
-      // deno-lint-ignore require-await
-      async (path, data) => {
-        output.set(path.toString(), data.toString());
-      },
-    );
+  afterEach(() => {
+    writeTextFileStub.restore();
   });
 
-  afterAll(() => {
-    writeTextFileStub.restore();
+  beforeEach(() => {
+    fs = new FileSystemFake();
+    writeTextFileStub = createWriteTextFileStub(fs);
   });
 
   it("direct import", async () => {
@@ -79,8 +72,17 @@ describe("writeAll", () => {
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
     await FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("test/fixtures/direct-import/mod.ts")));
-    assertExists(output.get(URI.from("test/fixtures/direct-import/lib.ts")));
+    assertSomeSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/direct-import/mod.ts", import.meta.url),
+    );
+    assertSomeSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/direct-import/lib.ts", import.meta.url),
+    );
+    assertSpyCalls(writeTextFileStub, 2);
   });
 
   it("import map", async () => {
@@ -91,7 +93,17 @@ describe("writeAll", () => {
       ),
     );
     await FileUpdate.writeAll(results);
-    assertExists(output.get(URI.from("test/fixtures/import-map/deno.json")));
+    assertSomeSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
+    );
+    assertSomeSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/import-map/lib.ts", import.meta.url),
+    );
+    assertSpyCalls(writeTextFileStub, 2);
   });
 
   it("import map with no resolve", async () => {
@@ -102,8 +114,11 @@ describe("writeAll", () => {
       ),
     );
     await FileUpdate.writeAll(results);
-    assertExists(
-      output.get(URI.from("test/fixtures/import-map-no-resolve/mod.ts")),
+    assertSomeSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/import-map-no-resolve/mod.ts", import.meta.url),
     );
+    assertSpyCalls(writeTextFileStub, 1);
   });
 });
