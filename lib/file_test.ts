@@ -9,8 +9,8 @@ import {
 import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
 import {
   assertFindSpyCallArg,
-  createWriteTextFileStub,
   FileSystemFake,
+  WriteTextFileStub,
 } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
@@ -56,7 +56,7 @@ describe("collect", () => {
 
 describe("writeAll", () => {
   let fs: FileSystemFake;
-  let writeTextFileStub: ReturnType<typeof createWriteTextFileStub>;
+  let writeTextFileStub: WriteTextFileStub;
 
   afterEach(() => {
     writeTextFileStub.restore();
@@ -64,7 +64,7 @@ describe("writeAll", () => {
 
   beforeEach(() => {
     fs = new FileSystemFake();
-    writeTextFileStub = createWriteTextFileStub(fs);
+    writeTextFileStub = WriteTextFileStub.create(fs);
   });
 
   it("direct import", async (t) => {

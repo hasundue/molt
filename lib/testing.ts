@@ -41,36 +41,42 @@ export function createCommandStub(): ConstructorSpy<
 
 export class FileSystemFake extends Map<URI<"file">, string> {}
 
-export function createReadTextFileStub(
-  fs: FileSystemFake,
-  options?: {
-    readThrough?: boolean;
+export const ReadTextFileStub = {
+  create(
+    fs: FileSystemFake,
+    options?: {
+      readThrough?: boolean;
+    },
+  ): Stub {
+    const original = Deno.readTextFile;
+    return stub(
+      Deno,
+      "readTextFile",
+      async (path) => {
+        return fs.get(URI.from(path)) ?? options?.readThrough
+          ? await original(path)
+          : _throw(new Deno.errors.NotFound(`File not found: ${path}`));
+      },
+    );
   },
-): Stub {
-  const original = Deno.readTextFile;
-  return stub(
-    Deno,
-    "readTextFile",
-    async (path) => {
-      return fs.get(URI.from(path)) ?? options?.readThrough
-        ? await original(path)
-        : _throw(new Deno.errors.NotFound(`File not found: ${path}`));
-    },
-  );
-}
+};
+export type ReadTextFileStub = ReturnType<typeof ReadTextFileStub.create>;
 
-export function createWriteTextFileStub(
-  fs: FileSystemFake,
-) {
-  return stub(
-    Deno,
-    "writeTextFile",
-    // deno-lint-ignore require-await
-    async (path, data) => {
-      fs.set(URI.from(path), data.toString());
-    },
-  );
-}
+export const WriteTextFileStub = {
+  create(
+    fs: FileSystemFake,
+  ) {
+    return stub(
+      Deno,
+      "writeTextFile",
+      // deno-lint-ignore require-await
+      async (path, data) => {
+        fs.set(URI.from(path), data.toString());
+      },
+    );
+  },
+};
+export type WriteTextFileStub = ReturnType<typeof WriteTextFileStub.create>;
 
 /** Asserts that a spy is called as expected at any index. */
 export function assertFindSpyCall<

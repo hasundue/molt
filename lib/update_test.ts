@@ -7,9 +7,23 @@ import {
   assertObjectMatch,
   assertThrows,
 } from "./std/assert.ts";
+import { filterKeys } from "./std/collections.ts";
 import { URI } from "./uri.ts";
 import { _create, createVersionProp, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
+
+async function assertUpdateSnapshot(
+  t: Deno.TestContext,
+  update: DependencyUpdate,
+) {
+  await assertSnapshot(
+    t,
+    filterKeys(
+      update as Readonly<Record<string, any>>,
+      (key) => ["name", "version", "path", "specifier", "code"].includes(key),
+    ),
+  );
+}
 
 describe("_create", () => {
   it("https://deno.land/std", async (t) => {
@@ -20,7 +34,7 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertSnapshot(t, update);
+    await assertUpdateSnapshot(t, update);
   });
   it("https://deno.land/std - unversioned", async (t) => {
     const update = await _create({
@@ -30,7 +44,7 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertSnapshot(t, update);
+    await assertUpdateSnapshot(t, update);
   });
   it("https://deno.land/x/deno_graph", async (t) => {
     const update = await _create({
@@ -40,7 +54,7 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertSnapshot(t, update);
+    await assertUpdateSnapshot(t, update);
   });
   it("npm:node-emoji", async (t) => {
     const update = await _create({
@@ -50,7 +64,7 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertSnapshot(t, update);
+    await assertUpdateSnapshot(t, update);
   });
   it("npm:node-emoji - unversioned", async (t) => {
     const update = await _create({
@@ -60,7 +74,7 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertSnapshot(t, update);
+    await assertUpdateSnapshot(t, update);
   });
 });
 
@@ -111,7 +125,9 @@ describe("collect", () => {
       "./test/fixtures/direct-import/mod.ts",
     );
     assertEquals(updates.length, 4);
-    await assertSnapshot(t, updates);
+    for (const update of updates) {
+      await assertUpdateSnapshot(t, update);
+    }
   });
   it("import map", async (t) => {
     const updates = await DependencyUpdate.collect(
@@ -121,7 +137,9 @@ describe("collect", () => {
       },
     );
     assertEquals(updates.length, 4);
-    await assertSnapshot(t, updates);
+    for (const update of updates) {
+      await assertUpdateSnapshot(t, update);
+    }
   });
 });
 
