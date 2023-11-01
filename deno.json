@@ -1,9 +1,10 @@
 {
   "tasks": {
-    "cache": "deno cache ./lib/*/*.ts --reload --lock",
+    "cache": "deno cache ./lib/*/*.ts --lock",
     "lock": "deno task -q cache --lock-write && git add deno.lock",
-    "check": "deno check ./*.ts ./lib/*/*.ts",
+    "check": "deno check ./*.ts ./lib/**/*.ts",
     "test": "deno test -A --no-check",
+    "test:update": "deno task -q test -- --update",
     "dev": "deno fmt && deno lint && deno task lock && deno task -q check && deno task -q test",
     "install": "deno install -f --name molt --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
     "run:molt": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno ./cli.ts",

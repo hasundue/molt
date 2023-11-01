@@ -1,0 +1,347 @@
+export const snapshot = {};
+
+snapshot[`_create > https://deno.land/std 1`] = `
+{
+  code: {
+    span: undefined,
+    specifier: "https://deno.land/std@0.1.0/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std@0.1.0/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: "0.1.0",
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`_create > https://deno.land/std - unversioned 1`] = `
+{
+  code: {
+    span: undefined,
+    specifier: "https://deno.land/std/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: undefined,
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`_create > https://deno.land/x/deno_graph 1`] = `
+{
+  code: {
+    span: undefined,
+    specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
+  },
+  name: "deno.land/x/deno_graph",
+  path: "/mod.ts",
+  specifier: {
+    from: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+  },
+  version: {
+    from: "0.1.0",
+    to: "0.59.1",
+  },
+}
+`;
+
+snapshot[`_create > npm:node-emoji 1`] = `
+{
+  code: {
+    span: undefined,
+    specifier: "npm:node-emoji@1.0.0",
+  },
+  name: "node-emoji",
+  path: "",
+  specifier: {
+    from: "npm:node-emoji@1.0.0",
+    to: "npm:node-emoji@2.1.0",
+  },
+  version: {
+    from: "1.0.0",
+    to: "2.1.0",
+  },
+}
+`;
+
+snapshot[`_create > npm:node-emoji - unversioned 1`] = `
+{
+  code: {
+    span: undefined,
+    specifier: "npm:node-emoji",
+  },
+  name: "node-emoji",
+  path: "",
+  specifier: {
+    from: "npm:node-emoji",
+    to: "npm:node-emoji@2.1.0",
+  },
+  version: {
+    from: undefined,
+    to: "2.1.0",
+  },
+}
+`;
+
+snapshot[`collect > direct import 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 66,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std@0.200.0/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: "0.200.0",
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`collect > direct import 2`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 74,
+        line: 1,
+      },
+      start: {
+        character: 28,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+  },
+  name: "deno.land/x/deno_graph",
+  path: "/mod.ts",
+  specifier: {
+    from: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+  },
+  version: {
+    from: "0.50.0",
+    to: "0.59.1",
+  },
+}
+`;
+
+snapshot[`collect > direct import 3`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 46,
+        line: 2,
+      },
+      start: {
+        character: 24,
+        line: 2,
+      },
+    },
+    specifier: "npm:node-emoji@1.0.0",
+  },
+  name: "node-emoji",
+  path: "",
+  specifier: {
+    from: "npm:node-emoji@1.0.0",
+    to: "npm:node-emoji@2.1.0",
+  },
+  version: {
+    from: "1.0.0",
+    to: "2.1.0",
+  },
+}
+`;
+
+snapshot[`collect > direct import 4`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 66,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std@0.200.0/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: "0.200.0",
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`collect > import map 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 66,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std@0.200.0/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: "0.200.0",
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`collect > import map 2`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 40,
+        line: 1,
+      },
+      start: {
+        character: 28,
+        line: 1,
+      },
+    },
+    specifier: "deno_graph",
+  },
+  name: "deno.land/x/deno_graph",
+  path: "/mod.ts",
+  specifier: {
+    from: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+  },
+  version: {
+    from: "0.50.0",
+    to: "0.59.1",
+  },
+}
+`;
+
+snapshot[`collect > import map 3`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 36,
+        line: 2,
+      },
+      start: {
+        character: 24,
+        line: 2,
+      },
+    },
+    specifier: "node-emoji",
+  },
+  name: "node-emoji",
+  path: "",
+  specifier: {
+    from: "npm:node-emoji@1.0.0",
+    to: "npm:node-emoji@2.1.0",
+  },
+  version: {
+    from: "1.0.0",
+    to: "2.1.0",
+  },
+}
+`;
+
+snapshot[`collect > import map 4`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 40,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "std/version.ts",
+  },
+  name: "deno.land/std",
+  path: "/version.ts",
+  specifier: {
+    from: "https://deno.land/std@0.200.0/version.ts",
+    to: "https://deno.land/std@0.204.0/version.ts",
+  },
+  version: {
+    from: "0.200.0",
+    to: "0.204.0",
+  },
+}
+`;
+
+snapshot[`applyToModule > https://deno.land/x/deno_graph 1`] = `
+'import { VERSION } from "https://deno.land/std@0.200.0/version.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.59.1/mod.ts";
+import { emojify } from "npm:node-emoji@1.0.0";
+import { noop } from "./lib.ts";
+'
+`;
+
+snapshot[`applyToModule > npm:node-emoji 1`] = `
+'import { VERSION } from "https://deno.land/std@0.200.0/version.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.50.0/mod.ts";
+import { emojify } from "npm:node-emoji@2.1.0";
+import { noop } from "./lib.ts";
+'
+`;
+
+snapshot[`applyToImportMap > deno_graph 1`] = `
+'{
+  "imports": {
+    "std/": "https://deno.land/std@0.200.0/",
+    "deno_graph": "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+    "node-emoji": "npm:node-emoji@1.0.0",
+    "/": "./"
+  }
+}'
+`;

@@ -9,8 +9,12 @@ import {
   stub,
 } from "./std/testing.ts";
 import { AssertionError } from "./std/assert.ts";
+import { URI } from "./uri.ts";
 
-export function createCommandStub(): ConstructorSpy {
+export function createCommandStub(): ConstructorSpy<
+  Deno.Command,
+  ConstructorParameters<typeof Deno.Command>
+> {
   const CommandSpy = spy(Deno.Command);
   return class extends CommandSpy {
     #output: Deno.CommandOutput = {
@@ -35,43 +39,47 @@ export function createCommandStub(): ConstructorSpy {
   };
 }
 
-export class FileSystemFake extends Map<string | URL, Uint8Array> {}
+export class FileSystemFake extends Map<URI<"file">, string> {}
 
-export function createReadTextFileStub(
-  fs: FileSystemFake,
-  options?: {
-    readThrough?: boolean;
+export const ReadTextFileStub = {
+  create(
+    fs: FileSystemFake,
+    options?: {
+      readThrough?: boolean;
+    },
+  ): Stub {
+    const original = Deno.readTextFile;
+    return stub(
+      Deno,
+      "readTextFile",
+      async (path) => {
+        return fs.get(URI.from(path)) ?? options?.readThrough
+          ? await original(path)
+          : _throw(new Deno.errors.NotFound(`File not found: ${path}`));
+      },
+    );
   },
-): Stub {
-  const decoder = new TextDecoder();
-  return stub(
-    Deno,
-    "readTextFile",
-    async (path) => {
-      const data = fs.get(path) ?? options?.readThrough
-        ? await Deno.readFile(path)
-        : _throw(new Deno.errors.NotFound(`File not found: ${path}`));
-      return decoder.decode(data);
-    },
-  );
-}
+};
+export type ReadTextFileStub = ReturnType<typeof ReadTextFileStub.create>;
 
-export function createWriteTextFileStub(
-  fs: FileSystemFake,
-): Stub {
-  const encoder = new TextEncoder();
-  return stub(
-    Deno,
-    "writeTextFile",
-    // deno-lint-ignore require-await
-    async (path, data) => {
-      fs.set(path, encoder.encode(data.toString()));
-    },
-  );
-}
+export const WriteTextFileStub = {
+  create(
+    fs: FileSystemFake,
+  ) {
+    return stub(
+      Deno,
+      "writeTextFile",
+      // deno-lint-ignore require-await
+      async (path, data) => {
+        fs.set(URI.from(path), data.toString());
+      },
+    );
+  },
+};
+export type WriteTextFileStub = ReturnType<typeof WriteTextFileStub.create>;
 
 /** Asserts that a spy is called as expected at any index. */
-export function assertSomeSpyCall<
+export function assertFindSpyCall<
   Self,
   Args extends unknown[],
   Return,
@@ -79,7 +87,7 @@ export function assertSomeSpyCall<
   spy: Spy<Self, Args, Return>,
   expected: ExpectedSpyCall<Self, Args, Return>,
 ) {
-  const some = spy.calls.some((_, index) => {
+  const call = spy.calls.find((_, index) => {
     try {
       assertSpyCall(spy, index, expected);
       return true;
@@ -87,12 +95,13 @@ export function assertSomeSpyCall<
       return false;
     }
   });
-  if (!some) {
+  if (!call) {
     throw new AssertionError("Expected spy call does not exist");
   }
+  return call;
 }
 
-export function assertSomeSpyCallArg<
+export function assertFindSpyCallArg<
   Self,
   Args extends unknown[],
   Return,
@@ -102,7 +111,7 @@ export function assertSomeSpyCallArg<
   argIndex: number,
   expected: ExpectedArg,
 ) {
-  const some = spy.calls.some((_, index) => {
+  const call = spy.calls.find((_, index) => {
     try {
       assertSpyCallArg(spy, index, argIndex, expected);
       return true;
@@ -110,9 +119,10 @@ export function assertSomeSpyCallArg<
       return false;
     }
   });
-  if (!some) {
+  if (!call) {
     throw new AssertionError("Expected spy call does not exist");
   }
+  return call;
 }
 
 /** Utility function to throw an error. */

@@ -1,16 +1,16 @@
 import {
   afterEach,
+  assertSnapshot,
   assertSpyCalls,
   beforeEach,
   describe,
   it,
-  type Stub,
 } from "./std/testing.ts";
 import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
 import {
-  assertSomeSpyCallArg,
-  createWriteTextFileStub,
+  assertFindSpyCallArg,
   FileSystemFake,
+  WriteTextFileStub,
 } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
@@ -56,7 +56,7 @@ describe("collect", () => {
 
 describe("writeAll", () => {
   let fs: FileSystemFake;
-  let writeTextFileStub: Stub;
+  let writeTextFileStub: WriteTextFileStub;
 
   afterEach(() => {
     writeTextFileStub.restore();
@@ -64,28 +64,30 @@ describe("writeAll", () => {
 
   beforeEach(() => {
     fs = new FileSystemFake();
-    writeTextFileStub = createWriteTextFileStub(fs);
+    writeTextFileStub = WriteTextFileStub.create(fs);
   });
 
-  it("direct import", async () => {
+  it("direct import", async (t) => {
     const results = await FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
     await FileUpdate.writeAll(results);
-    assertSomeSpyCallArg(
+    const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
       new URL("../test/fixtures/direct-import/mod.ts", import.meta.url),
     );
-    assertSomeSpyCallArg(
+    await assertSnapshot(t, call_1.args[1]);
+    const call_2 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
       new URL("../test/fixtures/direct-import/lib.ts", import.meta.url),
     );
+    await assertSnapshot(t, call_2.args[1]);
     assertSpyCalls(writeTextFileStub, 2);
   });
 
-  it("import map", async () => {
+  it("import map", async (t) => {
     const results = await FileUpdate.collect(
       await DependencyUpdate.collect(
         "./test/fixtures/import-map/mod.ts",
@@ -93,20 +95,22 @@ describe("writeAll", () => {
       ),
     );
     await FileUpdate.writeAll(results);
-    assertSomeSpyCallArg(
+    const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
       new URL("../test/fixtures/import-map/deno.json", import.meta.url),
     );
-    assertSomeSpyCallArg(
+    await assertSnapshot(t, call_1.args[1]);
+    const call_2 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
       new URL("../test/fixtures/import-map/lib.ts", import.meta.url),
     );
+    await assertSnapshot(t, call_2.args[1]);
     assertSpyCalls(writeTextFileStub, 2);
   });
 
-  it("import map with no resolve", async () => {
+  it("import map with no resolve", async (t) => {
     const results = await FileUpdate.collect(
       await DependencyUpdate.collect(
         "./test/fixtures/import-map-no-resolve/mod.ts",
@@ -114,11 +118,32 @@ describe("writeAll", () => {
       ),
     );
     await FileUpdate.writeAll(results);
-    assertSomeSpyCallArg(
+    const call = assertFindSpyCallArg(
       writeTextFileStub,
       0,
       new URL("../test/fixtures/import-map-no-resolve/mod.ts", import.meta.url),
     );
+    await assertSnapshot(t, call.args[1]);
     assertSpyCalls(writeTextFileStub, 1);
+  });
+
+  it("unversioned specifiers", async (t) => {
+    const results = await FileUpdate.collect(
+      await DependencyUpdate.collect("./test/fixtures/unversioned/mod.ts"),
+    );
+    await FileUpdate.writeAll(results);
+    const call_1 = assertFindSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/unversioned/mod.ts", import.meta.url),
+    );
+    await assertSnapshot(t, call_1.args[1]);
+    const call_2 = assertFindSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/fixtures/unversioned/lib.ts", import.meta.url),
+    );
+    await assertSnapshot(t, call_2.args[1]);
+    assertSpyCalls(writeTextFileStub, 2);
   });
 });

@@ -1,0 +1,51 @@
+export const snapshot = {};
+
+snapshot[`writeAll > direct import 1`] = `
+'import { VERSION } from "https://deno.land/std@0.204.0/version.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.59.1/mod.ts";
+import { emojify } from "npm:node-emoji@2.1.0";
+import { noop } from "./lib.ts";
+'
+`;
+
+snapshot[`writeAll > direct import 2`] = `
+'import { VERSION } from "https://deno.land/std@0.204.0/version.ts";
+export const noop = () => {};
+'
+`;
+
+snapshot[`writeAll > import map 1`] = `
+'{
+  "imports": {
+    "std/": "https://deno.land/std@0.200.0/",
+    "deno_graph": "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+    "node-emoji": "npm:node-emoji@2.1.0",
+    "/": "./"
+  }
+}'
+`;
+
+snapshot[`writeAll > import map 2`] = `
+'import { VERSION } from "https://deno.land/std@0.204.0/version.ts";
+export const noop = () => {};
+'
+`;
+
+snapshot[`writeAll > import map with no resolve 1`] = `
+'import {} from "https://deno.land/std@0.204.0/version.ts";
+'
+`;
+
+snapshot[`writeAll > unversioned specifiers 1`] = `
+'import { VERSION } from "https://deno.land/std@0.204.0/version.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.59.1/mod.ts";
+import { emojify } from "npm:node-emoji@2.1.0";
+import { noop } from "./lib.ts";
+'
+`;
+
+snapshot[`writeAll > unversioned specifiers 2`] = `
+'import { VERSION } from "https://deno.land/std@0.204.0/version.ts";
+export const noop = () => {};
+'
+`;
