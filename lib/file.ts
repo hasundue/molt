@@ -1,11 +1,16 @@
+import { assertExists } from "./std/assert.ts";
+import { parse as parseJsonc } from "./std/jsonc.ts";
+import { detectEOL } from "./std/fs.ts";
+import { TextLineStream } from "./std/streams.ts";
 import { DependencyUpdate } from "./update.ts";
+import { ImportMapJson } from "./import_map.ts";
 import { URI } from "./uri.ts";
 
 export interface FileUpdate {
+  /** The type of the updated file. */
+  kind: "module" | "import-map";
   /** The specifier of the updated dependency (a remote module.) */
   specifier: URI<"file">;
-  /** The updated content of the module. */
-  content: string;
   /** The dependency updates in the module. */
   dependencies: DependencyUpdate[];
 }
@@ -16,31 +21,27 @@ export const FileUpdate = {
   writeAll,
 };
 
-async function collect(
+function collect(
   dependencies: DependencyUpdate[],
-): Promise<FileUpdate[]> {
+): FileUpdate[] {
   /** A map of module specifiers to the module content updates. */
-  const results = new Map<URI<"file">, FileUpdate>();
+  const fileToDepsMap = new Map<URI<"file">, DependencyUpdate[]>();
   for (const dependency of dependencies) {
     const referrer = dependency.map?.source ?? dependency.referrer;
-    const current = results.get(referrer) ?? {
-      specifier: referrer,
-      content: await Deno.readTextFile(new URL(referrer)),
-      dependencies: [],
-    } satisfies FileUpdate;
-    const content = dependency.map
-      ? DependencyUpdate.applyToImportMap(dependency, current.content)
-      : DependencyUpdate.applyToModule(dependency, current.content);
-    results.set(referrer, {
-      specifier: current.specifier,
-      content,
-      dependencies: current.dependencies.concat(dependency),
-    });
+    const deps = fileToDepsMap.get(referrer) ??
+      fileToDepsMap.set(referrer, []).get(referrer)!;
+    deps.push(dependency);
   }
-  return Array.from(results.values());
+  return Array.from(fileToDepsMap.entries()).map((
+    [specifier, dependencies],
+  ) => ({
+    kind: dependencies[0].map ? "import-map" : "module",
+    specifier,
+    dependencies,
+  }));
 }
 
-export async function writeAll(
+async function writeAll(
   updates: FileUpdate[],
   options?: {
     onWrite?: (result: FileUpdate) => void | Promise<void>;
@@ -52,8 +53,78 @@ export async function writeAll(
   }
 }
 
-export async function write(
-  result: FileUpdate,
+function write(
+  update: FileUpdate,
 ) {
-  await Deno.writeTextFile(new URL(result.specifier), result.content);
+  switch (update.kind) {
+    case "module":
+      return writeToModule(update);
+    case "import-map":
+      return writeToImportMap(update);
+  }
+}
+
+async function writeToModule(
+  update: FileUpdate,
+) {
+  const lineToUpdateMap = new Map<number, DependencyUpdate>(
+    update.dependencies.map((
+      dependency,
+    ) => [dependency.code.span.start.line, dependency]),
+  );
+  const lines: string[] = [];
+  const content = await Deno.readTextFile(new URL(update.specifier));
+  await ReadableStream.from(content)
+    .pipeThrough(new TextLineStream({ allowCR: true }))
+    .pipeThrough(
+      new TextLineTransformer(
+        (current, line) => {
+          const update = lineToUpdateMap.get(current);
+          return update
+            ? line.replace(update.specifier.from, update.specifier.to)
+            : line;
+        },
+      ),
+    )
+    .pipeTo(
+      new WritableStream({
+        write(line) {
+          lines.push(line);
+        },
+      }),
+    );
+  const eol = detectEOL(content) ?? "\n";
+  await Deno.writeTextFile(new URL(update.specifier), lines.join(eol));
+}
+
+class TextLineTransformer extends TransformStream<string, string> {
+  #current = 0;
+  constructor(
+    transform: (current: number, line: string) => string,
+  ) {
+    super({
+      transform: (line, controller) => {
+        controller.enqueue(transform(this.#current++, line));
+      },
+    });
+  }
+}
+
+async function writeToImportMap(
+  /** The dependency update to apply. */
+  update: FileUpdate,
+): Promise<void> {
+  const content = await Deno.readTextFile(new URL(update.specifier));
+  const json = parseJsonc(content) as unknown as ImportMapJson;
+  for (const dependency of update.dependencies) {
+    assertExists(dependency.map);
+    json.imports[dependency.map.from] = dependency.map.to.replace(
+      dependency.specifier.from,
+      dependency.specifier.to,
+    );
+  }
+  await Deno.writeTextFile(
+    new URL(update.specifier),
+    JSON.stringify(json, null, 2),
+  );
 }

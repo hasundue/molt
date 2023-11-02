@@ -8,7 +8,7 @@ import {
 } from "./x/deno_graph.ts";
 import { URI } from "./uri.ts";
 import type { Maybe } from "./types.ts";
-import { ImportMap, ImportMapJson } from "./import_map.ts";
+import { ImportMap } from "./import_map.ts";
 import { Dependency, type DependencyProps, parseSemVer } from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
@@ -26,15 +26,12 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
     to: URI<"http" | "https" | "npm">;
   };
   version: VersionProp;
-  /** The code of the dependency. */
-  code?: {
+  /** The code of the dependency. Note that `type` in the DependencyJSON is
+   * merged into `code` here for convenience. */
+  code: {
     /** The original specifier of the dependency appeared in the code. */
     specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
-  };
-  type?: {
-    specifier: string;
-    span: NonNullable<DependencyJson["type"]>["span"];
   };
   /** The specifier of the module that imports the dependency. */
   referrer: URI<"file">;
@@ -51,8 +48,6 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
 
 export const DependencyUpdate = {
   collect,
-  applyToModule,
-  applyToImportMap,
 };
 
 class DenoGraph {
@@ -131,10 +126,7 @@ export async function collect(
 export async function _create(
   dependency: DependencyJson,
   referrer: URI<"file">,
-  options?: {
-    importMap?: ImportMap;
-    force?: boolean;
-  },
+  options?: { importMap?: ImportMap },
 ): Promise<DependencyUpdate | undefined> {
   const specifier = dependency.code?.specifier ?? dependency.type?.specifier;
   if (!specifier) {
@@ -153,22 +145,24 @@ export async function _create(
     dependency.specifier,
     referrer,
   );
+  const span = dependency.code?.span ?? dependency.type?.span;
+  if (!span) {
+    throw new Error(
+      `The dependency ${dependency.specifier} in ${
+        URI.relative(referrer)
+      } has no span.`,
+    );
+  }
   return {
     ...props,
-    // We prefer to put the fully resolved specifier here.
     specifier: {
       from: URI.ensure("http", "https", "npm")(specifier),
       to: URI.ensure("http", "https", "npm")(latest.href),
     },
-    code: dependency.code && {
+    code: {
       // We prefer to put the original specifier here.
       specifier: dependency.specifier,
-      span: dependency.code.span,
-    },
-    type: dependency.type && {
-      // We prefer to put the original specifier here.
-      specifier: dependency.specifier,
-      span: dependency.type.span,
+      span,
     },
     version: {
       from: parseSemVer(specifier),
@@ -183,38 +177,6 @@ export async function _create(
       }
       : undefined,
   };
-}
-
-function applyToModule(
-  /** The dependency update to apply. */
-  update: DependencyUpdate,
-  /** Content of the module to update. */
-  content: string,
-): string {
-  const span = update.code?.span ?? update.type?.span!;
-  if (span.start.line !== span.end.line) {
-    throw new Error(
-      `The import specifier ${update.specifier} in ${update.referrer} is not a single line`,
-    );
-  }
-  const line = span.start.line;
-  const lines = content.split("\n");
-  lines[line] = lines[line].replace(update.specifier.from, update.specifier.to);
-  return lines.join("\n");
-}
-
-export function applyToImportMap(
-  /** The dependency update to apply. */
-  update: DependencyUpdate,
-  /** Content of the import map to update. */
-  content: string,
-): string {
-  const json = JSON.parse(content) as ImportMapJson;
-  json.imports[update.map!.from] = update.map!.to.replace(
-    update.specifier.from,
-    update.specifier.to,
-  );
-  return JSON.stringify(json, null, 2);
 }
 
 export function createVersionProp(
