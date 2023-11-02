@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.8.0](https://github.com/hasundue/molt/compare/0.7.6...0.8.0) (2023-11-02)
+
+
+### ⚠ BREAKING CHANGES
+
+* insert latest semver into unversioned deps ([#63](https://github.com/hasundue/molt/issues/63))
+
+### Features
+
+* insert latest semver into unversioned deps ([#63](https://github.com/hasundue/molt/issues/63)) ([6e0a76e](https://github.com/hasundue/molt/commit/6e0a76e6d537b005f944f42b3c399248a6be0f5f))
+
+
+### Bug Fixes
+
+* **git:** avoid reading files concurrently ([#66](https://github.com/hasundue/molt/issues/66)) ([4f655cf](https://github.com/hasundue/molt/commit/4f655cf3029d1f2e70acb0745ac41f45739c4205))
+
 ## [0.7.6](https://github.com/hasundue/molt/compare/0.7.5...0.7.6) (2023-10-24)
 
 
