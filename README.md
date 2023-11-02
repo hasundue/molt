@@ -1,6 +1,6 @@
 # 🦕 Molt
 
-[![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
+[![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
 > [!WARNING]\
