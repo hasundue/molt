@@ -103,7 +103,7 @@ async function execGitCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
-  const results = await FileUpdate.collect(commit.updates);
+  const results = FileUpdate.collect(commit.updates);
   await FileUpdate.writeAll(results);
   await options?.preCommit?.(commit);
   await _add(results, options?.gitAddOptions ?? []);

@@ -3,7 +3,6 @@ import { assertSnapshot, beforeAll, describe, it } from "./std/testing.ts";
 import {
   assertEquals,
   assertExists,
-  assertNotEquals,
   assertObjectMatch,
   assertThrows,
 } from "./std/assert.ts";
@@ -30,6 +29,7 @@ describe("_create", () => {
     const update = await _create({
       specifier: "https://deno.land/std@0.1.0/version.ts",
       code: {
+        span: {},
         specifier: "https://deno.land/std@0.1.0/version.ts",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
@@ -40,6 +40,7 @@ describe("_create", () => {
     const update = await _create({
       specifier: "https://deno.land/std/version.ts",
       code: {
+        span: {},
         specifier: "https://deno.land/std/version.ts",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
@@ -50,6 +51,7 @@ describe("_create", () => {
     const update = await _create({
       specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
       code: {
+        span: {},
         specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
@@ -60,6 +62,7 @@ describe("_create", () => {
     const update = await _create({
       specifier: "npm:node-emoji@1.0.0",
       code: {
+        span: {},
         specifier: "npm:node-emoji@1.0.0",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
@@ -70,6 +73,7 @@ describe("_create", () => {
     const update = await _create({
       specifier: "npm:node-emoji",
       code: {
+        span: {},
         specifier: "npm:node-emoji",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
@@ -90,6 +94,7 @@ describe("_create - with import map", () => {
       {
         specifier: "std/version.ts",
         code: {
+          span: {},
           specifier: "https://deno.land/std@0.200.0/version.ts",
         } as any,
       },
@@ -140,65 +145,6 @@ describe("collect", () => {
     for (const update of updates) {
       await assertUpdateSnapshot(t, update);
     }
-  });
-});
-
-describe("applyToModule", () => {
-  let updates: DependencyUpdate[];
-  let content: string;
-  beforeAll(async () => {
-    updates = await DependencyUpdate.collect(
-      "./test/fixtures/direct-import/mod.ts",
-    );
-    content = await Deno.readTextFile("./test/fixtures/direct-import/mod.ts");
-  });
-  it("https://deno.land/x/deno_graph", async (t) => {
-    const update = updates.find((update) =>
-      update.specifier.from.includes("deno.land/x/deno_graph")
-    )!;
-    const result = DependencyUpdate.applyToModule(
-      update,
-      content,
-    );
-    assertExists(result);
-    assertNotEquals(result, content);
-    await assertSnapshot(t, result);
-  });
-  it("npm:node-emoji", async (t) => {
-    const update = updates.find((update) =>
-      update.specifier.from.includes("node-emoji")
-    )!;
-    const result = DependencyUpdate.applyToModule(
-      update,
-      content,
-    );
-    assertExists(result);
-    assertNotEquals(result, content);
-    await assertSnapshot(t, result);
-  });
-});
-
-describe("applyToImportMap", () => {
-  let updates: DependencyUpdate[];
-  let content: string;
-  beforeAll(async () => {
-    updates = await DependencyUpdate.collect(
-      "./test/fixtures/import-map/mod.ts",
-      { importMap: "test/fixtures/import-map/deno.json" },
-    );
-    content = await Deno.readTextFile("test/fixtures/import-map/deno.json");
-  });
-  it("deno_graph", async (t) => {
-    const update = updates.find((update) =>
-      update.code?.specifier === "deno_graph"
-    )!;
-    const result = DependencyUpdate.applyToImportMap(
-      update,
-      content,
-    );
-    assertExists(result);
-    assertNotEquals(result, content);
-    await assertSnapshot(t, result);
   });
 });
 

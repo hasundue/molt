@@ -3,18 +3,18 @@ export const snapshot = {};
 snapshot[`_create > https://deno.land/std 1`] = `
 {
   code: {
-    span: undefined,
+    span: {},
     specifier: "https://deno.land/std@0.1.0/version.ts",
   },
   name: "deno.land/std",
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std@0.1.0/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: "0.1.0",
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
 `;
@@ -22,18 +22,18 @@ snapshot[`_create > https://deno.land/std 1`] = `
 snapshot[`_create > https://deno.land/std - unversioned 1`] = `
 {
   code: {
-    span: undefined,
+    span: {},
     specifier: "https://deno.land/std/version.ts",
   },
   name: "deno.land/std",
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: undefined,
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
 `;
@@ -41,18 +41,18 @@ snapshot[`_create > https://deno.land/std - unversioned 1`] = `
 snapshot[`_create > https://deno.land/x/deno_graph 1`] = `
 {
   code: {
-    span: undefined,
+    span: {},
     specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
   },
   name: "deno.land/x/deno_graph",
   path: "/mod.ts",
   specifier: {
     from: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
-    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.2/mod.ts",
   },
   version: {
     from: "0.1.0",
-    to: "0.59.1",
+    to: "0.59.2",
   },
 }
 `;
@@ -60,7 +60,7 @@ snapshot[`_create > https://deno.land/x/deno_graph 1`] = `
 snapshot[`_create > npm:node-emoji 1`] = `
 {
   code: {
-    span: undefined,
+    span: {},
     specifier: "npm:node-emoji@1.0.0",
   },
   name: "node-emoji",
@@ -79,7 +79,7 @@ snapshot[`_create > npm:node-emoji 1`] = `
 snapshot[`_create > npm:node-emoji - unversioned 1`] = `
 {
   code: {
-    span: undefined,
+    span: {},
     specifier: "npm:node-emoji",
   },
   name: "node-emoji",
@@ -114,11 +114,11 @@ snapshot[`collect > direct import 1`] = `
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std@0.200.0/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: "0.200.0",
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
 `;
@@ -142,11 +142,11 @@ snapshot[`collect > direct import 2`] = `
   path: "/mod.ts",
   specifier: {
     from: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
-    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.2/mod.ts",
   },
   version: {
     from: "0.50.0",
-    to: "0.59.1",
+    to: "0.59.2",
   },
 }
 `;
@@ -198,11 +198,11 @@ snapshot[`collect > direct import 4`] = `
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std@0.200.0/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: "0.200.0",
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
 `;
@@ -226,11 +226,11 @@ snapshot[`collect > import map 1`] = `
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std@0.200.0/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: "0.200.0",
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
 `;
@@ -254,11 +254,11 @@ snapshot[`collect > import map 2`] = `
   path: "/mod.ts",
   specifier: {
     from: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
-    to: "https://deno.land/x/deno_graph@0.59.1/mod.ts",
+    to: "https://deno.land/x/deno_graph@0.59.2/mod.ts",
   },
   version: {
     from: "0.50.0",
-    to: "0.59.1",
+    to: "0.59.2",
   },
 }
 `;
@@ -310,38 +310,11 @@ snapshot[`collect > import map 4`] = `
   path: "/version.ts",
   specifier: {
     from: "https://deno.land/std@0.200.0/version.ts",
-    to: "https://deno.land/std@0.204.0/version.ts",
+    to: "https://deno.land/std@0.205.0/version.ts",
   },
   version: {
     from: "0.200.0",
-    to: "0.204.0",
+    to: "0.205.0",
   },
 }
-`;
-
-snapshot[`applyToModule > https://deno.land/x/deno_graph 1`] = `
-'import { VERSION } from "https://deno.land/std@0.200.0/version.ts";
-import { createGraph } from "https://deno.land/x/deno_graph@0.59.1/mod.ts";
-import { emojify } from "npm:node-emoji@1.0.0";
-import { noop } from "./lib.ts";
-'
-`;
-
-snapshot[`applyToModule > npm:node-emoji 1`] = `
-'import { VERSION } from "https://deno.land/std@0.200.0/version.ts";
-import { createGraph } from "https://deno.land/x/deno_graph@0.50.0/mod.ts";
-import { emojify } from "npm:node-emoji@2.1.0";
-import { noop } from "./lib.ts";
-'
-`;
-
-snapshot[`applyToImportMap > deno_graph 1`] = `
-'{
-  "imports": {
-    "std/": "https://deno.land/std@0.200.0/",
-    "deno_graph": "https://deno.land/x/deno_graph@0.59.1/mod.ts",
-    "node-emoji": "npm:node-emoji@1.0.0",
-    "/": "./"
-  }
-}'
 `;

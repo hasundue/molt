@@ -1,12 +1,12 @@
 import {
   afterAll,
-  assertSnapshot,
   assertSpyCalls,
   beforeAll,
   beforeEach,
   describe,
   it,
 } from "./std/testing.ts";
+import { assertArrayIncludes } from "./std/assert.ts";
 import {
   assertFindSpyCall,
   createCommandStub,
@@ -48,17 +48,26 @@ describe("commitAll()", () => {
     Deno.Command = CommandStub;
   });
 
+  const expected = [
+    `import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
+import { emojify } from "npm:node-emoji@2.1.0";
+import { noop } from "./lib.ts";`,
+    `import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+export const noop = () => {};`,
+  ];
+
   // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
-  it("no grouping", async (t) => {
+  it("no grouping", async () => {
     await commitAll(updates);
     // TODO: Can't test this because of the order of targets is not guaranteed.
     // assertGitAdd(CommandStub, "src/fixtures/mod.ts", "src/fixtures/lib.ts");
     assertGitCommit(CommandStub, "build(deps): update dependencies");
     assertSpyCalls(CommandStub, 2);
-    await assertSnapshot(t, Array.from(fileSystemFake.values()));
+    assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
   });
 
-  it("group by dependency name", async (t) => {
+  it("group by dependency name", async () => {
     await commitAll(updates, {
       groupBy: (update) => update.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
@@ -71,10 +80,10 @@ describe("commitAll()", () => {
     // assertGitAdd(CommandStub, "src/fixtures/lib.ts", "src/fixtures/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update deno.land/std");
     assertSpyCalls(CommandStub, 6);
-    await assertSnapshot(t, Array.from(fileSystemFake.values()));
+    assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
   });
 
-  it("group by module (file) name", async (t) => {
+  it("group by module (file) name", async () => {
     await commitAll(updates, {
       groupBy: (update) => update.referrer,
       composeCommitMessage: ({ group }) => {
@@ -86,15 +95,19 @@ describe("commitAll()", () => {
     assertGitAdd(CommandStub, "test/fixtures/direct-import/mod.ts");
     assertGitCommit(
       CommandStub,
-      "build(deps): update test/fixtures/direct-import/mod.ts",
+      `build(deps): update ${
+        normalizePath("test/fixtures/direct-import/mod.ts")
+      }`,
     );
     assertGitAdd(CommandStub, "test/fixtures/direct-import/lib.ts");
     assertGitCommit(
       CommandStub,
-      "build(deps): update test/fixtures/direct-import/lib.ts",
+      `build(deps): update ${
+        normalizePath("test/fixtures/direct-import/lib.ts")
+      }`,
     );
     assertSpyCalls(CommandStub, 4);
-    await assertSnapshot(t, Array.from(fileSystemFake.values()));
+    assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
   });
 });
 

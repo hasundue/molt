@@ -9,6 +9,7 @@ import {
   stub,
 } from "./std/testing.ts";
 import { AssertionError } from "./std/assert.ts";
+import { EOL, formatEOL } from "./std/fs.ts";
 import { URI } from "./uri.ts";
 
 export function createCommandStub(): ConstructorSpy<
@@ -53,9 +54,10 @@ export const ReadTextFileStub = {
       Deno,
       "readTextFile",
       async (path) => {
-        return fs.get(URI.from(path)) ?? options?.readThrough
-          ? await original(path)
-          : _throw(new Deno.errors.NotFound(`File not found: ${path}`));
+        return fs.get(URI.from(path)) ??
+          (options?.readThrough
+            ? await original(path)
+            : _throw(new Deno.errors.NotFound(`File not found: ${path}`)));
       },
     );
   },
@@ -69,9 +71,9 @@ export const WriteTextFileStub = {
     return stub(
       Deno,
       "writeTextFile",
-      // deno-lint-ignore require-await
-      async (path, data) => {
-        fs.set(URI.from(path), data.toString());
+      (path, data) => {
+        fs.set(URI.from(path), formatEOL(data.toString(), EOL.LF));
+        return Promise.resolve();
       },
     );
   },
@@ -96,7 +98,9 @@ export function assertFindSpyCall<
     }
   });
   if (!call) {
-    throw new AssertionError("Expected spy call does not exist");
+    throw new AssertionError(
+      `Expected spy call does not exist: ${JSON.stringify(expected)}`,
+    );
   }
   return call;
 }
