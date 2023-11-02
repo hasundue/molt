@@ -148,8 +148,7 @@ molt check [...options] <...entrypoints>
 ##### Example: Commit changes to git
 
 ```
-> deno run --allow-env --allow-net --allow-read --allow-write=. --allow-run=git\
-https://deno.land/x/molt/cli.ts check src/fixtures/mod.ts 
+> molt check src/fixtures/mod.ts 
 🔎 Checking for updates...
 💡 Found updates:
     ...
