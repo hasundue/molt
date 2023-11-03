@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/hasundue/molt/compare/0.9.0...0.9.1) (2023-11-03)
+
+
+### Bug Fixes
+
+* **cli:** do not capitalize commit messages ([0608cd9](https://github.com/hasundue/molt/commit/0608cd92d090d5c355fc07467f43b0383e879642))
+
 ## [0.9.0](https://github.com/hasundue/molt/compare/0.8.0...0.9.0) (2023-11-03)
 
 
