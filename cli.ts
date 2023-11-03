@@ -177,7 +177,7 @@ async function _write(
     report?: string;
   },
 ) {
-  const results = await FileUpdate.collect(updates);
+  const results = FileUpdate.collect(updates);
   await FileUpdate.writeAll(results, {
     onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
   });
