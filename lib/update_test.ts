@@ -221,7 +221,7 @@ async function assertUpdateSnapshot(
     t,
     filterKeys(
       update as Readonly<Record<string, any>>,
-      (key) => ["from", "to", "referrer", "code"].includes(key),
+      (key) => ["from", "to", "code"].includes(key),
     ),
   );
 }

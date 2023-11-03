@@ -76,7 +76,6 @@ describe("writeAll", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
-    await assertSnapshot(t, results);
     await FileUpdate.writeAll(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,

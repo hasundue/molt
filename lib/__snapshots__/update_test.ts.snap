@@ -21,7 +21,6 @@ snapshot[`collect > direct import 1`] = `
     scheme: "https://",
     version: "0.200.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/direct-import/lib.ts",
   to: {
     name: "deno.land/std",
     path: "/assert/assert_exists.ts",
@@ -52,7 +51,6 @@ snapshot[`collect > direct import 2`] = `
     scheme: "https://",
     version: "0.50.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
@@ -83,7 +81,6 @@ snapshot[`collect > direct import 3`] = `
     scheme: "npm:",
     version: "2.0.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
   to: {
     name: "node-emoji",
     path: "",
@@ -114,7 +111,6 @@ snapshot[`collect > direct import 4`] = `
     scheme: "https://",
     version: "0.200.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
   to: {
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
@@ -145,7 +141,6 @@ snapshot[`collect > import map 1`] = `
     scheme: "https://",
     version: "0.200.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/import-map/lib.ts",
   to: {
     name: "deno.land/std",
     path: "/version.ts",
@@ -176,7 +171,6 @@ snapshot[`collect > import map 2`] = `
     scheme: "https://",
     version: "0.50.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/import-map/mod.ts",
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
@@ -207,7 +201,6 @@ snapshot[`collect > import map 3`] = `
     scheme: "npm:",
     version: "1.0.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/import-map/mod.ts",
   to: {
     name: "node-emoji",
     path: "",
@@ -238,7 +231,6 @@ snapshot[`collect > import map 4`] = `
     scheme: "https://",
     version: "0.200.0",
   },
-  referrer: "file:///home/shun/molt/test/fixtures/import-map/mod.ts",
   to: {
     name: "deno.land/std",
     path: "/",
