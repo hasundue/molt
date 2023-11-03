@@ -1,8 +1,5 @@
 {
   "version": "3",
-  "redirects": {
-    "https://pax.deno.dev/hasundue/deno_std@feat-constructor-spy/testing/mock.ts": "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/testing/mock.ts"
-  },
   "remote": {
     "https://deno.land/std@0.186.0/async/deferred.ts": "42790112f36a75a57db4a96d33974a936deb7b04d25c6084a9fa8a49f135def8",
     "https://deno.land/std@0.196.0/_util/os.ts": "d932f56d41e4f6a6093d56044e29ce637f8dcc43c5a90af43504a889cf1775e3",
