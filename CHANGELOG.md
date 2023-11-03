@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/hasundue/molt/compare/0.8.0...0.9.0) (2023-11-03)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mod:** critical bug in replacing specifiers
+
+### Bug Fixes
+
+* **mod:** critical bug in replacing specifiers ([86a102f](https://github.com/hasundue/molt/commit/86a102fca8ae1b5e6f243028a99cf2f3fe3f2830))
+* **mod:** ignore redirected url without semver ([aaf3239](https://github.com/hasundue/molt/commit/aaf3239dbfcaf322f56677dcce9df904b15d11d2))
+
 ## [0.8.0](https://github.com/hasundue/molt/compare/0.7.6...0.8.0) (2023-11-02)
 
 
