@@ -9,7 +9,12 @@ import {
 import { URI } from "./uri.ts";
 import type { Maybe } from "./types.ts";
 import { ImportMap } from "./import_map.ts";
-import { Dependency, type DependencyProps, parseSemVer } from "./dependency.ts";
+import {
+  type DependencyProps,
+  parseProps,
+  parseSemVer,
+  resolveLatestURL,
+} from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
@@ -136,11 +141,11 @@ export async function _create(
       } has no resolved specifier.`,
     );
   }
-  const latest = await Dependency.resolveLatestURL(new URL(specifier));
+  const latest = await resolveLatestURL(new URL(specifier));
   if (!latest) {
     return;
   }
-  const props = Dependency.parseProps(latest);
+  const props = parseProps(latest);
   const mapped = options?.importMap?.resolve(
     dependency.specifier,
     referrer,

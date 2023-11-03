@@ -29,12 +29,7 @@ export interface DependencyProps {
   path?: Path;
 }
 
-export const Dependency = {
-  parseProps,
-  resolveLatestURL,
-};
-
-function parseProps(url: URL): DependencyProps {
+export function parseProps(url: URL): DependencyProps {
   const body = url.hostname + url.pathname;
   const semver = parseSemVer(url.href);
   if (!semver) {
