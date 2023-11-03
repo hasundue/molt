@@ -9,28 +9,16 @@ import {
 import { URI } from "./uri.ts";
 import type { Maybe } from "./types.ts";
 import { ImportMap } from "./import_map.ts";
-import {
-  type DependencyProps,
-  parseProps,
-  parseSemVer,
-  resolveLatestURL,
-} from "./dependency.ts";
+import { Dependency, LatestDependency } from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-export type VersionProp = {
-  from?: string;
-  to: string;
-};
-
 /** Representation of a dependency update. */
-export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
-  /** The fully resolved specifier of the dependency. */
-  specifier: {
-    from: URI<"http" | "https" | "npm">;
-    to: URI<"http" | "https" | "npm">;
-  };
-  version: VersionProp;
+export interface DependencyUpdate {
+  /** Properties of the dependency being updated. */
+  from: Dependency;
+  /** Properties of the dependency after the update. */
+  to: LatestDependency;
   /** The code of the dependency. Note that `type` in the DependencyJSON is
    * merged into `code` here for convenience. */
   code: {
@@ -53,6 +41,7 @@ export interface DependencyUpdate extends Omit<DependencyProps, "version"> {
 
 export const DependencyUpdate = {
   collect,
+  getVersionChange,
 };
 
 class DenoGraph {
@@ -66,30 +55,6 @@ class DenoGraph {
     this.#initialized = true;
   }
 }
-
-const load: NonNullable<CreateGraphOptions["load"]> = async (
-  specifier,
-) => {
-  const url = new URL(specifier); // should not throw
-  switch (url.protocol) {
-    case "node:":
-    case "npm:":
-      return {
-        kind: "external",
-        specifier,
-      };
-    case "http:":
-    case "https:":
-      return {
-        kind: "external",
-        specifier,
-      };
-    case "file:":
-      return await defaultLoad(specifier);
-    default:
-      throw new Error(`Unsupported protocol: ${url.protocol}`);
-  }
-};
 
 export async function collect(
   entrypoints: string | string[],
@@ -128,50 +93,68 @@ export async function collect(
   return updates;
 }
 
+const load: NonNullable<CreateGraphOptions["load"]> = async (
+  specifier,
+) => {
+  const url = new URL(specifier); // should not throw
+  switch (url.protocol) {
+    case "node:":
+    case "npm:":
+      return {
+        kind: "external",
+        specifier,
+      };
+    case "http:":
+    case "https:":
+      return {
+        kind: "external",
+        specifier,
+      };
+    case "file:":
+      return await defaultLoad(specifier);
+    default:
+      throw new Error(`Unsupported protocol: ${url.protocol}`);
+  }
+};
+
 export async function _create(
-  dependency: DependencyJson,
+  dependencyJson: DependencyJson,
   referrer: URI<"file">,
   options?: { importMap?: ImportMap },
-): Promise<DependencyUpdate | undefined> {
-  const specifier = dependency.code?.specifier ?? dependency.type?.specifier;
+): Promise<Maybe<DependencyUpdate>> {
+  const specifier = dependencyJson.code?.specifier ??
+    dependencyJson.type?.specifier;
   if (!specifier) {
     throw new Error(
-      `The dependency ${dependency.specifier} in ${
+      `The dependency ${dependencyJson.specifier} in ${
         URI.relative(referrer)
       } has no resolved specifier.`,
     );
   }
-  const latest = await resolveLatestURL(new URL(specifier));
+  const mapped = options?.importMap?.resolve(
+    dependencyJson.specifier,
+    referrer,
+  );
+  const dependency = Dependency.parse(new URL(mapped?.to ?? specifier));
+  const latest = await Dependency.resolveLatest(dependency);
   if (!latest) {
     return;
   }
-  const props = parseProps(latest);
-  const mapped = options?.importMap?.resolve(
-    dependency.specifier,
-    referrer,
-  );
-  const span = dependency.code?.span ?? dependency.type?.span;
+  const span = dependencyJson.code?.span ?? dependencyJson.type?.span;
   if (!span) {
     throw new Error(
-      `The dependency ${dependency.specifier} in ${
+      `The dependency ${dependencyJson.specifier} in ${
         URI.relative(referrer)
       } has no span.`,
     );
   }
   return {
-    ...props,
-    specifier: {
-      from: URI.ensure("http", "https", "npm")(specifier),
-      to: URI.ensure("http", "https", "npm")(latest.href),
-    },
+    from: dependency,
+    to: latest,
     code: {
       // We prefer to put the original specifier here.
-      specifier: dependency.specifier,
+      specifier: dependencyJson.specifier,
       span,
-    },
-    version: {
-      from: parseSemVer(specifier),
-      to: props.version!, // Latest URL must have a semver
     },
     referrer,
     map: mapped
@@ -184,21 +167,26 @@ export async function _create(
   };
 }
 
-export function createVersionProp(
+export type VersionChange = {
+  from?: string;
+  to: string;
+};
+
+export function getVersionChange(
   dependencies: DependencyUpdate[],
-): Maybe<VersionProp> {
-  const modules = distinct(dependencies.map((d) => d.name));
+): Maybe<VersionChange> {
+  const modules = distinct(dependencies.map((d) => d.to.name));
   if (modules.length > 1) {
     // Cannot provide a well-defined version prop
     return;
   }
-  const tos = distinct(dependencies.map((d) => d.version.to));
+  const tos = distinct(dependencies.map((d) => d.to.version));
   if (tos.length > 1) {
     throw new Error(
       "Multiple target versions are specified for a single module",
     );
   }
-  const froms = distinct(dependencies.map((d) => d.version.from));
+  const froms = distinct(dependencies.map((d) => d.from.version));
   return {
     from: froms.length === 1 ? froms[0] : undefined,
     to: tos[0],

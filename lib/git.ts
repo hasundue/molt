@@ -1,11 +1,11 @@
-import { createVersionProp, DependencyUpdate, VersionProp } from "./update.ts";
+import { DependencyUpdate, VersionChange } from "./update.ts";
 import { FileUpdate } from "./file.ts";
 import { URI } from "./uri.ts";
 
 export interface CommitProps {
   /** The name of the module group */
   group: string;
-  version?: VersionProp;
+  version?: VersionChange;
 }
 
 export interface CommitOptions {
@@ -80,7 +80,7 @@ function createGitCommitSequence(
   const commits: GitCommit[] = Array.from(groups.entries()).map((
     [group, updates],
   ) => {
-    const version = createVersionProp(updates);
+    const version = DependencyUpdate.getVersionChange(updates);
     return ({
       group,
       version,

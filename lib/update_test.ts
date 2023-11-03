@@ -8,24 +8,11 @@ import {
 } from "./std/assert.ts";
 import { filterKeys } from "./std/collections.ts";
 import { URI } from "./uri.ts";
-import { _create, createVersionProp, DependencyUpdate } from "./update.ts";
+import { _create, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
 
-async function assertUpdateSnapshot(
-  t: Deno.TestContext,
-  update: DependencyUpdate,
-) {
-  await assertSnapshot(
-    t,
-    filterKeys(
-      update as Readonly<Record<string, any>>,
-      (key) => ["name", "version", "path", "specifier", "code"].includes(key),
-    ),
-  );
-}
-
 describe("_create", () => {
-  it("https://deno.land/std", async (t) => {
+  it("https://deno.land/std", async () => {
     const update = await _create({
       specifier: "https://deno.land/std@0.1.0/version.ts",
       code: {
@@ -34,9 +21,26 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertUpdateSnapshot(t, update);
+    assertObjectMatch(update, {
+      from: {
+        scheme: "https://",
+        name: "deno.land/std",
+        version: "0.1.0",
+        path: "/version.ts",
+      },
+      to: {
+        scheme: "https://",
+        name: "deno.land/std",
+        version: "0.205.0",
+        path: "/version.ts",
+      },
+      code: {
+        specifier: "https://deno.land/std@0.1.0/version.ts",
+      },
+      referrer: URI.from("test/fixtures/direct-import/mod.ts"),
+    });
   });
-  it("https://deno.land/std - unversioned", async (t) => {
+  it("https://deno.land/std - unversioned", async () => {
     const update = await _create({
       specifier: "https://deno.land/std/version.ts",
       code: {
@@ -45,31 +49,75 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertUpdateSnapshot(t, update);
+    assertObjectMatch(update, {
+      from: {
+        scheme: "https://",
+        name: "deno.land/std/version.ts",
+      },
+      to: {
+        scheme: "https://",
+        name: "deno.land/std",
+        version: "0.205.0",
+        path: "/version.ts",
+      },
+      code: {
+        specifier: "https://deno.land/std/version.ts",
+      },
+    });
   });
-  it("https://deno.land/x/deno_graph", async (t) => {
+  it("https://deno.land/x/deno_graph", async () => {
     const update = await _create({
-      specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
+      specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
       code: {
         span: {},
-        specifier: "https://deno.land/x/deno_graph@0.1.0/mod.ts",
+        specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertUpdateSnapshot(t, update);
+    assertObjectMatch(update, {
+      from: {
+        scheme: "https://",
+        name: "deno.land/x/deno_graph",
+        version: "0.50.0",
+        path: "/mod.ts",
+      },
+      to: {
+        scheme: "https://",
+        name: "deno.land/x/deno_graph",
+        version: "0.59.2",
+        path: "/mod.ts",
+      },
+      code: {
+        specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+      },
+    });
   });
-  it("npm:node-emoji", async (t) => {
+  it("npm:node-emoji", async () => {
     const update = await _create({
-      specifier: "npm:node-emoji@1.0.0",
+      specifier: "npm:node-emoji@2.0.0",
       code: {
         span: {},
-        specifier: "npm:node-emoji@1.0.0",
+        specifier: "npm:node-emoji@2.0.0",
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertUpdateSnapshot(t, update);
+    assertObjectMatch(update, {
+      from: {
+        scheme: "npm:",
+        name: "node-emoji",
+        version: "2.0.0",
+      },
+      to: {
+        scheme: "npm:",
+        name: "node-emoji",
+        version: "2.1.0",
+      },
+      code: {
+        specifier: "npm:node-emoji@2.0.0",
+      },
+    });
   });
-  it("npm:node-emoji - unversioned", async (t) => {
+  it("npm:node-emoji - unversioned", async () => {
     const update = await _create({
       specifier: "npm:node-emoji",
       code: {
@@ -78,7 +126,20 @@ describe("_create", () => {
       } as any,
     }, URI.from("test/fixtures/direct-import/mod.ts"));
     assertExists(update);
-    await assertUpdateSnapshot(t, update);
+    assertObjectMatch(update, {
+      from: {
+        scheme: "npm:",
+        name: "node-emoji",
+      },
+      to: {
+        scheme: "npm:",
+        name: "node-emoji",
+        version: "2.1.0",
+      },
+      code: {
+        specifier: "npm:node-emoji",
+      },
+    });
   });
 });
 
@@ -103,17 +164,21 @@ describe("_create - with import map", () => {
     );
     assertExists(update);
     assertObjectMatch(update, {
-      name: "deno.land/std",
-      version: {
-        from: "0.200.0",
-        // to: "0.203.0",
+      from: {
+        scheme: "https://",
+        name: "deno.land/std",
+        version: "0.200.0",
+        path: "/",
       },
-      path: "/version.ts",
-      specifier: {
-        from: "https://deno.land/std@0.200.0/version.ts",
-        // to: "https://deno.land/std@0.203.0/version.ts",
+      to: {
+        scheme: "https://",
+        name: "deno.land/std",
+        version: "0.205.0",
+        path: "/",
       },
-      code: { specifier: "std/version.ts" },
+      code: {
+        specifier: "std/version.ts",
+      },
       referrer: URI.from("test/fixtures/import-map/mod.ts"),
       map: {
         source: URI.from("test/fixtures/import-map/deno.json"),
@@ -148,13 +213,32 @@ describe("collect", () => {
   });
 });
 
-describe("createVersionProps()", () => {
+async function assertUpdateSnapshot(
+  t: Deno.TestContext,
+  update: DependencyUpdate,
+) {
+  await assertSnapshot(
+    t,
+    filterKeys(
+      update as Readonly<Record<string, any>>,
+      (key) => ["from", "to", "referrer", "code"].includes(key),
+    ),
+  );
+}
+
+describe("DependencyUpdate.getVersionChange()", () => {
   it("single version", () => {
     assertEquals(
-      createVersionProp([
+      DependencyUpdate.getVersionChange([
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.1.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
         },
       ] as any),
       {
@@ -165,26 +249,53 @@ describe("createVersionProps()", () => {
   });
   it("multiple versions with different names", () => {
     assertEquals(
-      createVersionProp([{
-        name: "deno_graph",
-        version: { from: "0.0.1", to: "0.1.0" },
-      }, {
-        name: "node-emoji",
-        version: { from: "0.0.1", to: "0.1.0" },
-      }] as any),
+      DependencyUpdate.getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        {
+          from: {
+            name: "node-emoji",
+            version: "0.0.1",
+          },
+          to: {
+            name: "node-emoji",
+            version: "0.1.0",
+          },
+        },
+      ] as any),
       undefined,
     );
   });
   it("multiple versions with different `from`s and a common `to`", () => {
     assertEquals(
-      createVersionProp([
+      DependencyUpdate.getVersionChange([
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.1.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
         },
         {
-          name: "deno_graph",
-          version: { from: "0.0.2", to: "0.1.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.2",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
         },
       ] as any),
       {
@@ -195,14 +306,26 @@ describe("createVersionProps()", () => {
   });
   it("multiple versions with a common `from` and `to`", () => {
     assertEquals(
-      createVersionProp([
+      DependencyUpdate.getVersionChange([
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.2.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
         },
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.2.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
         },
       ] as any),
       {
@@ -213,14 +336,26 @@ describe("createVersionProps()", () => {
   });
   it("multiple versions with a common `from` and different `to`s", () => {
     assertThrows(() =>
-      createVersionProp([
+      DependencyUpdate.getVersionChange([
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.1.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
         },
         {
-          name: "deno_graph",
-          version: { from: "0.0.1", to: "0.2.0" },
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
         },
       ] as any)
     );

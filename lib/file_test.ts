@@ -12,6 +12,7 @@ import { EOL, formatEOL } from "./std/fs.ts";
 import {
   assertFindSpyCallArg,
   FileSystemFake,
+  ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
@@ -35,7 +36,7 @@ describe("collect", () => {
     assertEquals(results.length, 2);
     const dependencies = results.flatMap((r) => r.dependencies);
     assertEquals(dependencies.length, 4);
-    const names = dependencies.map((d) => d.name);
+    const names = dependencies.map((d) => d.from.name);
     assertArrayIncludes(names, [
       "deno.land/std",
       "deno.land/x/deno_graph",
@@ -52,27 +53,30 @@ describe("collect", () => {
     );
     assertEquals(results.length, 1);
     assertEquals(results[0].dependencies.length, 1);
-    assertEquals(results[0].dependencies[0].name, "deno.land/std");
+    assertEquals(results[0].dependencies[0].from.name, "deno.land/std");
   });
 });
 
 describe("writeAll", () => {
   let fs: FileSystemFake;
+  let readTextFileStub: ReadTextFileStub;
   let writeTextFileStub: WriteTextFileStub;
-
-  afterEach(() => {
-    writeTextFileStub.restore();
-  });
 
   beforeEach(() => {
     fs = new FileSystemFake();
+    readTextFileStub = ReadTextFileStub.create(fs, { readThrough: true });
     writeTextFileStub = WriteTextFileStub.create(fs);
+  });
+  afterEach(() => {
+    readTextFileStub.restore();
+    writeTextFileStub.restore();
   });
 
   it("direct import", async (t) => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
+    await assertSnapshot(t, results);
     await FileUpdate.writeAll(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,

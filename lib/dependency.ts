@@ -1,6 +1,7 @@
 import { assertExists } from "./std/assert.ts";
 import { Mutex } from "./x/async.ts";
 import type { Maybe, Path, SemVerString } from "./types.ts";
+import { URI } from "./uri.ts";
 
 // Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
 const SEMVER_REGEXP =
@@ -23,50 +24,62 @@ export function parseSemVer(
   return match[0].slice(1) as SemVerString;
 }
 
-export interface DependencyProps {
+export interface Dependency {
+  scheme: "http://" | "https://" | "npm:" | "node:" | "file:///";
   name: string;
   version?: SemVerString;
   path?: Path;
 }
 
-export function parseProps(url: URL): DependencyProps {
-  const body = url.hostname + url.pathname;
-  const semver = parseSemVer(url.href);
-  if (!semver) {
-    return { name: body };
-  }
-  const atSemver = "@" + semver;
-  const name = body.split(atSemver)[0];
-  const path = body.slice(name.length + atSemver.length);
-  return { name, version: semver, path: path as Path };
+export interface LatestDependency extends Dependency {
+  version: SemVerString;
 }
 
-export async function resolveLatestURL(
-  url: URL,
-): Promise<Maybe<URL>> {
-  const props = parseProps(url);
-  await LatestUrlCache.lock(props.name);
-  const result = await _resolve(url, props);
-  LatestUrlCache.unlock(props.name);
-  return result;
-}
+export const Dependency = {
+  parse(url: URL): Dependency {
+    const scheme = url.protocol === "npm:" ? "npm:" : url.protocol + "//";
+    const body = url.hostname + url.pathname;
+    const semver = parseSemVer(url.href);
+    if (!semver) {
+      return { scheme, name: body } as Dependency;
+    }
+    const atSemver = "@" + semver;
+    const name = body.split(atSemver)[0];
+    const path = body.slice(name.length + atSemver.length);
+    return { scheme, name, version: semver, path: path as Path } as Dependency;
+  },
+  toURI(dependency: Dependency): URI<"http" | "https" | "npm"> {
+    return URI.ensure("http", "https", "npm")(
+      `${dependency.scheme}${dependency.name}${
+        dependency.version ? "@" + dependency.version : ""
+      }${dependency.path ?? ""}`,
+    );
+  },
+  async resolveLatest(
+    dependency: Dependency,
+  ): Promise<Maybe<LatestDependency>> {
+    await LatestDependencyCache.lock(dependency.name);
+    const result = await _resolveLatest(dependency);
+    LatestDependencyCache.unlock(dependency.name);
+    return result;
+  },
+};
 
-async function _resolve(
-  url: URL,
-  props: DependencyProps,
-): Promise<Maybe<URL>> {
-  const cached = LatestUrlCache.get(props.name);
+async function _resolveLatest(
+  dependency: Dependency,
+): Promise<Maybe<LatestDependency>> {
+  const cached = LatestDependencyCache.get(dependency.name);
   if (cached) {
-    return cached;
+    return { ...cached, path: dependency.path };
   }
   if (cached === null) {
     // The dependency is already found to be up to date or unable to resolve.
     return;
   }
-  switch (url.protocol) {
+  switch (dependency.scheme) {
     case "npm:": {
       const response = await fetch(
-        `https://registry.npmjs.org/${props.name}`,
+        `https://registry.npmjs.org/${dependency.name}`,
       );
       if (!response.ok) {
         throw new Error(
@@ -76,42 +89,47 @@ async function _resolve(
       const json = await response.json();
       if (!json["dist-tags"]?.latest) {
         throw new Error(
-          `Could not find the latest version of ${props.name} from registry.`,
+          `Could not find the latest version of ${dependency.name} from registry.`,
         );
       }
       const latestSemVer = json["dist-tags"].latest as SemVerString;
-      if (latestSemVer === props.version) {
+      if (latestSemVer === dependency.version) {
         // The dependency is up to date
-        LatestUrlCache.set(props.name, null);
+        LatestDependencyCache.set(dependency.name, null);
         return;
       }
-      return LatestUrlCache.set(
-        props.name,
-        new URL(`npm:${props.name}@${latestSemVer}${props.path}`),
+      return LatestDependencyCache.set(
+        dependency.name,
+        { ...dependency, version: latestSemVer },
       );
     }
-    case "http:":
-    case "https:": {
+    case "http://":
+    case "https://": {
       const response = await fetch(
-        url.protocol + "//" + props.name + (props.path ?? ""),
+        dependency.scheme + dependency.name + (dependency.path ?? ""),
         { method: "HEAD" },
       );
       await response.arrayBuffer();
       if (!response.redirected) {
         // The host did not redirect
-        LatestUrlCache.set(props.name, null);
+        LatestDependencyCache.set(dependency.name, null);
         return;
       }
-      const latest = new URL(response.url);
-      if (latest === url || !parseSemVer(latest.href)) {
-        // The dependency is already up to date
-        LatestUrlCache.set(props.name, null);
+      const latest = Dependency.parse(new URL(response.url));
+      if (
+        !latest.version || // The redirected URL has no semver
+        latest.version === dependency.version // The dependency is already up to date
+      ) {
+        LatestDependencyCache.set(dependency.name, null);
         return;
       }
-      return LatestUrlCache.set(props.name, latest);
+      return LatestDependencyCache.set(
+        dependency.name,
+        latest as LatestDependency,
+      );
     }
     case "node:":
-    case "file:":
+    case "file:///":
       return;
     default:
       // TODO: throw an error?
@@ -119,9 +137,9 @@ async function _resolve(
   }
 }
 
-class LatestUrlCache {
+class LatestDependencyCache {
   static #mutex = new Map<string, Mutex>();
-  static #cache = new Map<string, URL | null>();
+  static #cache = new Map<string, LatestDependency | null>();
 
   static lock(name: string): Promise<void> {
     const mutex = this.#mutex.get(name) ??
@@ -135,15 +153,15 @@ class LatestUrlCache {
     mutex.release();
   }
 
-  static get(name: string): URL | null | undefined {
+  static get(name: string): LatestDependency | null | undefined {
     return this.#cache.get(name);
   }
 
-  static set<T extends URL | null>(
+  static set<T extends LatestDependency | null>(
     name: string,
-    url: T,
+    dependency: T,
   ): T {
-    this.#cache.set(name, url);
-    return url;
+    this.#cache.set(name, dependency);
+    return dependency;
   }
 }

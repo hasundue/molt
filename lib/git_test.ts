@@ -49,11 +49,11 @@ describe("commitAll()", () => {
   });
 
   const expected = [
-    `import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+    `import { assertEquals } from "https://deno.land/std@0.205.0/assert/assert_equals.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
-import { emojify } from "npm:node-emoji@2.1.0";
+import emoji from "npm:node-emoji@2.1.0";
 import { noop } from "./lib.ts";`,
-    `import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+    `import { assertExists } from "https://deno.land/std@0.205.0/assert/assert_exists.ts";
 export const noop = () => {};`,
   ];
 
@@ -69,7 +69,7 @@ export const noop = () => {};`,
 
   it("group by dependency name", async () => {
     await commitAll(updates, {
-      groupBy: (update) => update.name,
+      groupBy: (update) => update.to.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
     assertGitAdd(CommandStub, "test/fixtures/direct-import/mod.ts");

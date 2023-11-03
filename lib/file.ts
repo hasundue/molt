@@ -2,6 +2,7 @@ import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
 import { TextLineStream } from "./std/streams.ts";
+import { Dependency } from "./dependency.ts";
 import { DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
 import { URI } from "./uri.ts";
@@ -67,7 +68,7 @@ function write(
 async function writeToModule(
   update: FileUpdate,
 ) {
-  const lineToUpdateMap = new Map<number, DependencyUpdate>(
+  const lineToDependencyMap = new Map<number, DependencyUpdate>(
     update.dependencies.map((
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
@@ -79,9 +80,15 @@ async function writeToModule(
     .pipeThrough(
       new TextLineTransformer(
         (current, line) => {
-          const update = lineToUpdateMap.get(current);
-          return update
-            ? line.replace(update.specifier.from, update.specifier.to)
+          const dependency = lineToDependencyMap.get(current);
+          return dependency
+            ? line.replace(
+              line.slice(
+                dependency.code.span.start.character + 1,
+                dependency.code.span.end.character - 1,
+              ),
+              Dependency.toURI(dependency.to),
+            )
             : line;
         },
       ),
@@ -119,8 +126,8 @@ async function writeToImportMap(
   for (const dependency of update.dependencies) {
     assertExists(dependency.map);
     json.imports[dependency.map.from] = dependency.map.to.replace(
-      dependency.specifier.from,
-      dependency.specifier.to,
+      Dependency.toURI(dependency.from),
+      Dependency.toURI(dependency.to),
     );
   }
   await Deno.writeTextFile(

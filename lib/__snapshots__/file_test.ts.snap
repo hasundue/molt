@@ -1,21 +1,154 @@
 export const snapshot = {};
 
 snapshot[`writeAll > direct import 1`] = `
-'import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
-import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
-import { emojify } from "npm:node-emoji@2.1.0";
-import { noop } from "./lib.ts";'
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 84,
+              line: 0,
+            },
+            start: {
+              character: 29,
+              line: 0,
+            },
+          },
+          specifier: "https://deno.land/std@0.200.0/assert/assert_exists.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/assert/assert_exists.ts",
+          scheme: "https://",
+          version: "0.200.0",
+        },
+        map: undefined,
+        referrer: "file:///home/shun/molt/test/fixtures/direct-import/lib.ts",
+        to: {
+          name: "deno.land/std",
+          path: "/assert/assert_exists.ts",
+          scheme: "https://",
+          version: "0.205.0",
+        },
+      },
+    ],
+    kind: "module",
+    specifier: "file:///home/shun/molt/test/fixtures/direct-import/lib.ts",
+  },
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 74,
+              line: 1,
+            },
+            start: {
+              character: 28,
+              line: 1,
+            },
+          },
+          specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        },
+        from: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          scheme: "https://",
+          version: "0.50.0",
+        },
+        map: undefined,
+        referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
+        to: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          scheme: "https://",
+          version: "0.59.2",
+        },
+      },
+      {
+        code: {
+          span: {
+            end: {
+              character: 40,
+              line: 2,
+            },
+            start: {
+              character: 18,
+              line: 2,
+            },
+          },
+          specifier: "npm:node-emoji@2.0.0",
+        },
+        from: {
+          name: "node-emoji",
+          path: "",
+          scheme: "npm:",
+          version: "2.0.0",
+        },
+        map: undefined,
+        referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
+        to: {
+          name: "node-emoji",
+          path: "",
+          scheme: "npm:",
+          version: "2.1.0",
+        },
+      },
+      {
+        code: {
+          span: {
+            end: {
+              character: 84,
+              line: 0,
+            },
+            start: {
+              character: 29,
+              line: 0,
+            },
+          },
+          specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/assert/assert_equals.ts",
+          scheme: "https://",
+          version: "0.200.0",
+        },
+        map: undefined,
+        referrer: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
+        to: {
+          name: "deno.land/std",
+          path: "/assert/assert_equals.ts",
+          scheme: "https://",
+          version: "0.205.0",
+        },
+      },
+    ],
+    kind: "module",
+    specifier: "file:///home/shun/molt/test/fixtures/direct-import/mod.ts",
+  },
+]
 `;
 
 snapshot[`writeAll > direct import 2`] = `
-'import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+'import { assertEquals } from "https://deno.land/std@0.205.0/assert/assert_equals.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
+import emoji from "npm:node-emoji@2.1.0";
+import { noop } from "./lib.ts";'
+`;
+
+snapshot[`writeAll > direct import 3`] = `
+'import { assertExists } from "https://deno.land/std@0.205.0/assert/assert_exists.ts";
 export const noop = () => {};'
 `;
 
 snapshot[`writeAll > import map 1`] = `
 '{
   "imports": {
-    "std/": "https://deno.land/std@0.200.0/",
+    "std/": "https://deno.land/std@0.205.0/",
     "deno_graph": "https://deno.land/x/deno_graph@0.59.2/mod.ts",
     "node-emoji": "npm:node-emoji@2.1.0",
     "/": "./"
@@ -28,10 +161,10 @@ snapshot[`writeAll > import map 2`] = `
 export const noop = () => {};'
 `;
 
-snapshot[`writeAll > import map with no resolve 1`] = `'import {} from "https://deno.land/std@0.205.0/version.ts";'`;
+snapshot[`writeAll > import map with no resolve 1`] = `'import {} from "https://deno.land/std@0.205.0/testing/asserts.ts";'`;
 
 snapshot[`writeAll > unversioned specifiers 1`] = `
-'import { VERSION } from "https://deno.land/std@0.205.0/version.ts";
+'import { VERSION } from "https://deno.land/std@0.205.0";
 import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
 import { emojify } from "npm:node-emoji@2.1.0";
 import { noop } from "./lib.ts";'

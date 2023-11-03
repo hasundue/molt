@@ -8,7 +8,7 @@ import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
-import { parseSemVer, resolveLatestURL } from "./lib/dependency.ts";
+import { Dependency, parseSemVer } from "./lib/dependency.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -150,20 +150,20 @@ function _list(updates: DependencyUpdate[]) {
   console.log(`💡 Found ${updates.length > 1 ? "updates" : "an update"}:`);
   const dependencies = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
-    const list = dependencies.get(u.name) ?? [];
+    const list = dependencies.get(u.to.name) ?? [];
     list.push(u);
-    dependencies.set(u.name, list);
+    dependencies.set(u.to.name, list);
   }
   for (const [name, list] of dependencies.entries()) {
     console.log();
-    const froms = distinct(list.map((u) => u.version.from)).join(", ");
+    const froms = distinct(list.map((u) => u.from.version)).join(", ");
     console.log(
-      `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].version.to)}`,
+      `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].to.version)}`,
     );
     distinct(
       list.map((u) => {
         const source = URI.relative(u.map?.source ?? u.referrer);
-        return `  ${source} ` + gray(u.version.from ?? "");
+        return `  ${source} ` + gray(u.from.version ?? "");
       }),
     ).forEach((line) => console.log(line));
   }
@@ -188,7 +188,7 @@ async function _write(
   }
   if (options?.report) {
     const content = distinct(
-      updates.map((u) => `- ${u.name} ${u.version.from} => ${u.version.to}`),
+      updates.map((u) => `- ${u.to.name} ${u.from.version} => ${u.to.version}`),
     ).join("\n");
     await Deno.writeTextFile(options.report, content);
     console.log(`📄 ${options.report}`);
@@ -206,7 +206,7 @@ async function _commit(
   },
 ) {
   const commits = GitCommitSequence.from(updates, {
-    groupBy: (dependency) => dependency.name,
+    groupBy: (dependency) => dependency.to.name,
     composeCommitMessage: ({ group, version }) =>
       _formatPrefix(options.prefix) + `bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
@@ -328,13 +328,13 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
-async function _version() {
+async function versionCommand() {
   const version = parseSemVer(import.meta.url) ??
     await $.progress("Fetching version info").with(async () => {
-      const url = await resolveLatestURL(
-        new URL("https://deno.land/x/molt/cli.ts"),
+      const latest = await Dependency.resolveLatest(
+        Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),
       );
-      return url ? parseSemVer(url.href) : undefined;
+      return latest ? latest.version : undefined;
     }) ?? "unknown";
   console.log(version);
 }
@@ -348,7 +348,7 @@ const main = new Command()
   .versionOption(
     "-v, --version",
     "Print version info.",
-    _version,
+    versionCommand,
   )
   .command("check", checkCommand)
   .command("update", updateCommand);
