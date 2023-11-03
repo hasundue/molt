@@ -5,8 +5,8 @@ export {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.204.0/testing/bdd.ts";
-export { assertSnapshot } from "https://deno.land/std@0.204.0/testing/snapshot.ts";
+} from "https://deno.land/std@0.205.0/testing/bdd.ts";
+export { assertSnapshot } from "https://deno.land/std@0.205.0/testing/snapshot.ts";
 export {
   assertSpyCall,
   assertSpyCallArg,
