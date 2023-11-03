@@ -1,0 +1,2 @@
+- build(deps): bump deno.land/std from 0.204.0 to 0.205.0
+- build(deps): bump deno.land/x/deno_graph from 0.59.1 to 0.59.2
