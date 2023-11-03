@@ -9,7 +9,7 @@
     "install": "deno install -f --name molt --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
     "run:molt": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org,pax.deno.dev,raw.githubusercontent.com --allow-run=git,deno ./cli.ts",
     "update": "deno task -q run:molt check ./lib/*/*.ts",
-    "update:commit": "deno task -q run:molt update --commit --pre-commit=lock,test --prefix 'build(deps):' ./lib/*/*.ts"
+    "update:commit": "deno task -q run:molt update --commit --pre-commit=dev --prefix 'build(deps):' ./lib/*/*.ts"
   },
   "fmt": {
     "exclude": ["CHANGELOG.md"]
