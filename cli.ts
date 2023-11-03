@@ -314,10 +314,10 @@ function _summary(
     return sequence.commits[0].message;
   }
   const groups = sequence.commits.map((commit) => commit.group).join(", ");
-  const full = _formatPrefix(options.prefix) + `Update ${groups}`;
+  const full = _formatPrefix(options.prefix) + `update ${groups}`;
   return (full.length <= 50)
     ? full
-    : _formatPrefix(options.prefix) + "Update dependencies";
+    : _formatPrefix(options.prefix) + "update dependencies";
 }
 
 function _report(sequence: GitCommitSequence): string {
