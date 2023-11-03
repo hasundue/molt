@@ -22,7 +22,8 @@ export {
 import {
   createAssertSnapshot,
 } from "https://deno.land/std@0.205.0/testing/snapshot.ts";
+import { fromFileUrl } from "./path.ts";
 
 export const assertSnapshot = createAssertSnapshot({
-  dir: new URL("../../test/snapshots", import.meta.url).pathname,
+  dir: fromFileUrl(new URL("../../test/snapshots/", import.meta.url)),
 });
