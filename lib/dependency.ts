@@ -108,7 +108,7 @@ async function _resolve(
         return;
       }
       const latest = new URL(response.url);
-      if (latest === url) {
+      if (latest === url || !parseSemVer(latest.href)) {
         // The dependency is already up to date
         LatestUrlCache.set(props.name, null);
         return;
