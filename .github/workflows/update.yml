@@ -13,4 +13,5 @@ jobs:
   update:
     name: Update
     uses: hasundue/actions/.github/workflows/update-deno.yml@main
-    secrets: inherit
+    secrets:
+      GH_TOKEN: ${{ secrets.PAT_UPDATE }}
