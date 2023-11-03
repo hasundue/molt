@@ -46,7 +46,7 @@ const updates = await DependencyUpdate.collect("./mod.ts", {
   importMap: "./deno.json",
 });
 
-const results = await FileUpdate.collect(updates);
+const results = FileUpdate.collect(updates);
 await FileUpdate.writeAll(results);
 ```
 
