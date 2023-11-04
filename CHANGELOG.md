@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.2](https://github.com/hasundue/molt/compare/0.9.1...0.9.2) (2023-11-04)
+
+
+### Features
+
+* **cli:** run deno subcommands as tasks ([afd68d6](https://github.com/hasundue/molt/commit/afd68d6d4f02c53fd4a3b7a2b1ac7076fa5dea28))
+
 ## [0.9.1](https://github.com/hasundue/molt/compare/0.9.0...0.9.1) (2023-11-03)
 
 
