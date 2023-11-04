@@ -95,6 +95,7 @@
     "https://deno.land/std@0.205.0/bytes/copy.ts": "939d89e302a9761dcf1d9c937c7711174ed74c59eef40a1e4569a05c9de88219",
     "https://deno.land/std@0.205.0/collections/distinct.ts": "01595bd8e608a5e2de8a8631055587e6f01d68861e463eef34f8e295713500b8",
     "https://deno.land/std@0.205.0/collections/filter_keys.ts": "a29cfe8730ddb54e9e071ea45e8a82e166c7629d18675652def70c1bf80e2ef6",
+    "https://deno.land/std@0.205.0/collections/map_entries.ts": "282b0e5141fbe73a45903674597fb10ec2b211fab8cbac85874eebd97f522a62",
     "https://deno.land/std@0.205.0/collections/max_by.ts": "9d5940986aac51b2e4feaebef9cd8bf6e1eceeee5edcf3303e334b737f99520d",
     "https://deno.land/std@0.205.0/fmt/colors.ts": "c51c4642678eb690dcf5ffee5918b675bf01a33fba82acf303701ae1a4f8c8d9",
     "https://deno.land/std@0.205.0/fs/_util.ts": "fbf57dcdc9f7bc8128d60301eece608246971a7836a3bb1e78da75314f08b978",
