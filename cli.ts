@@ -1,9 +1,9 @@
-import { existsSync } from "./lib/std/fs.ts";
-import { distinct } from "./lib/std/collections.ts";
+import { distinct, filterKeys, mapEntries } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
 import { dirname, extname, join } from "./lib/std/path.ts";
 import { colors, Command, Input, List, Select } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
+import { ensure, is } from "./lib/x/unknownutil.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
@@ -43,10 +43,8 @@ async function checkAction(
         message: "Prefix for commit messages",
         default: "build(deps):",
       });
-      const suggestions = _getTasks();
-      if (!suggestions.length) {
-        return _commit(updates, { prefix });
-      }
+      const tasks = await _getTasks();
+      const suggestions = Object.keys(tasks);
       const preCommit = await List.prompt(
         {
           message: "Tasks to run before each commit (comma separated)",
@@ -59,7 +57,12 @@ async function checkAction(
           suggestions,
         },
       );
-      return _commit(updates, { preCommit, postCommit, prefix });
+      console.log();
+      return _commit(updates, {
+        preCommit: filterKeys(tasks, (key) => preCommit.includes(key)),
+        postCommit: filterKeys(tasks, (key) => postCommit.includes(key)),
+        prefix,
+      });
     }
   }
 }
@@ -97,7 +100,17 @@ async function updateAction(
   const updates = await _collect(entrypoints, options);
   _list(updates);
   if (options.commit) {
-    return _commit(updates, options);
+    return _commit(updates, {
+      ...options,
+      preCommit: filterKeys(
+        await _getTasks(),
+        (key) => options.preCommit?.includes(key) ?? false,
+      ),
+      postCommit: filterKeys(
+        await _getTasks(),
+        (key) => options.postCommit?.includes(key) ?? false,
+      ),
+    });
   }
   return _write(updates, options);
 }
@@ -110,7 +123,7 @@ async function _collect(
     const updates = await Promise.all(
       entrypoints.map(async (entrypoint) =>
         await DependencyUpdate.collect(entrypoint, {
-          importMap: options.importMap ?? await _findImportMap(entrypoint),
+          importMap: options.importMap ?? await _findDenoJson(entrypoint),
         })
       ),
     ).then((results) => results.flat());
@@ -122,27 +135,33 @@ async function _collect(
   });
 }
 
-async function _findImportMap(entrypoint: string): Promise<string | undefined> {
-  const map = [
-    await _findFileUp(entrypoint, "deno.json"),
-    await _findFileUp(entrypoint, "deno.jsonc"),
-  ].flat();
-
-  if (map.length === 0) return;
-  return map[0];
+function _findDenoJson(entrypoint: string) {
+  return _findFileUp(entrypoint, "deno.json", "deno.jsonc");
 }
 
-function _getTasks(): string[] {
-  const path = ["./deno.json", "./deno.jsonc"].find((path) => existsSync(path));
-  if (!path) {
-    return [];
+type TaskRecord = Record<string, string[]>;
+
+async function _getTasks() {
+  const tasks: TaskRecord = {
+    fmt: ["fmt"],
+    lint: ["lint"],
+    test: ["test"],
+  };
+  const config = await _findDenoJson(Deno.cwd());
+  if (!config) {
+    return tasks;
   }
   try {
-    // deno-lint-ignore no-explicit-any
-    const json = parseJsonc(Deno.readTextFileSync(path)) as any;
-    return Object.keys(json.tasks ?? {});
+    const json = ensure(
+      parseJsonc(await Deno.readTextFile(config)),
+      is.ObjectOf({ tasks: is.Record }),
+    );
+    return {
+      ...tasks,
+      ...mapEntries(json.tasks, ([name]) => [name, ["task", "-q", name]]),
+    };
   } catch {
-    return [];
+    return tasks;
   }
 }
 
@@ -198,8 +217,8 @@ async function _write(
 async function _commit(
   updates: DependencyUpdate[],
   options: {
-    preCommit?: string[];
-    postCommit?: string[];
+    preCommit?: TaskRecord;
+    postCommit?: TaskRecord;
     prefix?: string;
     summary?: string;
     report?: string;
@@ -213,15 +232,15 @@ async function _commit(
       (version?.to ? ` to ${version?.to}` : ""),
     preCommit: options?.preCommit
       ? async (commit) => {
-        console.log(`\n📝 Commiting "${commit.message}"...`);
-        for (const task of options?.preCommit ?? []) {
+        console.log(`📝 Commiting "${commit.message}"...`);
+        for (const task of Object.entries(options?.preCommit ?? {})) {
           await _task(task);
         }
       }
       : undefined,
     postCommit: async (commit) => {
       console.log(`📝 ${commit.message}`);
-      for (const task of options?.postCommit ?? []) {
+      for (const task of Object.entries(options?.postCommit ?? {})) {
         await _task(task);
       }
     },
@@ -238,10 +257,10 @@ async function _commit(
   }
 }
 
-async function _task(task: string) {
-  console.log(`\n🔨 Running task ${cyan(task)}...`);
+async function _task([name, args]: [string, string[]]) {
+  console.log(`🔨 Running task ${cyan(name)}...`);
   const { code } = await new Deno.Command("deno", {
-    args: ["task", "-q", task],
+    args,
     stdout: "inherit",
     stderr: "inherit",
   }).output();
@@ -280,27 +299,24 @@ function _ensureJsFiles(paths: string[]) {
  * starting from the given entrypoint directory.
  *
  * @param entrypoint - The file to start the search from its parent dir.
- * @param root - The name of the file to search for.
- * @returns An array of matching file paths found
+ * @param files - The name of the files to search for.
+ * @returns The first file path found or undefined if no file was found.
  */
-async function _findFileUp(entrypoint: string, root: string) {
+async function _findFileUp(entrypoint: string, ...files: string[]) {
   let path = dirname(entrypoint);
-  const hits = [];
-
-  upLoop:
-  while (true) {
+  for (;;) {
     for await (const dirEntry of Deno.readDir(path)) {
-      if (dirEntry.name === root) hits.push(join(path, dirEntry.name));
+      if (files.includes(dirEntry.name)) {
+        return join(path, dirEntry.name);
+      }
     }
     const newPath = dirname(path);
     if (newPath === path) {
-      // reached the end of the up loop
-      break upLoop;
+      // reached the system root
+      return undefined;
     }
     path = newPath;
   }
-
-  return hits;
 }
 
 function _summary(
