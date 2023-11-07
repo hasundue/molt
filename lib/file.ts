@@ -6,68 +6,59 @@ import { DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
 import { URI } from "./uri.ts";
 
+/**
+ * A collection of updates to dependencies in a file.
+ */
 export interface FileUpdate {
-  /** The type of the updated file. */
-  kind: "module" | "import-map";
   /** The specifier of the updated dependency (a remote module.) */
   specifier: URI<"file">;
+  /** The type of the updated file. */
+  kind: "module" | "import-map";
   /** The dependency updates in the module. */
   dependencies: DependencyUpdate[];
 }
 
 export const FileUpdate = {
-  collect,
-  write,
-  writeAll,
+  /**
+   * Collect updates to files from the given updates to dependencies.
+   * The collected updates are lexically sorted by the specifier of the file.
+   */
+  collect(
+    from: DependencyUpdate[],
+  ): FileUpdate[] {
+    /** A map of module specifiers to the module content updates. */
+    const fileToDepsMap = new Map<URI<"file">, DependencyUpdate[]>();
+    for (const dependency of from) {
+      const referrer = dependency.map?.source ?? dependency.referrer;
+      const deps = fileToDepsMap.get(referrer) ??
+        fileToDepsMap.set(referrer, []).get(referrer)!;
+      deps.push(dependency);
+    }
+    return Array.from(fileToDepsMap.entries()).map((
+      [specifier, dependencies],
+    ) => ({
+      kind: dependencies[0].map ? "import-map" : "module",
+      specifier,
+      dependencies,
+    })).sort((a, b) => a.specifier.localeCompare(b.specifier)) as FileUpdate[];
+  },
+  /**
+   * Write the given (array of) FileUpdate to file system.
+   */
+  async write(
+    updates: FileUpdate | FileUpdate[],
+    options?: {
+      onWrite?: (result: FileUpdate) => void | Promise<void>;
+    },
+  ) {
+    for (const update of [updates].flat()) {
+      await _write(update);
+      await options?.onWrite?.(update);
+    }
+  },
 };
 
-/**
- * Collect updates to files from the given updates to dependencies.
- * The collected updates are lexically sorted by the specifier of the file.
- *
- * @param dependencies The dependencies to collect updates from.
- * @returns The collected dependency updates.
- *
- * @example
- * ```ts
- * const updates = FileUpdate.collect(
- *   DependencyUpdate.collect("./mod.ts")
- * );
- * ```
- */
-function collect(
-  dependencies: DependencyUpdate[],
-): FileUpdate[] {
-  /** A map of module specifiers to the module content updates. */
-  const fileToDepsMap = new Map<URI<"file">, DependencyUpdate[]>();
-  for (const dependency of dependencies) {
-    const referrer = dependency.map?.source ?? dependency.referrer;
-    const deps = fileToDepsMap.get(referrer) ??
-      fileToDepsMap.set(referrer, []).get(referrer)!;
-    deps.push(dependency);
-  }
-  return Array.from(fileToDepsMap.entries()).map((
-    [specifier, dependencies],
-  ) => ({
-    kind: dependencies[0].map ? "import-map" : "module",
-    specifier,
-    dependencies,
-  })).sort((a, b) => a.specifier.localeCompare(b.specifier)) as FileUpdate[];
-}
-
-async function writeAll(
-  updates: FileUpdate[],
-  options?: {
-    onWrite?: (result: FileUpdate) => void | Promise<void>;
-  },
-) {
-  for (const update of updates) {
-    await write(update);
-    await options?.onWrite?.(update);
-  }
-}
-
-function write(
+function _write(
   update: FileUpdate,
 ) {
   switch (update.kind) {
