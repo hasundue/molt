@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.11.0](https://github.com/hasundue/molt/compare/0.10.0...0.11.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **file:** rename `writeAll` to `write`
+
+### Features
+
+* **mod:** `writeAll` ([91502e9](https://github.com/hasundue/molt/commit/91502e964b89d1869a07b3cf209b0606d94c5311))
+
+
+### Bug Fixes
+
+* **cli:** import lib/testing.ts dynamically ([de089b6](https://github.com/hasundue/molt/commit/de089b6ea5848d612e826ebbf6f21034f128c209))
+
+
+### Code Refactoring
+
+* **file:** rename `writeAll` to `write` ([664d58c](https://github.com/hasundue/molt/commit/664d58ce05c1401619376facbe44712911b1d578))
+
 ## [0.10.0](https://github.com/hasundue/molt/compare/0.9.2...0.10.0) (2023-11-07)
 
 
