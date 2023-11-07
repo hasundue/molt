@@ -9,9 +9,15 @@ import { DependencyUpdate } from "./lib/update.ts";
 import { FileUpdate } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
 import { Dependency, parseSemVer } from "./lib/dependency.ts";
+import {
+  createCommandStub,
+  FileSystemFake,
+  LatestSemVerStub,
+  ReadTextFileStub,
+  WriteTextFileStub,
+} from "./lib/testing.ts";
 
 const { gray, yellow, bold, cyan } = colors;
-
 const checkCommand = new Command()
   .description("Check for the latest version of dependencies")
   .option("--import-map <file:string>", "Specify import map file")
@@ -187,7 +193,6 @@ function _list(updates: DependencyUpdate[]) {
       }),
     ).forEach((line) => console.log(line));
   }
-  console.log();
 }
 
 async function _write(
@@ -198,10 +203,13 @@ async function _write(
   },
 ) {
   const results = FileUpdate.collect(updates);
+  console.log();
   await FileUpdate.writeAll(results, {
     onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
   });
-  console.log();
+  if (options?.summary || options?.report) {
+    console.log();
+  }
   if (options?.summary) {
     await Deno.writeTextFile(options.summary, "Update dependencies");
     console.log(`📄 ${options.summary}`);
@@ -225,17 +233,19 @@ async function _commit(
     report?: string;
   },
 ) {
+  const preCommitTasks = Object.entries(options?.preCommit ?? {});
   const commits = GitCommitSequence.from(updates, {
     groupBy: (dependency) => dependency.to.name,
     composeCommitMessage: ({ group, version }) =>
       _formatPrefix(options.prefix) + `bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
       (version?.to ? ` to ${version?.to}` : ""),
-    preCommit: options?.preCommit
+    preCommit: preCommitTasks.length > 0
       ? async (commit) => {
-        console.log(`📝 Commiting "${commit.message}"...`);
-        for (const task of Object.entries(options?.preCommit ?? {})) {
-          await _task(task);
+        const tasks = Object.entries(options?.preCommit ?? {});
+        console.log(`\n💾 ${commit.message}`);
+        for (const t of tasks) {
+          await _task(t);
         }
       }
       : undefined,
@@ -246,8 +256,13 @@ async function _commit(
       }
     },
   });
+  if (!commits.options.preCommit) {
+    console.log();
+  }
   await GitCommitSequence.exec(commits);
-  console.log();
+  if (options?.summary || options?.report) {
+    console.log();
+  }
   if (options?.summary) {
     await Deno.writeTextFile(options.summary, _summary(commits, options));
     console.log(`📄 ${options.summary}`);
@@ -356,6 +371,16 @@ async function versionCommand() {
   console.log(version);
 }
 
+function _enableTestMode() {
+  if (Deno.env.get("MOLT_TEST")) {
+    const fs = new FileSystemFake();
+    ReadTextFileStub.create(fs, { readThrough: true });
+    WriteTextFileStub.create(fs);
+    LatestSemVerStub.create("123.456.789");
+    Deno.Command = createCommandStub();
+  }
+}
+
 const main = new Command()
   .name("molt")
   .description("A tool for updating dependencies in Deno projects")
@@ -371,6 +396,9 @@ const main = new Command()
   .command("update", updateCommand);
 
 try {
+  if (Deno.env.get("MOLT_TEST")) {
+    _enableTestMode();
+  }
   await main.parse(Deno.args);
 } catch (error) {
   console.error(error);
