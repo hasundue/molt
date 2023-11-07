@@ -39,6 +39,12 @@ const main = new Command()
   .option("--report <file:string>", "Write a report of changes to file")
   .arguments("<modules...:string>")
   .action(async function (options, ...entrypoints) {
+    if (options.importMap) {
+      if (await $.path(options.importMap).exists() === false) {
+        console.error(`Import map ${options.importMap} does not exist.`);
+        Deno.exit(1);
+      }
+    }
     _ensureJsFiles(entrypoints);
     const updates = await _collect(entrypoints, options);
     _list(updates);
