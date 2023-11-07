@@ -97,6 +97,7 @@ async function updateAction(
   },
   ...entrypoints: string[]
 ) {
+  _ensureJsFiles(entrypoints);
   const updates = await _collect(entrypoints, options);
   _list(updates);
   if (options.commit) {
