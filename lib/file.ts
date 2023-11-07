@@ -22,6 +22,20 @@ export const FileUpdate = {
   writeAll,
 };
 
+/**
+ * Collect updates to files from the given updates to dependencies.
+ * The collected updates are lexically sorted by the specifier of the file.
+ *
+ * @param dependencies The dependencies to collect updates from.
+ * @returns The collected dependency updates.
+ *
+ * @example
+ * ```ts
+ * const updates = FileUpdate.collect(
+ *   DependencyUpdate.collect("./mod.ts")
+ * );
+ * ```
+ */
 function collect(
   dependencies: DependencyUpdate[],
 ): FileUpdate[] {
@@ -39,7 +53,7 @@ function collect(
     kind: dependencies[0].map ? "import-map" : "module",
     specifier,
     dependencies,
-  }));
+  })).sort((a, b) => a.specifier.localeCompare(b.specifier)) as FileUpdate[];
 }
 
 async function writeAll(
