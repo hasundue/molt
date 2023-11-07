@@ -1,7 +1,6 @@
 import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
-import { TextLineStream } from "./std/streams.ts";
 import { Dependency } from "./dependency.ts";
 import { DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
@@ -87,48 +86,27 @@ async function writeToModule(
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
   );
-  const lines: string[] = [];
   const content = await Deno.readTextFile(new URL(update.specifier));
-  await ReadableStream.from(content)
-    .pipeThrough(new TextLineStream({ allowCR: true }))
-    .pipeThrough(
-      new TextLineTransformer(
-        (current, line) => {
-          const dependency = lineToDependencyMap.get(current);
-          return dependency
-            ? line.replace(
-              line.slice(
-                dependency.code.span.start.character + 1,
-                dependency.code.span.end.character - 1,
-              ),
-              Dependency.toURI(dependency.to),
-            )
-            : line;
-        },
-      ),
-    )
-    .pipeTo(
-      new WritableStream({
-        write(line) {
-          lines.push(line);
-        },
-      }),
-    );
   const eol = detectEOL(content) ?? "\n";
-  await Deno.writeTextFile(new URL(update.specifier), lines.join(eol));
-}
-
-class TextLineTransformer extends TransformStream<string, string> {
-  #current = 0;
-  constructor(
-    transform: (current: number, line: string) => string,
-  ) {
-    super({
-      transform: (line, controller) => {
-        controller.enqueue(transform(this.#current++, line));
-      },
-    });
-  }
+  await Deno.writeTextFile(
+    new URL(update.specifier),
+    content
+      .trimEnd()
+      .split(eol)
+      .map((line, index) => {
+        const dependency = lineToDependencyMap.get(index);
+        return dependency
+          ? line.replace(
+            line.slice(
+              dependency.code.span.start.character + 1,
+              dependency.code.span.end.character - 1,
+            ),
+            Dependency.toURI(dependency.to),
+          )
+          : line;
+      })
+      .join(eol),
+  );
 }
 
 async function writeToImportMap(
