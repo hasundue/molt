@@ -37,7 +37,12 @@ const isImportMapReferrer = is.ObjectOf({
 // This implementation is ridiculously inefficient, but we prefer not to reimplement the whole
 // import_map module. Maybe we should rathre patch rust code of the import_map module.
 async function readFromJson(specifier: URI<"file">): Promise<Maybe<ImportMap>> {
-  const data = await Deno.readTextFile(new URL(specifier));
+  let data: string;
+  try {
+    data = await Deno.readTextFile(new URL(specifier));
+  } catch {
+    throw new Deno.errors.NotFound(`The import map ${specifier} is not found.`);
+  }
   if (data.length === 0) {
     return;
   }

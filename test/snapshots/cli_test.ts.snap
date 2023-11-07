@@ -143,22 +143,9 @@ snapshot[`molt test/fixtures/import-map/mod.ts --import-map test/fixtures/import
 snapshot[`molt test/fixtures/import-map/mod.ts --import-map not_exist.json 1`] = `""`;
 
 snapshot[`molt test/fixtures/import-map/mod.ts --import-map not_exist.json 2`] = `
-\`Checking for updates
-NotFound: No such file or directory (os error 2): readfile '/home/shun/molt/not_exist.json'
-    at async readTextFile (ext:deno_fs/30_fs.js:747:18)
-    at async Object.<anonymous> (file:///home/shun/molt/lib/testing.ts:61:15)
-    at async Object.readFromJson (file:///home/shun/molt/lib/import_map.ts:40:16)
-    at async Object.collect (file:///home/shun/molt/lib/update.ts:72:7)
-    at async file:///home/shun/molt/cli.ts:75:9
-    at async Promise.all (index 0)
-    at async file:///home/shun/molt/cli.ts:73:21
-    at async _collect (file:///home/shun/molt/cli.ts:72:10)
-    at async Command.actionHandler (file:///home/shun/molt/cli.ts:47:21)
-    at async Command.execute (https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts:1948:7) {
-  name: "NotFound",
-  code: "ENOENT"
-}
-\`
+"Checking for updates
+The import map file:///home/shun/molt/not_exist.json is not found.
+"
 `;
 
 snapshot[`molt test/fixtures/direct-import/mod.ts --write 1`] = `
