@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.0](https://github.com/hasundue/molt/compare/0.9.2...0.10.0) (2023-11-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* **cli:** abandon subcommands
+
+### Code Refactoring
+
+* **lib:** sort updates in lexicographical order
+
 ## [0.9.2](https://github.com/hasundue/molt/compare/0.9.1...0.9.2) (2023-11-04)
 
 
