@@ -11,6 +11,8 @@ import {
 import { AssertionError } from "./std/assert.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { URI } from "./uri.ts";
+import { parseSemVer } from "./dependency.ts";
+import { SemVerString } from "./types.ts";
 
 export function createCommandStub(): ConstructorSpy<
   Deno.Command,
@@ -79,6 +81,63 @@ export const WriteTextFileStub = {
   },
 };
 export type WriteTextFileStub = ReturnType<typeof WriteTextFileStub.create>;
+
+export const FetchStub = {
+  create(
+    createResponse: (
+      request: string | URL | Request,
+      init: RequestInit & { original: typeof fetch },
+    ) => Response | Promise<Response>,
+  ) {
+    const original = globalThis.fetch;
+    return stub(
+      globalThis,
+      "fetch",
+      (request, init) =>
+        Promise.resolve(createResponse(request, { ...init, original })),
+    );
+  },
+};
+export type FetchStub = ReturnType<typeof FetchStub.create>;
+
+export const LatestSemVerStub = {
+  create(latest: SemVerString): FetchStub {
+    return FetchStub.create(async (request, init) => {
+      request = (request instanceof Request)
+        ? request
+        : new Request(request, init);
+      const url = new URL(request.url);
+      switch (url.hostname) {
+        case "registry.npmjs.org":
+          return new Response(
+            JSON.stringify({ "dist-tags": { latest } }),
+            { status: 200 },
+          );
+        case "deno.land": {
+          if (request.method !== "HEAD") {
+            return init.original(request);
+          }
+          const response = await init.original(request);
+          await response.arrayBuffer();
+          const semver = parseSemVer(response.url);
+          if (!semver) {
+            return response;
+          }
+          const url = new URL(response.url.replace(semver, latest));
+          return {
+            arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+            redirected: true,
+            status: 302,
+            url: url.href,
+          } as Response;
+        }
+        default:
+          return init.original(request, init);
+      }
+    });
+  },
+};
+export type LatestSemVerStub = ReturnType<typeof LatestSemVerStub.create>;
 
 /** Asserts that a spy is called as expected at any index. */
 export function assertFindSpyCall<

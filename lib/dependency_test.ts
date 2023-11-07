@@ -1,7 +1,8 @@
-import { describe, it } from "./std/testing.ts";
+import { beforeAll, describe, it } from "./std/testing.ts";
 import { assertEquals } from "./std/assert.ts";
 import { Dependency, parseSemVer } from "./dependency.ts";
 import { Path, SemVerString } from "./types.ts";
+import { LatestSemVerStub } from "./testing.ts";
 
 describe("parseSemVer()", () => {
   it("https://deno.land/std", () =>
@@ -97,6 +98,10 @@ describe("Dependency.toURI()", () => {
 });
 
 describe("Dependency.resolveLatest()", () => {
+  const LATEST = "123.456.789" as SemVerString;
+  beforeAll(() => {
+    LatestSemVerStub.create(LATEST);
+  });
   it("https://deno.land/std/version.ts", async () =>
     assertEquals(
       await Dependency.resolveLatest(
@@ -105,7 +110,7 @@ describe("Dependency.resolveLatest()", () => {
       {
         scheme: "https://",
         name: "deno.land/std",
-        version: "0.205.0" as SemVerString,
+        version: LATEST,
         path: "/version.ts" as Path,
       },
     ));
@@ -117,7 +122,7 @@ describe("Dependency.resolveLatest()", () => {
       {
         scheme: "https://",
         name: "deno.land/std",
-        version: "0.205.0" as SemVerString,
+        version: LATEST,
         path: "/version.ts" as Path,
       },
     ));
@@ -135,7 +140,7 @@ describe("Dependency.resolveLatest()", () => {
         {
           scheme: "https://",
           name: "deno.land/std",
-          version: "0.205.0" as SemVerString,
+          version: LATEST,
           path: "/assert/assert_equals.ts" as Path,
         },
       ),
