@@ -143,8 +143,7 @@ snapshot[`molt test/fixtures/import-map/mod.ts --import-map test/fixtures/import
 snapshot[`molt test/fixtures/import-map/mod.ts --import-map not_exist.json 1`] = `""`;
 
 snapshot[`molt test/fixtures/import-map/mod.ts --import-map not_exist.json 2`] = `
-"Checking for updates
-The import map file:///home/shun/molt/not_exist.json is not found.
+"Import map not_exist.json does not exist.
 "
 `;
 
