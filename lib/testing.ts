@@ -2,6 +2,7 @@ import {
   assertSpyCall,
   assertSpyCallArg,
   ConstructorSpy,
+  createAssertSnapshot,
   ExpectedSpyCall,
   Spy,
   spy,
@@ -10,9 +11,14 @@ import {
 } from "./std/testing.ts";
 import { AssertionError } from "./std/assert.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
+import { fromFileUrl } from "./std/path.ts";
 import { URI } from "./uri.ts";
 import { parseSemVer } from "./dependency.ts";
 import { SemVerString } from "./types.ts";
+
+export const assertSnapshot = createAssertSnapshot({
+  dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
+});
 
 export function createCommandStub(): ConstructorSpy<
   Deno.Command,

@@ -1,6 +1,5 @@
 import {
   afterEach,
-  assertSnapshot,
   assertSpyCalls,
   beforeEach,
   describe,
@@ -15,6 +14,7 @@ import {
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
+import { assertSnapshot } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
 import { LatestSemVerStub } from "./testing.ts";

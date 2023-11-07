@@ -1,5 +1,5 @@
 // deno-lint-ignore-file no-explicit-any
-import { assertSnapshot, beforeAll, describe, it } from "./std/testing.ts";
+import { beforeAll, describe, it } from "./std/testing.ts";
 import {
   assertEquals,
   assertExists,
@@ -7,6 +7,7 @@ import {
   assertThrows,
 } from "./std/assert.ts";
 import { filterKeys } from "./std/collections.ts";
+import { assertSnapshot } from "./testing.ts";
 import { URI } from "./uri.ts";
 import { _create, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";

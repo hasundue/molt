@@ -18,12 +18,6 @@ export {
   type Stub,
   stub,
 } from "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/testing/mock.ts";
-
-import {
+export {
   createAssertSnapshot,
 } from "https://deno.land/std@0.205.0/testing/snapshot.ts";
-import { fromFileUrl } from "./path.ts";
-
-export const assertSnapshot = createAssertSnapshot({
-  dir: fromFileUrl(new URL("../../test/snapshots/", import.meta.url)),
-});

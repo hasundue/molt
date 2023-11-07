@@ -1,7 +1,7 @@
 import { $ } from "../../lib/x/dax.ts";
-import { assertSnapshot } from "../../lib/std/testing.ts";
 import { assertEquals } from "../../lib/std/assert.ts";
 import { stripAnsiCode } from "../../lib/std/fmt.ts";
+import { assertSnapshot } from "../../lib/testing.ts";
 
 function stringify(data: Uint8Array) {
   const decoder = new TextDecoder();
