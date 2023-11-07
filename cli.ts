@@ -9,13 +9,6 @@ import { DependencyUpdate } from "./lib/update.ts";
 import { writeAll } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
 import { Dependency, parseSemVer } from "./lib/dependency.ts";
-import {
-  createCommandStub,
-  FileSystemFake,
-  LatestSemVerStub,
-  ReadTextFileStub,
-  WriteTextFileStub,
-} from "./lib/testing.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -315,18 +308,11 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
-function _enableTestMode() {
-  const fs = new FileSystemFake();
-  ReadTextFileStub.create(fs, { readThrough: true });
-  WriteTextFileStub.create(fs);
-  LatestSemVerStub.create("123.456.789");
-  Deno.Command = createCommandStub();
-}
-
 try {
   const env = await Deno.permissions.query({ name: "env" });
   if (env.state === "granted" && Deno.env.get("MOLT_TEST")) {
-    _enableTestMode();
+    const { enableTestMode } = await import("./lib/testing.ts");
+    enableTestMode();
   }
   await main.parse(Deno.args);
 } catch (error) {

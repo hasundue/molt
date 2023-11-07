@@ -145,6 +145,17 @@ export const LatestSemVerStub = {
 };
 export type LatestSemVerStub = ReturnType<typeof LatestSemVerStub.create>;
 
+/**
+ * Enables all test stubs.
+ */
+export function enableTestMode() {
+  const fs = new FileSystemFake();
+  ReadTextFileStub.create(fs, { readThrough: true });
+  WriteTextFileStub.create(fs);
+  LatestSemVerStub.create("123.456.789");
+  Deno.Command = createCommandStub();
+}
+
 /** Asserts that a spy is called as expected at any index. */
 export function assertFindSpyCall<
   Self,
