@@ -87,7 +87,7 @@ function createGitCommitSequence(
       message: _options.composeCommitMessage({ group, version }),
       updates,
     });
-  });
+  }).sort((a, b) => a.group.localeCompare(b.group));
   return { commits, options: _options };
 }
 

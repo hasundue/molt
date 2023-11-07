@@ -83,15 +83,15 @@ snapshot[`molt test/fixtures/import-map/deno.json 2`] = `
 snapshot[`molt test/fixtures/direct-import/mod.ts 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/fixtures/direct-import/lib.ts 0.200.0
+  test/fixtures/direct-import/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/direct-import/mod.ts 0.50.0
 
-📦 deno.land/std 0.200.0 => 123.456.789
-  test/fixtures/direct-import/lib.ts 0.200.0
-  test/fixtures/direct-import/mod.ts 0.200.0
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
 "
 `;
 
@@ -103,15 +103,15 @@ snapshot[`molt test/fixtures/direct-import/mod.ts 2`] = `
 snapshot[`molt test/fixtures/import-map/mod.ts 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 1.0.0 => 123.456.789
-  test/fixtures/import-map/deno.json 1.0.0
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/fixtures/import-map/lib.ts 0.200.0
+  test/fixtures/import-map/deno.json 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/import-map/deno.json 0.50.0
 
-📦 deno.land/std 0.200.0 => 123.456.789
-  test/fixtures/import-map/lib.ts 0.200.0
-  test/fixtures/import-map/deno.json 0.200.0
+📦 node-emoji 1.0.0 => 123.456.789
+  test/fixtures/import-map/deno.json 1.0.0
 "
 `;
 
@@ -123,15 +123,15 @@ snapshot[`molt test/fixtures/import-map/mod.ts 2`] = `
 snapshot[`molt test/fixtures/import-map/mod.ts --import-map test/fixtures/import-map/deno.json 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 1.0.0 => 123.456.789
-  test/fixtures/import-map/deno.json 1.0.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/import-map/lib.ts 0.200.0
   test/fixtures/import-map/deno.json 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/import-map/deno.json 0.50.0
+
+📦 node-emoji 1.0.0 => 123.456.789
+  test/fixtures/import-map/deno.json 1.0.0
 "
 `;
 
@@ -164,9 +164,6 @@ NotFound: No such file or directory (os error 2): readfile '/home/shun/molt/not_
 snapshot[`molt test/fixtures/direct-import/mod.ts --write 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
@@ -174,8 +171,11 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --write 1`] = `
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/direct-import/mod.ts 0.50.0
 
-💾 test/fixtures/direct-import/mod.ts
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
+
 💾 test/fixtures/direct-import/lib.ts
+💾 test/fixtures/direct-import/mod.ts
 "
 `;
 
@@ -187,18 +187,18 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --write 2`] = `
 snapshot[`molt test/fixtures/direct-import/mod.ts --write --summary title.txt --report body.md 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 0.50.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
 
-💾 test/fixtures/direct-import/mod.ts
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 0.50.0
+
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
+
 💾 test/fixtures/direct-import/lib.ts
+💾 test/fixtures/direct-import/mod.ts
 
 📄 title.txt
 📄 body.md
@@ -213,19 +213,19 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --write --summary title.txt --
 snapshot[`molt test/fixtures/direct-import/mod.ts --commit 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 0.50.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
 
-📝 bump node-emoji from 2.0.0 to 123.456.789
-📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 0.50.0
+
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
+
 📝 bump deno.land/std from 0.200.0 to 123.456.789
+📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 bump node-emoji from 2.0.0 to 123.456.789
 "
 `;
 
@@ -237,19 +237,19 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit 2`] = `
 snapshot[`molt test/fixtures/direct-import/mod.ts --commit --prefix :package: 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 0.50.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
 
-📝 :package: bump node-emoji from 2.0.0 to 123.456.789
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 0.50.0
+
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
+
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
+📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 :package: bump node-emoji from 2.0.0 to 123.456.789
 "
 `;
 
@@ -261,9 +261,6 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit --prefix :package: 2`
 snapshot[`molt test/fixtures/direct-import/mod.ts --commit --pre-commit=fmt --post-commit=lint 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
@@ -271,10 +268,8 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit --pre-commit=fmt --po
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/direct-import/mod.ts 0.50.0
 
-💾 bump node-emoji from 2.0.0 to 123.456.789
-🔨 Running task fmt...
-📝 bump node-emoji from 2.0.0 to 123.456.789
-🔨 Running task lint...
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
 
 💾 bump deno.land/std from 0.200.0 to 123.456.789
 🔨 Running task fmt...
@@ -284,6 +279,11 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit --pre-commit=fmt --po
 💾 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
 🔨 Running task fmt...
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+🔨 Running task lint...
+
+💾 bump node-emoji from 2.0.0 to 123.456.789
+🔨 Running task fmt...
+📝 bump node-emoji from 2.0.0 to 123.456.789
 🔨 Running task lint...
 "
 `;
@@ -296,9 +296,6 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit --pre-commit=fmt --po
 snapshot[`molt test/fixtures/direct-import/mod.ts --commit --summary title.txt --report body.md 1`] = `
 "💡 Found updates:
 
-📦 node-emoji 2.0.0 => 123.456.789
-  test/fixtures/direct-import/mod.ts 2.0.0
-
 📦 deno.land/std 0.200.0 => 123.456.789
   test/fixtures/direct-import/lib.ts 0.200.0
   test/fixtures/direct-import/mod.ts 0.200.0
@@ -306,9 +303,12 @@ snapshot[`molt test/fixtures/direct-import/mod.ts --commit --summary title.txt -
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
   test/fixtures/direct-import/mod.ts 0.50.0
 
-📝 bump node-emoji from 2.0.0 to 123.456.789
+📦 node-emoji 2.0.0 => 123.456.789
+  test/fixtures/direct-import/mod.ts 2.0.0
+
 📝 bump deno.land/std from 0.200.0 to 123.456.789
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 bump node-emoji from 2.0.0 to 123.456.789
 
 📄 title.txt
 📄 body.md

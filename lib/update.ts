@@ -90,7 +90,7 @@ export async function collect(
       })
     ),
   );
-  return updates;
+  return updates.sort((a, b) => a.to.name.localeCompare(b.to.name));
 }
 
 const load: NonNullable<CreateGraphOptions["load"]> = async (

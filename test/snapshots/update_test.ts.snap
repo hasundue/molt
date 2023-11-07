@@ -35,6 +35,36 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
   code: {
     span: {
       end: {
+        character: 84,
+        line: 0,
+      },
+      start: {
+        character: 29,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
+    scheme: "https://",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 3`] = `
+{
+  code: {
+    span: {
+      end: {
         character: 74,
         line: 1,
       },
@@ -60,7 +90,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 3`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 4`] = `
 {
   code: {
     span: {
@@ -85,36 +115,6 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
     name: "node-emoji",
     path: "",
     scheme: "npm:",
-    version: "123.456.789",
-  },
-}
-`;
-
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 4`] = `
-{
-  code: {
-    span: {
-      end: {
-        character: 84,
-        line: 0,
-      },
-      start: {
-        character: 29,
-        line: 0,
-      },
-    },
-    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
-  },
-  from: {
-    name: "deno.land/std",
-    path: "/assert/assert_equals.ts",
-    scheme: "https://",
-    version: "0.200.0",
-  },
-  to: {
-    name: "deno.land/std",
-    path: "/assert/assert_equals.ts",
-    scheme: "https://",
     version: "123.456.789",
   },
 }
@@ -156,6 +156,36 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
     span: {
       end: {
         character: 40,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "std/version.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/",
+    scheme: "https://",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 3`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 40,
         line: 1,
       },
       start: {
@@ -180,7 +210,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 3`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 4`] = `
 {
   code: {
     span: {
@@ -205,36 +235,6 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
     name: "node-emoji",
     path: "",
     scheme: "npm:",
-    version: "123.456.789",
-  },
-}
-`;
-
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 4`] = `
-{
-  code: {
-    span: {
-      end: {
-        character: 40,
-        line: 0,
-      },
-      start: {
-        character: 24,
-        line: 0,
-      },
-    },
-    specifier: "std/version.ts",
-  },
-  from: {
-    name: "deno.land/std",
-    path: "/",
-    scheme: "https://",
-    version: "0.200.0",
-  },
-  to: {
-    name: "deno.land/std",
-    path: "/",
-    scheme: "https://",
     version: "123.456.789",
   },
 }
