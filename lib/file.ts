@@ -30,17 +30,16 @@ export function writeAll(
 }
 
 /**
- * A collection of updates to dependencies in a file.
+ * A collection of updates to dependencies associated with a file.
  */
 export interface FileUpdate {
-  /** The specifier of the updated dependency (a remote module.) */
+  /** The specifier of the file to update. */
   specifier: URI<"file">;
-  /** The type of the updated file. */
+  /** The type of the file to update. */
   kind: "module" | "import-map";
-  /** The dependency updates in the module. */
+  /** The updates to dependencies associated with the file. */
   dependencies: DependencyUpdate[];
 }
-
 export const FileUpdate = {
   /**
    * Collect updates to files from the given updates to dependencies.
