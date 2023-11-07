@@ -10,9 +10,9 @@
 Molt is a [Deno] module to bump semvers in import specifiers, like
 [udd][deno-udd], but with a few different goals:
 
-**Consistent** - Molt uses [deno_graph] for dependency resolution, and
-"exploits" redirects of fetch requests, to get latest semvers. This should make
-it support as many module registries as Deno runtime does, with a minimum
+**Consistent** - Molt uses [deno_graph] for dependency resolution, and utilizes
+fetch redirects for unversioned dependencies to get latest semvers. This should
+make it support as many module registries as Deno runtime does, with a minimum
 maintenance cost.
 
 **Module-first** - The core logic is provided as versatile functions in a Deno
