@@ -231,7 +231,8 @@ async function _commit(
 
 async function _task([name, args]: [string, string[]]) {
   console.log(`🔨 Running task ${cyan(name)}...`);
-  const { code } = await new Deno.Command("deno", {
+  const COMMAND_DENO = Deno.build.os === "windows" ? "deno.exe" : "deno";
+  const { code } = await new Deno.Command(COMMAND_DENO, {
     args,
     stdout: "inherit",
     stderr: "inherit",
