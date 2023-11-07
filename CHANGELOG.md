@@ -5,30 +5,11 @@
 
 ### ⚠ BREAKING CHANGES
 
-* **lib:** sort updates lexicographicaly
 * **cli:** abandon subcommands
-
-### Bug Fixes
-
-* **cli,git:** set command names for windows ([75e8a36](https://github.com/hasundue/molt/commit/75e8a36dcdf38d254eab39fb8e86c77101d2370e))
-* **cli/update:** ensure entrypoints are JS or TS ([a19a78a](https://github.com/hasundue/molt/commit/a19a78a84cb00d49a0357e2a3b23d40f879c1954))
-* **cli:** check existence of import map ([84813c6](https://github.com/hasundue/molt/commit/84813c68892fd8f23f3e257514b401083cd9fa8d))
-
-
-### Reverts
-
-* "fix(cli,git): set command names for windows" ([d2ebb9e](https://github.com/hasundue/molt/commit/d2ebb9e2740ea69254070fc303996a4202c572f2))
-* "refactor(lib/import_map): throw NotFound error" ([34b2dd8](https://github.com/hasundue/molt/commit/34b2dd8cd3ed95b6d0c42b484ca84ec98c26b4b3))
-
-
-### Miscellaneous Chores
-
-* **lib:** sort updates lexicographicaly ([7f01703](https://github.com/hasundue/molt/commit/7f017036a6c66a29cc5d2fc7666adce2b5f646c0))
-
 
 ### Code Refactoring
 
-* **cli:** abandon subcommands ([6a7e49b](https://github.com/hasundue/molt/commit/6a7e49bc43f837f2cccde521e98b66159b3f7703))
+* **lib:** sort updates in lexicographical order
 
 ## [0.9.2](https://github.com/hasundue/molt/compare/0.9.1...0.9.2) (2023-11-04)
 
