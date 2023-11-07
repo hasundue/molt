@@ -1,7 +1,7 @@
 import { distinct, filterKeys, mapEntries } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
 import { dirname, extname, join } from "./lib/std/path.ts";
-import { colors, Command, Input, List, Select } from "./lib/x/cliffy.ts";
+import { colors, Command } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
 import { URI } from "./lib/uri.ts";
@@ -18,65 +18,18 @@ import {
 } from "./lib/testing.ts";
 
 const { gray, yellow, bold, cyan } = colors;
-const checkCommand = new Command()
-  .description("Check for the latest version of dependencies")
-  .option("--import-map <file:string>", "Specify import map file")
-  .arguments("<entrypoints...:string>")
-  .action(checkAction);
 
-async function checkAction(
-  options: { importMap?: string },
-  ...entrypoints: string[]
-) {
-  _ensureJsFiles(entrypoints);
-  const updates = await _collect(entrypoints, options);
-  _list(updates);
-  const action = await Select.prompt({
-    message: "Choose an action",
-    options: [
-      { name: "Abort", value: "abort" },
-      { name: "Write changes to local files", value: "write" },
-      { name: "Commit changes to git", value: "commit" },
-    ],
-  });
-  switch (action) {
-    case "abort":
-      return;
-    case "write":
-      return _write(updates);
-    case "commit": {
-      const prefix = await Input.prompt({
-        message: "Prefix for commit messages",
-        default: "build(deps):",
-      });
-      const tasks = await _getTasks();
-      const suggestions = Object.keys(tasks);
-      const preCommit = await List.prompt(
-        {
-          message: "Tasks to run before each commit (comma separated)",
-          suggestions,
-        },
-      );
-      const postCommit = await List.prompt(
-        {
-          message: "Tasks to run after each commit (comma separated)",
-          suggestions,
-        },
-      );
-      console.log();
-      return _commit(updates, {
-        preCommit: filterKeys(tasks, (key) => preCommit.includes(key)),
-        postCommit: filterKeys(tasks, (key) => postCommit.includes(key)),
-        prefix,
-      });
-    }
-  }
-}
-
-const updateCommand = new Command()
-  .description("Update dependencies to the latest version")
+const main = new Command()
+  .name("molt")
+  .description("Check updates to dependencies in Deno modules")
+  .versionOption(
+    "-v, --version",
+    "Print version info.",
+    versionCommand,
+  )
   .option("--import-map <file:string>", "Specify import map file")
-  .option("--commit", "Commit changes to git")
+  .option("-w, --write", "Write changes to local files")
+  .option("-c, --commit", "Commit changes to local git repository")
   .option("--pre-commit=<tasks:string[]>", "Run tasks before each commit", {
     depends: ["commit"],
   })
@@ -88,39 +41,29 @@ const updateCommand = new Command()
   })
   .option("--summary <file:string>", "Write a summary of changes to file")
   .option("--report <file:string>", "Write a report of changes to file")
-  .arguments("<entrypoints...:string>")
-  .action(updateAction);
-
-async function updateAction(
-  options: {
-    commit?: boolean;
-    importMap?: string;
-    preCommit?: string[];
-    postCommit?: string[];
-    prefix?: string;
-    summary?: string;
-    report?: string;
-  },
-  ...entrypoints: string[]
-) {
-  _ensureJsFiles(entrypoints);
-  const updates = await _collect(entrypoints, options);
-  _list(updates);
-  if (options.commit) {
-    return _commit(updates, {
-      ...options,
-      preCommit: filterKeys(
-        await _getTasks(),
-        (key) => options.preCommit?.includes(key) ?? false,
-      ),
-      postCommit: filterKeys(
-        await _getTasks(),
-        (key) => options.postCommit?.includes(key) ?? false,
-      ),
-    });
-  }
-  return _write(updates, options);
-}
+  .arguments("<modules...:string>")
+  .action(async function (options, ...entrypoints) {
+    _ensureJsFiles(entrypoints);
+    const updates = await _collect(entrypoints, options);
+    _list(updates);
+    if (options.write) {
+      return _write(updates, options);
+    }
+    if (options.commit) {
+      const tasks = await _getTasks();
+      return _commit(updates, {
+        ...options,
+        preCommit: filterKeys(
+          tasks,
+          (key) => options.preCommit?.includes(key) ?? false,
+        ),
+        postCommit: filterKeys(
+          tasks,
+          (key) => options.postCommit?.includes(key) ?? false,
+        ),
+      });
+    }
+  });
 
 async function _collect(
   entrypoints: string[],
@@ -372,31 +315,16 @@ async function versionCommand() {
 }
 
 function _enableTestMode() {
-  if (Deno.env.get("MOLT_TEST")) {
-    const fs = new FileSystemFake();
-    ReadTextFileStub.create(fs, { readThrough: true });
-    WriteTextFileStub.create(fs);
-    LatestSemVerStub.create("123.456.789");
-    Deno.Command = createCommandStub();
-  }
+  const fs = new FileSystemFake();
+  ReadTextFileStub.create(fs, { readThrough: true });
+  WriteTextFileStub.create(fs);
+  LatestSemVerStub.create("123.456.789");
+  Deno.Command = createCommandStub();
 }
 
-const main = new Command()
-  .name("molt")
-  .description("A tool for updating dependencies in Deno projects")
-  .action(function () {
-    this.showHelp();
-  })
-  .versionOption(
-    "-v, --version",
-    "Print version info.",
-    versionCommand,
-  )
-  .command("check", checkCommand)
-  .command("update", updateCommand);
-
 try {
-  if (Deno.env.get("MOLT_TEST")) {
+  const env = await Deno.permissions.query({ name: "env" });
+  if (env.state === "granted" && Deno.env.get("MOLT_TEST")) {
     _enableTestMode();
   }
   await main.parse(Deno.args);
