@@ -10,9 +10,10 @@ function stringify(data: Uint8Array) {
 }
 
 function test(cmd: string, code = 0) {
-  const [command, ...args] = cmd.split(" ");
+  const [, ...args] = cmd.split(" ");
+  const COMMAND_MOLT = Deno.build.os === "windows" ? "molt.cmd" : "molt";
   Deno.test(cmd, async (t) => {
-    const output = await new Deno.Command(command, {
+    const output = await new Deno.Command(COMMAND_MOLT, {
       args,
       env: { MOLT_TEST: "1" },
     }).output();
