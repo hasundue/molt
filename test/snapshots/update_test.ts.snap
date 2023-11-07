@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`collect > direct import 1`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 1`] = `
 {
   code: {
     span: {
@@ -25,12 +25,12 @@ snapshot[`collect > direct import 1`] = `
     name: "deno.land/std",
     path: "/assert/assert_exists.ts",
     scheme: "https://",
-    version: "0.205.0",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > direct import 2`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 2`] = `
 {
   code: {
     span: {
@@ -55,12 +55,12 @@ snapshot[`collect > direct import 2`] = `
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
     scheme: "https://",
-    version: "0.59.2",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > direct import 3`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 3`] = `
 {
   code: {
     span: {
@@ -85,12 +85,12 @@ snapshot[`collect > direct import 3`] = `
     name: "node-emoji",
     path: "",
     scheme: "npm:",
-    version: "2.1.0",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > direct import 4`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 4`] = `
 {
   code: {
     span: {
@@ -115,12 +115,12 @@ snapshot[`collect > direct import 4`] = `
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
     scheme: "https://",
-    version: "0.205.0",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > import map 1`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 1`] = `
 {
   code: {
     span: {
@@ -145,12 +145,12 @@ snapshot[`collect > import map 1`] = `
     name: "deno.land/std",
     path: "/version.ts",
     scheme: "https://",
-    version: "0.205.0",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > import map 2`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 2`] = `
 {
   code: {
     span: {
@@ -175,12 +175,12 @@ snapshot[`collect > import map 2`] = `
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
     scheme: "https://",
-    version: "0.59.2",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > import map 3`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 3`] = `
 {
   code: {
     span: {
@@ -205,12 +205,12 @@ snapshot[`collect > import map 3`] = `
     name: "node-emoji",
     path: "",
     scheme: "npm:",
-    version: "2.1.0",
+    version: "123.456.789",
   },
 }
 `;
 
-snapshot[`collect > import map 4`] = `
+snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 4`] = `
 {
   code: {
     span: {
@@ -235,7 +235,7 @@ snapshot[`collect > import map 4`] = `
     name: "deno.land/std",
     path: "/",
     scheme: "https://",
-    version: "0.205.0",
+    version: "123.456.789",
   },
 }
 `;

@@ -17,6 +17,11 @@ import {
 } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
+import { LatestSemVerStub } from "./testing.ts";
+import { SemVerString } from "./types.ts";
+
+const LATEST = "123.456.789" as SemVerString;
+LatestSemVerStub.create(LATEST);
 
 describe("collect", () => {
   it("direct import", async () => {
