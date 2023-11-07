@@ -7,6 +7,29 @@ import { ImportMapJson } from "./import_map.ts";
 import { URI } from "./uri.ts";
 
 /**
+ * Write the given array of DependencyUpdate to files.
+ *
+ * @returns A promise that resolves when all updates are written.
+ *
+ * @example
+ * ```ts
+ * await writeAll(updates, {
+ *   onWrite: (update) => {
+ *     console.log(`Updated ${update.specifier}`);
+ *   },
+ * });
+ * ```
+ */
+export function writeAll(
+  updates: DependencyUpdate[],
+  options?: {
+    onWrite?: (result: FileUpdate) => void | Promise<void>;
+  },
+) {
+  return FileUpdate.write(FileUpdate.collect(updates), options);
+}
+
+/**
  * A collection of updates to dependencies in a file.
  */
 export interface FileUpdate {

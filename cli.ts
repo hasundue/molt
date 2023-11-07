@@ -6,7 +6,7 @@ import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
 import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
-import { FileUpdate } from "./lib/file.ts";
+import { writeAll } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
 import { Dependency, parseSemVer } from "./lib/dependency.ts";
 import {
@@ -158,9 +158,8 @@ async function _write(
     report?: string;
   },
 ) {
-  const results = FileUpdate.collect(updates);
   console.log();
-  await FileUpdate.write(results, {
+  await writeAll(updates, {
     onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
   });
   if (options?.summary || options?.report) {
