@@ -22,11 +22,7 @@ const { gray, yellow, bold, cyan } = colors;
 const main = new Command()
   .name("molt")
   .description("Check updates to dependencies in Deno modules")
-  .versionOption(
-    "-v, --version",
-    "Print version info.",
-    versionCommand,
-  )
+  .versionOption("-v, --version", "Print version info.", versionCommand)
   .option("--import-map <file:string>", "Specify import map file")
   .option("-w, --write", "Write changes to local files")
   .option("-c, --commit", "Commit changes to local git repository")
@@ -64,6 +60,17 @@ const main = new Command()
       });
     }
   });
+
+async function versionCommand() {
+  const version = parseSemVer(import.meta.url) ??
+    await $.progress("Fetching version info").with(async () => {
+      const latest = await Dependency.resolveLatest(
+        Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),
+      );
+      return latest ? latest.version : undefined;
+    }) ?? "unknown";
+  console.log(version);
+}
 
 async function _collect(
   entrypoints: string[],
@@ -303,17 +310,6 @@ function _formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 
-async function versionCommand() {
-  const version = parseSemVer(import.meta.url) ??
-    await $.progress("Fetching version info").with(async () => {
-      const latest = await Dependency.resolveLatest(
-        Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),
-      );
-      return latest ? latest.version : undefined;
-    }) ?? "unknown";
-  console.log(version);
-}
-
 function _enableTestMode() {
   const fs = new FileSystemFake();
   ReadTextFileStub.create(fs, { readThrough: true });
@@ -329,6 +325,8 @@ try {
   }
   await main.parse(Deno.args);
 } catch (error) {
-  console.error(error);
+  if (error.message) {
+    console.error(error.message);
+  }
   Deno.exit(1);
 }
