@@ -62,12 +62,13 @@ await commitAll(updates, {
   groupBy: (dependency) => dependency.name,
   composeCommitMessage: ({ group, version }) =>
     `build(deps): bump ${group} to ${version!.to}`,
+  postCommit: (commit) => console.log(commit.message),
 });
 ```
 
 ### CLI
 
-Although we encourage you to write your own scripts, a pre-built CLI tool is
+Although it is encouraged to write your own scripts, a pre-built CLI tool is
 also provided as `cli.ts` for convenience or a reference implementation, which
 is supposed to cover most of the use cases.
 
@@ -83,23 +84,37 @@ deno install --allow-env --allow-read --allow-write --allow-net --allow-run=git,
 Alternatively, you may prefer to run the remote script directly through
 `deno task` for better security or reproducibility:
 
-```sh
+```json
 {
   "tasks": {
-    "run:molt": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land https://deno.land/x/molt@{VERSION}/cli.ts",
-    "update": "deno task -q run:molt check ./**/*.ts",
-    "update:commit": "deno task -q run:molt update --commit --pre-commit=test ./**/*.ts"",
-  },
+    "update": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land https://deno.land/x/molt@{VERSION}/cli.ts ./**/*.ts",
+    "update:commit": "deno task -q update --commit --pre-commit=fmt,lint,test"
+  }
 }
 ```
 
-#### Update dependencies interactively
+#### Usage
 
-The most interactive interface is provided as `check` sub-command of `cli.ts`.
-Run `molt check --help` for more details.
+```
+> molt --help
+Usage: molt <modules...>
 
-```sh
-molt check [...options] <...entrypoints>
+Description:
+
+  Check updates to dependencies in Deno modules
+
+Options:
+
+  -h, --help               - Show this help.                                            
+  -v, --version            - Print version info.                                        
+  --import-map   <file>    - Specify import map file                                    
+  -w, --write              - Write changes to local files                               
+  -c, --commit             - Commit changes to local git repository                     
+  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)
+  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)
+  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)
+  --summary      <file>    - Write a summary of changes to file                         
+  --report       <file>    - Write a report of changes to file
 ```
 
 > [!Note]\
@@ -107,85 +122,51 @@ molt check [...options] <...entrypoints>
 > if available.\
 > You can't, however, use import maps as entrypoints.
 
-##### Example: Just check
+#### Examples
 
-```
-> molt check test/fixtures/direct-import/mod.ts 
-🔎 Checking for updates...
+##### Check for updates
+
+```sh
+> molt mod.ts 
 💡 Found updates:
 
-📦 node-emoji 1.0.0 => 2.1.0
-  test/fixtures/mod.ts 1.0.0
+📦 deno.land/std 0.200.0 => 123.456.789
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 0.55.0
-  src/fixtures/mod.ts 0.50.0
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  mod.ts 0.50.0
 
-📦 deno.land/std 0.200.0 => 0.202.0
-  src/fixtures/mod.ts 0.200.0
-  src/fixtures/lib.ts 0.200.0
-
-? Choose an action › Abort
-
->
+📦 node-emoji 2.0.0 => 123.456.789
+  mod.ts 2.0.0
 ```
 
-##### Example: Write changes to files
+##### Write changes to files
 
-```
-> molt check test/fixtures/direct-import/mod.ts 
-🔎 Checking for updates...
+```sh
+> molt mod.ts --write
 💡 Found updates:
     ...
 
-? Choose an action › Write changes to local files
-
-💾 src/fixtures/mod.ts
-💾 src/fixtures/lib.ts
-
->
+💾 lib.ts
+💾 mod.ts
 ```
 
-##### Example: Commit changes to git
+##### Commit changes to git
 
-```
-> molt check src/fixtures/mod.ts 
-🔎 Checking for updates...
+```sh
+> molt mod.ts --commit --pre-commit=test --prefix :package: --summary title.txt --report report.md
 💡 Found updates:
     ...
 
-? Choose an action › Commit changes to git
-? Prefix for commit messages (build(deps):) › build(deps):
-? Tasks to run before each commit (comma separated) › lock, test
-? Tasks to run after each commit (comma separated) › 
-
-📝 build(deps): update deno.land/std from 0.200.0 to 0.202.0
-📝 build(deps): update deno.land/x/deno_graph from 0.50.0 to 0.55.0
-📝 build(deps): update node-emoji from 1.0.0 to 2.1.0
-
->
-```
-
-#### Update dependencies non-interactively
-
-The `update` sub-command of `cli.ts` is designed to be used in non-interactive
-environments, such as CI/CD pipelines. Run `molt update --help` for more
-details.
-
-##### Example: Update dependencies and write changes to files
-
-```sh
-molt update <...entrypoints>
-```
-
-##### Example: Update dependencies and commit changes to git
-
-```sh
-molt update --commit --pre-commit=check,test <...entrypoints>
+📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
+📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 :package: bump node-emoji from 2.0.0 to 123.456.789
 ```
 
 ## Limitations
 
-The following limitations are imposed by the design of Molt:
+The following limitations are (currently) imposed by the design of Molt:
 
 - Dependencies are always updated to the latest version. No version constraints
   are supported.
