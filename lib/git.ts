@@ -111,12 +111,14 @@ async function execGitCommit(
   await options?.postCommit?.(commit);
 }
 
+const COMMAND_GIT = Deno.build.os === "windows" ? "git.exe" : "git";
+
 async function _add(
   results: FileUpdate[],
   options: string[],
 ) {
   const files = results.map((result) => URI.relative(result.specifier));
-  const { code, stderr } = await new Deno.Command("git", {
+  const { code, stderr } = await new Deno.Command(COMMAND_GIT, {
     args: ["add", ...options, ...files],
   }).output();
   if (code !== 0) {
@@ -128,7 +130,7 @@ async function _commit(
   message: string,
   options: string[],
 ) {
-  const { code, stderr } = await new Deno.Command("git", {
+  const { code, stderr } = await new Deno.Command(COMMAND_GIT, {
     args: ["commit", ...options, "-m", message],
   }).output();
   if (code !== 0) {
