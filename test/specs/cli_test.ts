@@ -5,7 +5,12 @@ import { stripAnsiCode } from "../../lib/std/fmt.ts";
 
 function stringify(data: Uint8Array) {
   const decoder = new TextDecoder();
-  const text = decoder.decode(data);
+  let text = decoder.decode(data);
+  if (Deno.build.os === "windows") {
+    text = text
+      .replace(/\r\n/g, "\n")
+      .replace(/\\/g, "/");
+  }
   return stripAnsiCode(text);
 }
 
