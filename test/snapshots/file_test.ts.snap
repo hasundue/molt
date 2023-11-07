@@ -1,18 +1,18 @@
 export const snapshot = {};
 
-snapshot[`write > direct import 1`] = `
+snapshot[`FileUpdate.write() > direct import 1`] = `
 'import { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_equals.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 import emoji from "npm:node-emoji@123.456.789";
 import { noop } from "./lib.ts";'
 `;
 
-snapshot[`write > direct import 2`] = `
+snapshot[`FileUpdate.write() > direct import 2`] = `
 'import { assertExists } from "https://deno.land/std@123.456.789/assert/assert_exists.ts";
 export const noop = () => {};'
 `;
 
-snapshot[`write > import map 1`] = `
+snapshot[`FileUpdate.write() > import map 1`] = `
 '{
   "imports": {
     "std/": "https://deno.land/std@123.456.789/",
@@ -23,21 +23,21 @@ snapshot[`write > import map 1`] = `
 }'
 `;
 
-snapshot[`write > import map 2`] = `
+snapshot[`FileUpdate.write() > import map 2`] = `
 'import { VERSION } from "https://deno.land/std@123.456.789/version.ts";
 export const noop = () => {};'
 `;
 
-snapshot[`write > import map with no resolve 1`] = `'import {} from "https://deno.land/std@123.456.789/testing/asserts.ts";'`;
+snapshot[`FileUpdate.write() > import map with no resolve 1`] = `'import {} from "https://deno.land/std@123.456.789/testing/asserts.ts";'`;
 
-snapshot[`write > unversioned specifiers 1`] = `
+snapshot[`FileUpdate.write() > unversioned specifiers 1`] = `
 'import { VERSION } from "https://deno.land/std@123.456.789";
 import { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 import { emojify } from "npm:node-emoji@123.456.789";
 import { noop } from "./lib.ts";'
 `;
 
-snapshot[`write > unversioned specifiers 2`] = `
+snapshot[`FileUpdate.write() > unversioned specifiers 2`] = `
 'import { VERSION } from "https://deno.land/std@123.456.789/version.ts";
 export const noop = () => {};'
 `;

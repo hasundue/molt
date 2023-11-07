@@ -23,7 +23,7 @@ import { SemVerString } from "./types.ts";
 const LATEST = "123.456.789" as SemVerString;
 LatestSemVerStub.create(LATEST);
 
-describe("collect", () => {
+describe("FileUpdate.collect()", () => {
   it("direct import", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
@@ -62,7 +62,7 @@ describe("collect", () => {
   });
 });
 
-describe("write", () => {
+describe("FileUpdate.write()", () => {
   let fs: FileSystemFake;
   let readTextFileStub: ReadTextFileStub;
   let writeTextFileStub: WriteTextFileStub;
