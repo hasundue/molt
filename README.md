@@ -47,7 +47,7 @@ const updates = await DependencyUpdate.collect("./mod.ts", {
 });
 
 const results = FileUpdate.collect(updates);
-await FileUpdate.writeAll(results);
+await FileUpdate.write(results);
 ```
 
 ##### Update all dependencies in a module and commit the changes to local git repository

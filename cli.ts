@@ -160,7 +160,7 @@ async function _write(
 ) {
   const results = FileUpdate.collect(updates);
   console.log();
-  await FileUpdate.writeAll(results, {
+  await FileUpdate.write(results, {
     onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
   });
   if (options?.summary || options?.report) {

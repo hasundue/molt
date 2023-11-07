@@ -18,7 +18,7 @@
  * });
  *
  * const results = FileUpdate.collect(updates);
- * await FileUpdate.writeAll(results);
+ * await FileUpdate.write(results);
  * ```
  *
  * @module

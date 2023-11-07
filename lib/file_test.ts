@@ -62,7 +62,7 @@ describe("collect", () => {
   });
 });
 
-describe("writeAll", () => {
+describe("write", () => {
   let fs: FileSystemFake;
   let readTextFileStub: ReadTextFileStub;
   let writeTextFileStub: WriteTextFileStub;
@@ -81,7 +81,7 @@ describe("writeAll", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
     );
-    await FileUpdate.writeAll(results);
+    await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
@@ -104,7 +104,7 @@ describe("writeAll", () => {
         { importMap: "./test/fixtures/import-map/deno.json" },
       ),
     );
-    await FileUpdate.writeAll(results);
+    await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
@@ -127,7 +127,7 @@ describe("writeAll", () => {
         { importMap: "./test/fixtures/import-map-no-resolve/deno.json" },
       ),
     );
-    await FileUpdate.writeAll(results);
+    await FileUpdate.write(results);
     const call = assertFindSpyCallArg(
       writeTextFileStub,
       0,
@@ -141,7 +141,7 @@ describe("writeAll", () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect("./test/fixtures/unversioned/mod.ts"),
     );
-    await FileUpdate.writeAll(results);
+    await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
