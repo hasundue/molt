@@ -101,7 +101,7 @@ export const FetchStub = {
 export type FetchStub = ReturnType<typeof FetchStub.create>;
 
 export const LatestSemVerStub = {
-  create(latest: SemVerString): FetchStub {
+  create(latest: string | SemVerString): FetchStub {
     return FetchStub.create(async (request, init) => {
       request = (request instanceof Request)
         ? request
