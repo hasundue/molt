@@ -30,36 +30,34 @@ function test(cmd: string, code = 0) {
   });
 }
 
-await $`deno task -q install`;
+await $`deno task -q install`.quiet();
 
 const dir = "test/fixtures";
 
-test("molt");
+test("molt", 2);
 test("molt --help");
 test("molt --version");
 
-test("molt check", 2);
-test("molt check --help");
-
-test("molt update", 2);
-test("molt update --help");
-test(`molt update ${dir}/not_exist.ts`, 1);
-test(`molt update ${dir}/import-map/deno.json`, 1);
-test(`molt update ${dir}/direct-import/mod.ts`);
-test(`molt update ${dir}/import-map/mod.ts`);
+test(`molt not_exist.ts`, 1);
+test(`molt ${dir}/import-map/deno.json`, 1);
+test(`molt ${dir}/direct-import/mod.ts`);
+test(`molt ${dir}/import-map/mod.ts`);
+test(`molt ${dir}/import-map/mod.ts --import-map ${dir}/import-map/deno.json`);
 test(
-  `molt update ${dir}/import-map/mod.ts --import-map ${dir}/import-map/deno.json`,
-);
-test(
-  `molt update ${dir}/import-map/mod.ts --import-map ${dir}/import-map/not_exist.json`,
+  `molt ${dir}/import-map/mod.ts --import-map not_exist.json`,
   1,
 );
 
-test(`molt update ${dir}/direct-import/mod.ts --commit`);
-test(`molt update ${dir}/direct-import/mod.ts --commit --prefix :package:`);
+test(`molt ${dir}/direct-import/mod.ts --write`);
 test(
-  `molt update ${dir}/direct-import/mod.ts --commit --pre-commit=fmt --post-commit=lint`,
+  `molt ${dir}/direct-import/mod.ts --write --summary title.txt --report body.md`,
+);
+
+test(`molt ${dir}/direct-import/mod.ts --commit`);
+test(`molt ${dir}/direct-import/mod.ts --commit --prefix :package:`);
+test(
+  `molt ${dir}/direct-import/mod.ts --commit --pre-commit=fmt --post-commit=lint`,
 );
 test(
-  `molt update ${dir}/direct-import/mod.ts --commit --summary title.txt --report body.md`,
+  `molt ${dir}/direct-import/mod.ts --commit --summary title.txt --report body.md`,
 );
