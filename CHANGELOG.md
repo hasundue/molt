@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1](https://github.com/hasundue/molt/compare/0.11.0...0.11.1) (2023-11-09)
+
+
+### Bug Fixes
+
+* do not update to pre-releases ([#79](https://github.com/hasundue/molt/issues/79)) ([7a2e4bd](https://github.com/hasundue/molt/commit/7a2e4bd371ece7b9d2a11b546522150a00ba048c))
+* **mod:** export `writeAll` and other types ([19ff379](https://github.com/hasundue/molt/commit/19ff379b9ad9e7a60017e2f97d54affa93913828))
+
 ## [0.11.0](https://github.com/hasundue/molt/compare/0.10.0...0.11.0) (2023-11-07)
 
 
