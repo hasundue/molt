@@ -8,7 +8,8 @@ import { URI } from "./lib/uri.ts";
 import { DependencyUpdate } from "./lib/update.ts";
 import { writeAll } from "./lib/file.ts";
 import { GitCommitSequence } from "./lib/git.ts";
-import { Dependency, parseSemVer } from "./lib/dependency.ts";
+import { Dependency } from "./lib/dependency.ts";
+import { SemVerString } from "./lib/semver.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -61,7 +62,7 @@ const main = new Command()
   });
 
 async function versionCommand() {
-  const version = parseSemVer(import.meta.url) ??
+  const version = SemVerString.parse(import.meta.url) ??
     await $.progress("Fetching version info").with(async () => {
       const latest = await Dependency.resolveLatest(
         Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),

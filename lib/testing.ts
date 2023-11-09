@@ -13,8 +13,7 @@ import { AssertionError } from "./std/assert.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
 import { URI } from "./uri.ts";
-import { parseSemVer } from "./dependency.ts";
-import { SemVerString } from "./types.ts";
+import { SemVerString } from "./semver.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
@@ -125,7 +124,7 @@ export const LatestSemVerStub = {
           }
           const response = await init.original(request);
           await response.arrayBuffer();
-          const semver = parseSemVer(response.url);
+          const semver = SemVerString.parse(response.url);
           if (!semver) {
             return response;
           }

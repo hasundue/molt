@@ -4,9 +4,11 @@ import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
 import { is } from "./x/unknownutil.ts";
 import type { Maybe } from "./types.ts";
 import { URI } from "./uri.ts";
-import { URIScheme } from "./types.ts";
 
 export type { ImportMapJson };
+
+const URI_SCHEMES = ["http", "https", "file", "npm", "node"] as const;
+type URIScheme = typeof URI_SCHEMES[number];
 
 export interface ImportMapResolveResult {
   /** The full specifier resolved from the import map. */
@@ -71,7 +73,7 @@ async function readFromJson(specifier: URI<"file">): Promise<Maybe<ImportMap>> {
         URI.ensure("file")(resolved);
       }
       return {
-        specifier: URI.ensure(...URIScheme.values)(resolved),
+        specifier: URI.ensure(...URI_SCHEMES)(resolved),
         ...replacement,
       };
     },

@@ -18,7 +18,7 @@ import { assertSnapshot } from "./testing.ts";
 import { DependencyUpdate } from "./update.ts";
 import { FileUpdate } from "./file.ts";
 import { LatestSemVerStub } from "./testing.ts";
-import { SemVerString } from "./types.ts";
+import { SemVerString } from "./semver.ts";
 
 const LATEST = "123.456.789" as SemVerString;
 LatestSemVerStub.create(LATEST);

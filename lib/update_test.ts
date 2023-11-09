@@ -12,7 +12,7 @@ import { URI } from "./uri.ts";
 import { _create, DependencyUpdate } from "./update.ts";
 import { ImportMap } from "./import_map.ts";
 import { LatestSemVerStub } from "./testing.ts";
-import { SemVerString } from "./types.ts";
+import type { SemVerString } from "./semver.ts";
 
 describe("DependencyUpdate", () => {
   const LATEST = "123.456.789" as SemVerString;
