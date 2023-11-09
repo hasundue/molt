@@ -10,19 +10,23 @@
  * ```ts
  * import {
  *   DependencyUpdate,
- *   FileUpdate,
+ *   writeAll,
  * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
  *
  * const updates = await DependencyUpdate.collect("./mod.ts", {
  *   importMap: "./deno.json",
  * });
  *
- * const results = FileUpdate.collect(updates);
- * await FileUpdate.write(results);
+ * await writeAll(updates);
  * ```
  *
  * @module
  */
 
 export { DependencyUpdate } from "./lib/update.ts";
-export { FileUpdate } from "./lib/file.ts";
+export { FileUpdate, writeAll } from "./lib/file.ts";
+export type { Dependency, LatestDependency } from "./lib/dependency.ts";
+export type { SemVerString } from "./lib/semver.ts";
+export type { ImportMap } from "./lib/import_map.ts";
+export type { URI } from "./lib/uri.ts";
+export type { Path } from "./lib/types.ts";

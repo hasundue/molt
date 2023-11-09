@@ -14,8 +14,8 @@ import { URI } from "./uri.ts";
  * @example
  * ```ts
  * await writeAll(updates, {
- *   onWrite: (update) => {
- *     console.log(`Updated ${update.specifier}`);
+ *   onWrite: (file) => {
+ *     console.log(`Updated ${file.specifier}`);
  *   },
  * });
  * ```
@@ -23,7 +23,7 @@ import { URI } from "./uri.ts";
 export function writeAll(
   updates: DependencyUpdate[],
   options?: {
-    onWrite?: (result: FileUpdate) => void | Promise<void>;
+    onWrite?: (file: FileUpdate) => void | Promise<void>;
   },
 ) {
   return FileUpdate.write(FileUpdate.collect(updates), options);

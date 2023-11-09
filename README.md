@@ -39,15 +39,16 @@ provided.
 ```ts
 import {
   DependencyUpdate,
-  FileUpdate,
+  writeAll,
 } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
 const updates = await DependencyUpdate.collect("./mod.ts", {
   importMap: "./deno.json",
 });
 
-const results = FileUpdate.collect(updates);
-await FileUpdate.write(results);
+await writeAll(results, {
+  onWrite: (file) => console.log(`💾 ${file.specifier}`),
+});
 ```
 
 ##### Update all dependencies in a module and commit the changes to local git repository
