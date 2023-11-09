@@ -21,7 +21,7 @@ export interface ImportMap {
   // TODO: Accept a remote URL
   specifier: URI<"file">;
   resolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
-  resolveSimple(specifier: string, referrer: string): string;
+  resolveInner(specifier: string, referrer: string): string;
 }
 
 export const ImportMap = {
@@ -77,6 +77,6 @@ async function readFromJson(specifier: URI<"file">): Promise<Maybe<ImportMap>> {
         ...replacement,
       };
     },
-    resolveSimple: inner.resolve.bind(inner),
+    resolveInner: inner.resolve.bind(inner),
   };
 }

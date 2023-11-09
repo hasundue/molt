@@ -74,7 +74,7 @@ export async function collect(
 
   const graph = await createGraph(specifiers, {
     load,
-    resolve: importMap ? importMap.resolveSimple : undefined,
+    resolve: importMap ? importMap.resolveInner : undefined,
   });
 
   const updates: DependencyUpdate[] = [];

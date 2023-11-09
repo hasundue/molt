@@ -115,7 +115,7 @@ describe("resolve()", () => {
   });
 });
 
-describe("resolveSimple()", () => {
+describe("resolveInner()", () => {
   let importMap: ImportMap;
   beforeAll(async () => {
     const maybe = await ImportMap.readFromJson(
@@ -126,7 +126,7 @@ describe("resolveSimple()", () => {
   });
   it("resolve an absolute path", () => {
     assertEquals(
-      importMap.resolveSimple(
+      importMap.resolveInner(
         "/lib.ts",
         URI.from("test/fixtures/import-map/mod.ts"),
       ),
