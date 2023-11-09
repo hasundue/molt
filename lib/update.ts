@@ -13,7 +13,7 @@ import { Dependency, LatestDependency } from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-/** Representation of a dependency update. */
+/** Representation of an update to a dependency. */
 export interface DependencyUpdate {
   /** Properties of the dependency being updated. */
   from: Dependency;

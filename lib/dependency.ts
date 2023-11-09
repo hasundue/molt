@@ -1,42 +1,9 @@
 import { assertExists } from "./std/assert.ts";
 import { Mutex } from "./x/async.ts";
-import type { Path, SemVerString } from "./types.ts";
+import { ensure, is } from "./x/unknownutil.ts";
+import type { Path } from "./types.ts";
+import { SemVerString } from "./semver.ts";
 import { URI } from "./uri.ts";
-
-// Ref: https://semver.org/#is-there-a-suggested-regular-expression-regex-to-check-a-semver-string
-const SEMVER_REGEXP =
-  /@v?(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?/g;
-
-/**
- * Parse a semver string from the given import specifier.
- *
- * @param specifier The import specifier to parse.
- *
- * @returns The semver string parsed from the specifier, or `undefined` if no
- * semver string is found.
- *
- * @example
- * ```ts
- * const version = parseSemVer("https://deno.land/std@0.205.0/version.ts");
- * // -> "1"
- * ```
- */
-export function parseSemVer(
-  specifier: string,
-): SemVerString | undefined {
-  const match = specifier.match(SEMVER_REGEXP);
-  if (!match) {
-    return undefined;
-  }
-  if (match.length > 1) {
-    console.warn(
-      "Multiple semvers in a single specifier is not supported:",
-      specifier,
-    );
-    return undefined;
-  }
-  return match[0].slice(1) as SemVerString;
-}
 
 /**
  * Properties of a dependency parsed from an import specifier.
@@ -101,7 +68,7 @@ export const Dependency = {
   parse(url: URL): Dependency {
     const scheme = url.protocol === "npm:" ? "npm:" : url.protocol + "//";
     const body = url.hostname + url.pathname;
-    const semver = parseSemVer(url.href);
+    const semver = SemVerString.parse(url.href);
     if (!semver) {
       return { scheme, name: body } as Dependency;
     }
@@ -179,21 +146,27 @@ async function _resolveLatest(
           `Failed to fetch npm registry: ${response.statusText}`,
         );
       }
-      const json = await response.json();
-      if (!json["dist-tags"]?.latest) {
-        throw new Error(
-          `Could not find the latest version of ${dependency.name} from registry.`,
-        );
-      }
-      const latestSemVer = json["dist-tags"].latest as SemVerString;
-      if (latestSemVer === dependency.version) {
-        // The dependency is up to date
+      const pkg = ensure(
+        await response.json(),
+        is.ObjectOf({
+          "dist-tags": is.ObjectOf({
+            latest: is.String,
+          }),
+        }),
+        { message: `Invalid response from NPM registry: ${response.url}` },
+      );
+      const latest = SemVerString.parse(pkg["dist-tags"].latest);
+      if (
+        latest === undefined || // The latest version is not a semver
+        latest === dependency.version || // The dependency is already up to date
+        SemVerString.isPreRelease(latest)
+      ) {
         LatestDependencyCache.set(dependency.name, null);
         return;
       }
       return LatestDependencyCache.set(
         dependency.name,
-        { ...dependency, version: latestSemVer },
+        { ...dependency, version: latest },
       );
     }
     case "http://":
@@ -210,8 +183,9 @@ async function _resolveLatest(
       }
       const latest = Dependency.parse(new URL(response.url));
       if (
-        !latest.version || // The redirected URL has no semver
-        latest.version === dependency.version // The dependency is already up to date
+        latest.version === undefined || // The redirected URL has no semver
+        latest.version === dependency.version || // The dependency is already up to date
+        SemVerString.isPreRelease(latest.version)
       ) {
         LatestDependencyCache.set(dependency.name, null);
         return;
