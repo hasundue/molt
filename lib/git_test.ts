@@ -1,5 +1,4 @@
 import {
-  afterAll,
   assertSpyCalls,
   beforeAll,
   beforeEach,
@@ -11,35 +10,31 @@ import {
   assertFindSpyCall,
   createCommandStub,
   FileSystemFake,
+  LatestSemVerStub,
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
 import { URI } from "./uri.ts";
+import { SemVerString } from "./semver.ts";
 import { DependencyUpdate } from "./update.ts";
 import { commitAll } from "./git.ts";
 
 describe("commitAll()", () => {
   let updates: DependencyUpdate[];
   let fileSystemFake: FileSystemFake;
-  let writeTextFileStub: WriteTextFileStub;
-  let readTextFileStub: ReadTextFileStub;
   let CommandStub: ReturnType<typeof createCommandStub>;
+  const LATEST = "123.456.789" as SemVerString;
 
   beforeAll(async () => {
+    LatestSemVerStub.create(LATEST);
     updates = await DependencyUpdate.collect(
       "./test/fixtures/direct-import/mod.ts",
     );
     fileSystemFake = new FileSystemFake();
-    readTextFileStub = ReadTextFileStub.create(fileSystemFake, {
+    ReadTextFileStub.create(fileSystemFake, {
       readThrough: true,
     });
-    writeTextFileStub = WriteTextFileStub.create(fileSystemFake);
-  });
-
-  afterAll(() => {
-    writeTextFileStub.restore();
-    readTextFileStub.restore();
-    Deno.Command = CommandStub.original;
+    WriteTextFileStub.create(fileSystemFake);
   });
 
   beforeEach(() => {
@@ -49,12 +44,14 @@ describe("commitAll()", () => {
   });
 
   const expected = [
-    `import { assertEquals } from "https://deno.land/std@0.205.0/assert/assert_equals.ts";
-import { createGraph } from "https://deno.land/x/deno_graph@0.59.2/mod.ts";
-import emoji from "npm:node-emoji@2.1.0";
-import { noop } from "./lib.ts";`,
-    `import { assertExists } from "https://deno.land/std@0.205.0/assert/assert_exists.ts";
-export const noop = () => {};`,
+    `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
+import { createGraph } from "https://deno.land/x/deno_graph@${LATEST}/mod.ts";
+import emoji from "npm:node-emoji@${LATEST}";
+import { noop } from "./lib.ts";
+`,
+    `import { assertExists } from "https://deno.land/std@${LATEST}/assert/assert_exists.ts";
+export const noop = () => {};
+`,
   ];
 
   // "git add src/fixtures/mod.ts src/fixtures/lib.ts",

@@ -104,7 +104,6 @@ async function writeToModule(
   await Deno.writeTextFile(
     new URL(update.specifier),
     content
-      .trimEnd()
       .split(eol)
       .map((line, index) => {
         const dependency = lineToDependencyMap.get(index);
