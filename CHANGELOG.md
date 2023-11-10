@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.2](https://github.com/hasundue/molt/compare/0.11.1...0.11.2) (2023-11-10)
+
+
+### Bug Fixes
+
+* do not trim EOF on the last line of file ([205b9d4](https://github.com/hasundue/molt/commit/205b9d457ddd0df970cf3c4a0f1dd34c09b0938d))
+
 ## [0.11.1](https://github.com/hasundue/molt/compare/0.11.0...0.11.1) (2023-11-09)
 
 
