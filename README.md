@@ -46,7 +46,7 @@ const updates = await DependencyUpdate.collect("./mod.ts", {
   importMap: "./deno.json",
 });
 
-await writeAll(results, {
+await writeAll(updates, {
   onWrite: (file) => console.log(`💾 ${file.specifier}`),
 });
 ```
