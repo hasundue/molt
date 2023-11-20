@@ -28,7 +28,7 @@ describe("commitAll()", () => {
   beforeAll(async () => {
     LatestSemVerStub.create(LATEST);
     updates = await DependencyUpdate.collect(
-      "./test/fixtures/direct-import/mod.ts",
+      "./test/data/direct-import/mod.ts",
     );
     fileSystemFake = new FileSystemFake();
     ReadTextFileStub.create(fileSystemFake, {
@@ -54,11 +54,11 @@ export const noop = () => {};
 `,
   ];
 
-  // "git add src/fixtures/mod.ts src/fixtures/lib.ts",
+  // "git add src/data/mod.ts src/data/lib.ts",
   it("no grouping", async () => {
     await commitAll(updates);
     // TODO: Can't test this because of the order of targets is not guaranteed.
-    // assertGitAdd(CommandStub, "src/fixtures/mod.ts", "src/fixtures/lib.ts");
+    // assertGitAdd(CommandStub, "src/data/mod.ts", "src/data/lib.ts");
     assertGitCommit(CommandStub, "build(deps): update dependencies");
     assertSpyCalls(CommandStub, 2);
     assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
@@ -69,12 +69,12 @@ export const noop = () => {};
       groupBy: (update) => update.to.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertGitAdd(CommandStub, "test/fixtures/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update node-emoji");
-    assertGitAdd(CommandStub, "test/fixtures/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update deno.land/x/deno_graph");
     // TODO: Can't test this because of the order of targets is not guaranteed.
-    // assertGitAdd(CommandStub, "src/fixtures/lib.ts", "src/fixtures/mod.ts");
+    // assertGitAdd(CommandStub, "src/data/lib.ts", "src/data/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update deno.land/std");
     assertSpyCalls(CommandStub, 6);
     assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
@@ -89,19 +89,15 @@ export const noop = () => {};
         return `build(deps): update ${relative}`;
       },
     });
-    assertGitAdd(CommandStub, "test/fixtures/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
     assertGitCommit(
       CommandStub,
-      `build(deps): update ${
-        normalizePath("test/fixtures/direct-import/mod.ts")
-      }`,
+      `build(deps): update ${normalizePath("test/data/direct-import/mod.ts")}`,
     );
-    assertGitAdd(CommandStub, "test/fixtures/direct-import/lib.ts");
+    assertGitAdd(CommandStub, "test/data/direct-import/lib.ts");
     assertGitCommit(
       CommandStub,
-      `build(deps): update ${
-        normalizePath("test/fixtures/direct-import/lib.ts")
-      }`,
+      `build(deps): update ${normalizePath("test/data/direct-import/lib.ts")}`,
     );
     assertSpyCalls(CommandStub, 4);
     assertArrayIncludes(Array.from(fileSystemFake.values()), expected);
