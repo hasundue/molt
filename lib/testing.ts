@@ -161,7 +161,7 @@ export function assertFindSpyCall<
   Args extends unknown[],
   Return,
 >(
-  spy: Spy<Self, Args, Return>,
+  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
   expected: ExpectedSpyCall<Self, Args, Return>,
 ) {
   const call = spy.calls.find((_, index) => {
@@ -186,7 +186,7 @@ export function assertFindSpyCallArg<
   Return,
   ExpectedArg,
 >(
-  spy: Spy<Self, Args, Return>,
+  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
   argIndex: number,
   expected: ExpectedArg,
 ) {
