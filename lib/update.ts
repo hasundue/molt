@@ -137,7 +137,7 @@ export async function _create(
   );
   const dependency = Dependency.parse(new URL(mapped?.to ?? specifier));
   const latest = await Dependency.resolveLatest(dependency);
-  if (!latest) {
+  if (!latest || latest.version === dependency.version) {
     return;
   }
   const span = dependencyJson.code?.span ?? dependencyJson.type?.span;
