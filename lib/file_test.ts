@@ -26,7 +26,7 @@ LatestSemVerStub.create(LATEST);
 describe("FileUpdate.collect()", () => {
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
+      await DependencyUpdate.collect("./test/data/direct-import/mod.ts"),
     );
     assertEquals(results.length, 2);
   });
@@ -34,8 +34,8 @@ describe("FileUpdate.collect()", () => {
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/fixtures/import-map/mod.ts",
-        { importMap: "./test/fixtures/import-map/deno.json" },
+        "./test/data/import-map/mod.ts",
+        { importMap: "./test/data/import-map/deno.json" },
       ),
     );
     assertEquals(results.length, 2);
@@ -52,8 +52,8 @@ describe("FileUpdate.collect()", () => {
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/fixtures/import-map-no-resolve/mod.ts",
-        { importMap: "./test/fixtures/import-map-no-resolve/deno.json" },
+        "./test/data/import-map-no-resolve/mod.ts",
+        { importMap: "./test/data/import-map-no-resolve/deno.json" },
       ),
     );
     assertEquals(results.length, 1);
@@ -79,19 +79,19 @@ describe("FileUpdate.write()", () => {
 
   it("direct import", async (t) => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/fixtures/direct-import/mod.ts"),
+      await DependencyUpdate.collect("./test/data/direct-import/mod.ts"),
     );
     await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/direct-import/mod.ts", import.meta.url),
+      new URL("../test/data/direct-import/mod.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_1);
     const call_2 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/direct-import/lib.ts", import.meta.url),
+      new URL("../test/data/direct-import/lib.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_2);
     assertSpyCalls(writeTextFileStub, 2);
@@ -100,21 +100,21 @@ describe("FileUpdate.write()", () => {
   it("import map", async (t) => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/fixtures/import-map/mod.ts",
-        { importMap: "./test/fixtures/import-map/deno.json" },
+        "./test/data/import-map/mod.ts",
+        { importMap: "./test/data/import-map/deno.json" },
       ),
     );
     await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/import-map/deno.json", import.meta.url),
+      new URL("../test/data/import-map/deno.json", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_1);
     const call_2 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/import-map/lib.ts", import.meta.url),
+      new URL("../test/data/import-map/lib.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_2);
     assertSpyCalls(writeTextFileStub, 2);
@@ -123,15 +123,15 @@ describe("FileUpdate.write()", () => {
   it("import map with no resolve", async (t) => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/fixtures/import-map-no-resolve/mod.ts",
-        { importMap: "./test/fixtures/import-map-no-resolve/deno.json" },
+        "./test/data/import-map-no-resolve/mod.ts",
+        { importMap: "./test/data/import-map-no-resolve/deno.json" },
       ),
     );
     await FileUpdate.write(results);
     const call = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/import-map-no-resolve/mod.ts", import.meta.url),
+      new URL("../test/data/import-map-no-resolve/mod.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call);
     assertSpyCalls(writeTextFileStub, 1);
@@ -139,19 +139,19 @@ describe("FileUpdate.write()", () => {
 
   it("unversioned specifiers", async (t) => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/fixtures/unversioned/mod.ts"),
+      await DependencyUpdate.collect("./test/data/unversioned/mod.ts"),
     );
     await FileUpdate.write(results);
     const call_1 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/unversioned/mod.ts", import.meta.url),
+      new URL("../test/data/unversioned/mod.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_1);
     const call_2 = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/fixtures/unversioned/lib.ts", import.meta.url),
+      new URL("../test/data/unversioned/lib.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call_2);
     assertSpyCalls(writeTextFileStub, 2);

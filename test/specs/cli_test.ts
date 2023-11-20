@@ -16,10 +16,9 @@ function stringify(data: Uint8Array) {
 
 function test(cmd: string, code = 0) {
   const [, ...args] = cmd.split(" ");
-  const COMMAND_MOLT = Deno.build.os === "windows" ? "molt.cmd" : "molt";
   Deno.test(cmd, async (t) => {
-    const output = await new Deno.Command(COMMAND_MOLT, {
-      args,
+    const output = await new Deno.Command("deno", {
+      args: ["run", "-A", "./cli.ts", ...args],
       env: { MOLT_TEST: "1" },
     }).output();
     const stdout = stringify(output.stdout);
@@ -36,9 +35,7 @@ function test(cmd: string, code = 0) {
   });
 }
 
-await $`deno task -q install`.quiet();
-
-const dir = "test/fixtures";
+const dir = "test/data";
 
 test("molt", 2);
 test("molt --help");
