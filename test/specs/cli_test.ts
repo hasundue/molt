@@ -1,4 +1,3 @@
-import { $ } from "../../lib/x/dax.ts";
 import { assertEquals } from "../../lib/std/assert.ts";
 import { stripAnsiCode } from "../../lib/std/fmt.ts";
 import { assertSnapshot } from "../../lib/testing.ts";
