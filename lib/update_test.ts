@@ -199,29 +199,56 @@ describe("DependencyUpdate", () => {
         },
       });
     });
+  });
 
-    describe("collect()", () => {
-      it("direct import", async (t) => {
-        const updates = await DependencyUpdate.collect(
-          "./test/data/direct-import/mod.ts",
-        );
-        assertEquals(updates.length, 4);
-        for (const update of updates) {
-          await assertUpdateSnapshot(t, update);
-        }
-      });
-      it("import map", async (t) => {
-        const updates = await DependencyUpdate.collect(
-          "./test/data/import-map/mod.ts",
-          {
-            importMap: "./test/data/import-map/deno.json",
-          },
-        );
-        assertEquals(updates.length, 4);
-        for (const update of updates) {
-          await assertUpdateSnapshot(t, update);
-        }
-      });
+  describe("collect()", () => {
+    it("direct import", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/direct-import/mod.ts",
+      );
+      assertEquals(updates.length, 4);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
+    it("import map", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/import-map/mod.ts",
+        {
+          importMap: "./test/data/import-map/deno.json",
+        },
+      );
+      assertEquals(updates.length, 4);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
+    it("export", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/export.ts",
+      );
+      assertEquals(updates.length, 1);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
+    it("import and export", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/import_and_export.ts",
+      );
+      assertEquals(updates.length, 2);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
+    it("updated and outdated", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/updated_and_outdated.ts",
+      );
+      assertEquals(updates.length, 1);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
     });
   });
 
