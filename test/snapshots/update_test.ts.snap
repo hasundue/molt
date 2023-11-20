@@ -329,3 +329,63 @@ snapshot[`DependencyUpdate > collect() > import and export 2`] = `
   },
 }
 `;
+
+snapshot[`DependencyUpdate > collect() > updated and outdated 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 56,
+        line: 1,
+      },
+      start: {
+        character: 15,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/python@0.4.1/mod.ts",
+  },
+  from: {
+    name: "deno.land/x/python",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "0.4.1",
+  },
+  to: {
+    name: "deno.land/x/python",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > updated import and outdated export 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 56,
+        line: 1,
+      },
+      start: {
+        character: 15,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/python@0.4.1/mod.ts",
+  },
+  from: {
+    name: "deno.land/x/python",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "0.4.1",
+  },
+  to: {
+    name: "deno.land/x/python",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;

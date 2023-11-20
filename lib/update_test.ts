@@ -250,6 +250,15 @@ describe("DependencyUpdate", () => {
         await assertUpdateSnapshot(t, update);
       }
     });
+    it("updated import and outdated export", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/updated_import_and_outdated_export.ts",
+      );
+      assertEquals(updates.length, 1);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
   });
 
   describe("getVersionChange()", () => {

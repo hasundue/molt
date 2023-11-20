@@ -100,16 +100,16 @@ export const Dependency = {
    * Resolve the latest version of the given dependency.
    *
    * @returns The latest version of the given dependency, or `undefined` if the
-   * dependency is already up to date or unable to resolve.
+   * latest version of dependency is unable to resolve.
    *
    * @throws An error if the dependency is not found in the registry.
    *
    * @example
    * ```ts
-   * const latest = await Dependency.resolveLatest({
+   * await Dependency.resolveLatest({
    *   scheme: "https://",
    *   name: "deno.land/std",
-   *   version: "0.205.0",
+   *   version: "0.200.0",
    *   path: "/fs/mod.ts",
    * });
    * // -> { scheme: "https://", name: "deno.land/std", version: "0.206.0", path: "/fs/mod.ts" }
@@ -184,7 +184,6 @@ async function _resolveLatest(
       const latest = Dependency.parse(new URL(response.url));
       if (
         latest.version === undefined || // The redirected URL has no semver
-        latest.version === dependency.version || // The dependency is already up to date
         SemVerString.isPreRelease(latest.version)
       ) {
         LatestDependencyCache.set(dependency.name, null);
