@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.3](https://github.com/hasundue/molt/compare/0.11.2...0.11.3) (2023-11-20)
+
+
+### Bug Fixes
+
+* **mod:** find outdated dependency correctly when updated one coexists ([5f0a5dc](https://github.com/hasundue/molt/commit/5f0a5dc0fa684a48c5911907bcea51ea0689e999))
+
 ## [0.11.2](https://github.com/hasundue/molt/compare/0.11.1...0.11.2) (2023-11-10)
 
 
