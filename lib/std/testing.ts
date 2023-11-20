@@ -17,7 +17,7 @@ export {
   type SpyCall,
   type Stub,
   stub,
-} from "https://raw.githubusercontent.com/hasundue/deno_std/feat-constructor-spy/testing/mock.ts";
+} from "https://deno.land/std@0.207.0/testing/mock.ts";
 export {
   createAssertSnapshot,
 } from "https://deno.land/std@0.206.0/testing/snapshot.ts";
