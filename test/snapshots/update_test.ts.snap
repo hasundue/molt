@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 1`] = `
+snapshot[`DependencyUpdate > collect() > direct import 1`] = `
 {
   code: {
     span: {
@@ -30,7 +30,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 2`] = `
+snapshot[`DependencyUpdate > collect() > direct import 2`] = `
 {
   code: {
     span: {
@@ -60,7 +60,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 3`] = `
+snapshot[`DependencyUpdate > collect() > direct import 3`] = `
 {
   code: {
     span: {
@@ -90,7 +90,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > direct import 4`] = `
+snapshot[`DependencyUpdate > collect() > direct import 4`] = `
 {
   code: {
     span: {
@@ -120,7 +120,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > direct im
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 1`] = `
+snapshot[`DependencyUpdate > collect() > import map 1`] = `
 {
   code: {
     span: {
@@ -150,7 +150,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 2`] = `
+snapshot[`DependencyUpdate > collect() > import map 2`] = `
 {
   code: {
     span: {
@@ -180,7 +180,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 3`] = `
+snapshot[`DependencyUpdate > collect() > import map 3`] = `
 {
   code: {
     span: {
@@ -210,7 +210,7 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
 }
 `;
 
-snapshot[`DependencyUpdate > _create() - with import map > collect() > import map 4`] = `
+snapshot[`DependencyUpdate > collect() > import map 4`] = `
 {
   code: {
     span: {
@@ -235,6 +235,96 @@ snapshot[`DependencyUpdate > _create() - with import map > collect() > import ma
     name: "node-emoji",
     path: "",
     scheme: "npm:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > export 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 66,
+        line: 0,
+      },
+      start: {
+        character: 24,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/version.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/version.ts",
+    scheme: "https://",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/version.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > import and export 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 57,
+        line: 0,
+      },
+      start: {
+        character: 15,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/version.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/version.ts",
+    scheme: "https://",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/version.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > import and export 2`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 60,
+        line: 1,
+      },
+      start: {
+        character: 14,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+  },
+  from: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "0.50.0",
+  },
+  to: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
     version: "123.456.789",
   },
 }
