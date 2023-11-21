@@ -10,16 +10,27 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                            
-  -v, --version            - Print version info.                                        
-  --import-map   <file>    - Specify import map file                                    
-  -w, --write              - Write changes to local files                               
-  -c, --commit             - Commit changes to local git repository                     
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)
-  --summary      <file>    - Write a summary of changes to file                         
-  --report       <file>    - Write a report of changes to file                          
+  -h, --help               - Show this help.                                              
+  -v, --version            - Print version info.                                          
+  --import-map   <file>    - Specify import map file                                      
+  --ignore       <deps>    - Ignore dependencies                     (Conflicts: --only)  
+  --only         <deps>    - Check specified dependencies            (Conflicts: --ignore)
+  -w, --write              - Write changes to local files            (Conflicts: --commit)
+  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
+  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
+  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
+  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
+  --summary      <file>    - Write a summary of changes to file                           
+  --report       <file>    - Write a report of changes to file                            
+
+Examples:
+
+  Check updates in a module:     molt deps.ts                               
+  Include multiple modules:      molt mod.ts lib.ts                         
+  Target all .ts files:          molt ./**/*.ts                             
+  Specify an import map:         molt mod.ts --import-map deno.json         
+  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
+  Check deno_std only:           molt deps.ts --only deno.land/std          
 
 "
 `;
@@ -40,16 +51,27 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                            
-  -v, --version            - Print version info.                                        
-  --import-map   <file>    - Specify import map file                                    
-  -w, --write              - Write changes to local files                               
-  -c, --commit             - Commit changes to local git repository                     
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)
-  --summary      <file>    - Write a summary of changes to file                         
-  --report       <file>    - Write a report of changes to file                          
+  -h, --help               - Show this help.                                              
+  -v, --version            - Print version info.                                          
+  --import-map   <file>    - Specify import map file                                      
+  --ignore       <deps>    - Ignore dependencies                     (Conflicts: --only)  
+  --only         <deps>    - Check specified dependencies            (Conflicts: --ignore)
+  -w, --write              - Write changes to local files            (Conflicts: --commit)
+  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
+  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
+  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
+  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
+  --summary      <file>    - Write a summary of changes to file                           
+  --report       <file>    - Write a report of changes to file                            
+
+Examples:
+
+  Check updates in a module:     molt deps.ts                               
+  Include multiple modules:      molt mod.ts lib.ts                         
+  Target all .ts files:          molt ./**/*.ts                             
+  Specify an import map:         molt mod.ts --import-map deno.json         
+  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
+  Check deno_std only:           molt deps.ts --only deno.land/std          
 
 "
 `;
@@ -144,6 +166,64 @@ snapshot[`molt test/data/import-map/mod.ts --import-map not_exist.json 1`] = `""
 
 snapshot[`molt test/data/import-map/mod.ts --import-map not_exist.json 2`] = `
 "Import map not_exist.json does not exist.
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --ignore node-emoji 1`] = `
+"💡 Found updates:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/multiple_imports.ts 0.200.0
+
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/data/multiple_imports.ts 0.50.0
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --ignore node-emoji 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --ignore=deno_graph,node-emoji 1`] = `
+"💡 Found an update:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/multiple_imports.ts 0.200.0
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --ignore=deno_graph,node-emoji 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only deno.land/std 1`] = `
+"💡 Found an update:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/multiple_imports.ts 0.200.0
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only deno.land/std 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 1`] = `
+"💡 Found updates:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/multiple_imports.ts 0.200.0
+
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/data/multiple_imports.ts 0.50.0
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 2`] = `
+"Checking for updates
 "
 `;
 

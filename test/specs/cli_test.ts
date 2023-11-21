@@ -50,6 +50,12 @@ test(
   1,
 );
 
+test(`molt ${dir}/multiple_imports.ts --ignore node-emoji`);
+test(`molt ${dir}/multiple_imports.ts --ignore=deno_graph,node-emoji`);
+
+test(`molt ${dir}/multiple_imports.ts --only deno.land/std`);
+test(`molt ${dir}/multiple_imports.ts --only=deno.land/std,deno_graph`);
+
 test(`molt ${dir}/direct-import/mod.ts --write`);
 test(
   `molt ${dir}/direct-import/mod.ts --write --summary title.txt --report body.md`,
