@@ -259,6 +259,30 @@ describe("DependencyUpdate", () => {
         await assertUpdateSnapshot(t, update);
       }
     });
+    it("ignore a dependency", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/multiple_imports.ts",
+        {
+          ignore: (dep) => dep.name === "node-emoji",
+        },
+      );
+      assertEquals(updates.length, 2);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
+    it("only update a specified dependency", async (t) => {
+      const updates = await DependencyUpdate.collect(
+        "./test/data/multiple_imports.ts",
+        {
+          only: (dep) => dep.name.includes("deno_graph"),
+        },
+      );
+      assertEquals(updates.length, 1);
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    });
   });
 
   describe("getVersionChange()", () => {
