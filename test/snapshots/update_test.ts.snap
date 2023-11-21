@@ -389,3 +389,93 @@ snapshot[`DependencyUpdate > collect() > updated import and outdated export 1`] 
   },
 }
 `;
+
+snapshot[`DependencyUpdate > collect() > ignore a dependency 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 71,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    scheme: "https://",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > ignore a dependency 2`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 74,
+        line: 1,
+      },
+      start: {
+        character: 28,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+  },
+  from: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "0.50.0",
+  },
+  to: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`DependencyUpdate > collect() > only update a specified dependency 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 74,
+        line: 1,
+      },
+      start: {
+        character: 28,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+  },
+  from: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "0.50.0",
+  },
+  to: {
+    name: "deno.land/x/deno_graph",
+    path: "/mod.ts",
+    scheme: "https://",
+    version: "123.456.789",
+  },
+}
+`;
