@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.12.0](https://github.com/hasundue/molt/compare/0.11.3...0.12.0) (2023-11-21)
+
+
+### Features
+
+* **cli:** add `--ignore` and `--only` options ([a6df7f8](https://github.com/hasundue/molt/commit/a6df7f833b8e43bae8016aee8bdefe29f9a1f8dc))
+* **mod:** add `ignore` and `only` options in `collect` ([1b3469b](https://github.com/hasundue/molt/commit/1b3469b113d0ab5d3ad0220e1c9e727587f3d306))
+
 ## [0.11.3](https://github.com/hasundue/molt/compare/0.11.2...0.11.3) (2023-11-20)
 
 
