@@ -56,11 +56,18 @@ class DenoGraph {
   }
 }
 
+export interface CollectOptions {
+  /** The path to the import map used to resolve dependencies. */
+  importMap?: string;
+  /** A function to filter out dependencies. */
+  ignore?: (dependency: Dependency) => boolean;
+  /** A function to pick dependencies. */
+  only?: (dependency: Dependency) => boolean;
+}
+
 export async function collect(
   entrypoints: string | string[],
-  options: {
-    importMap?: string;
-  } = {},
+  options: CollectOptions = {},
 ): Promise<DependencyUpdate[]> {
   // This could throw if the entrypoints are not valid URIs.
   const specifiers = [entrypoints].flat().map((path) => URI.from(path));
@@ -79,12 +86,12 @@ export async function collect(
 
   const updates: DependencyUpdate[] = [];
   await Promise.all(
-    graph.modules.flatMap((module) =>
-      module.dependencies?.map(async (dependency) => {
+    graph.modules.flatMap((m) =>
+      m.dependencies?.map(async (dependency) => {
         const update = await _create(
           dependency,
-          URI.from(module.specifier),
-          { importMap },
+          URI.from(m.specifier),
+          { ...options, importMap },
         );
         return update ? updates.push(update) : undefined;
       })
@@ -120,7 +127,9 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
 export async function _create(
   dependencyJson: DependencyJson,
   referrer: URI<"file">,
-  options?: { importMap?: ImportMap },
+  options?: Pick<CollectOptions, "ignore" | "only"> & {
+    importMap?: ImportMap;
+  },
 ): Promise<Maybe<DependencyUpdate>> {
   const specifier = dependencyJson.code?.specifier ??
     dependencyJson.type?.specifier;
@@ -136,6 +145,12 @@ export async function _create(
     referrer,
   );
   const dependency = Dependency.parse(new URL(mapped?.to ?? specifier));
+  if (options?.ignore?.(dependency)) {
+    return;
+  }
+  if (options?.only && !options.only(dependency)) {
+    return;
+  }
   const latest = await Dependency.resolveLatest(dependency);
   if (!latest || latest.version === dependency.version) {
     return;
