@@ -17,9 +17,28 @@ const main = new Command()
   .name("molt")
   .description("Check updates to dependencies in Deno modules")
   .versionOption("-v, --version", "Print version info.", versionCommand)
+  .example("Check updates in a module", "molt deps.ts")
+  .example("Include multiple modules", "molt mod.ts lib.ts")
+  .example("Target all .ts files", "molt ./**/*.ts")
   .option("--import-map <file:string>", "Specify import map file")
-  .option("-w, --write", "Write changes to local files")
-  .option("-c, --commit", "Commit changes to local git repository")
+  .example("Specify an import map", "molt mod.ts --import-map deno.json")
+  .option("--ignore=<deps:string[]>", "Ignore dependencies", {
+    conflicts: ["only"],
+  })
+  .example(
+    "Ignore specified dependencies",
+    "molt deps.ts --ignore=deno_graph,node_emoji",
+  )
+  .option("--only=<deps:string[]>", "Check specified dependencies", {
+    conflicts: ["ignore"],
+  })
+  .example("Check deno_std only", "molt deps.ts --only deno.land/std")
+  .option("-w, --write", "Write changes to local files", {
+    conflicts: ["commit"],
+  })
+  .option("-c, --commit", "Commit changes to local git repository", {
+    conflicts: ["write"],
+  })
   .option("--pre-commit=<tasks:string[]>", "Run tasks before each commit", {
     depends: ["commit"],
   })
@@ -74,13 +93,23 @@ async function versionCommand() {
 
 async function _collect(
   entrypoints: string[],
-  options: { importMap?: string },
+  options: {
+    ignore?: string[];
+    importMap?: string;
+    only?: string[];
+  },
 ): Promise<DependencyUpdate[]> {
   return await $.progress("Checking for updates").with(async () => {
     const updates = await Promise.all(
       entrypoints.map(async (entrypoint) =>
         await DependencyUpdate.collect(entrypoint, {
+          ignore: options.ignore
+            ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
+            : undefined,
           importMap: options.importMap ?? await _findDenoJson(entrypoint),
+          only: options.only
+            ? (dep) => options.only!.some((it) => dep.name.includes(it))
+            : undefined,
         })
       ),
     ).then((results) => results.flat());
