@@ -6,7 +6,7 @@ import {
   it,
   SpyCall,
 } from "./std/testing.ts";
-import { assertArrayIncludes, assertEquals } from "./std/assert.ts";
+import { assertEquals } from "./std/assert.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import {
   assertFindSpyCallArg,
@@ -23,26 +23,39 @@ import { SemVerString } from "./semver.ts";
 const LATEST = "123.456.789" as SemVerString;
 LatestSemVerStub.create(LATEST);
 
+function assertCollected(
+  actual: FileUpdate[],
+  expected: string[],
+) {
+  const names = actual.map(
+    (f) => f.dependencies.map((d) => d.from.name),
+  ).flat();
+  assertEquals(names, expected);
+}
+
 describe("FileUpdate.collect()", () => {
   it("direct import", async () => {
     const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/direct-import/mod.ts"),
+      await DependencyUpdate.collect("./test/data/import.ts"),
     );
-    assertEquals(results.length, 2);
+    assertCollected(results, ["deno.land/std"]);
+  });
+
+  it("relative import", async () => {
+    const results = FileUpdate.collect(
+      await DependencyUpdate.collect("./test/data/relative_import/mod.ts"),
+    );
+    assertCollected(results, ["deno.land/std"]);
   });
 
   it("import map", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/data/import-map/mod.ts",
-        { importMap: "./test/data/import-map/deno.json" },
+        "./test/data/import_map/mod.ts",
+        { importMap: "./test/data/import_map/deno.json" },
       ),
     );
-    assertEquals(results.length, 2);
-    const dependencies = results.flatMap((r) => r.dependencies);
-    assertEquals(dependencies.length, 4);
-    const names = dependencies.map((d) => d.from.name);
-    assertArrayIncludes(names, [
+    assertCollected(results, [
       "deno.land/std",
       "deno.land/x/deno_graph",
       "node-emoji",
@@ -52,15 +65,20 @@ describe("FileUpdate.collect()", () => {
   it("import map with no resolve", async () => {
     const results = FileUpdate.collect(
       await DependencyUpdate.collect(
-        "./test/data/import-map-no-resolve/mod.ts",
-        { importMap: "./test/data/import-map-no-resolve/deno.json" },
+        "./test/data/import_map_no_resolve/mod.ts",
+        { importMap: "./test/data/import_map_no_resolve/deno.json" },
       ),
     );
-    assertEquals(results.length, 1);
-    assertEquals(results[0].dependencies.length, 1);
-    assertEquals(results[0].dependencies[0].from.name, "deno.land/std");
+    assertCollected(results, ["deno.land/std"]);
   });
 });
+
+async function assertWriteTextFileSnapshot(
+  t: Deno.TestContext,
+  call: SpyCall,
+) {
+  await assertSnapshot(t, formatEOL(call.args[1], EOL.LF));
+}
 
 describe("FileUpdate.write()", () => {
   let fs: FileSystemFake;
@@ -78,89 +96,73 @@ describe("FileUpdate.write()", () => {
   });
 
   it("direct import", async (t) => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/direct-import/mod.ts"),
-    );
-    await FileUpdate.write(results);
-    const call_1 = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/direct-import/mod.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call_1);
-    const call_2 = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/direct-import/lib.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call_2);
-    assertSpyCalls(writeTextFileStub, 2);
-  });
-
-  it("import map", async (t) => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import-map/mod.ts",
-        { importMap: "./test/data/import-map/deno.json" },
-      ),
-    );
-    await FileUpdate.write(results);
-    const call_1 = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/import-map/deno.json", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call_1);
-    const call_2 = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/import-map/lib.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call_2);
-    assertSpyCalls(writeTextFileStub, 2);
-  });
-
-  it("import map with no resolve", async (t) => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import-map-no-resolve/mod.ts",
-        { importMap: "./test/data/import-map-no-resolve/deno.json" },
-      ),
-    );
-    await FileUpdate.write(results);
+    await FileUpdate.write(FileUpdate.collect(
+      await DependencyUpdate.collect("./test/data/import.ts"),
+    ));
     const call = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/data/import-map-no-resolve/mod.ts", import.meta.url),
+      new URL("../test/data/import.ts", import.meta.url),
+    );
+    await assertWriteTextFileSnapshot(t, call);
+    assertSpyCalls(writeTextFileStub, 1);
+  });
+
+  it("relative import", async (t) => {
+    await FileUpdate.write(FileUpdate.collect(
+      await DependencyUpdate.collect("./test/data/relative_import/mod.ts"),
+    ));
+    const call = assertFindSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/data/relative_import/assert.ts", import.meta.url),
+    );
+    await assertWriteTextFileSnapshot(t, call);
+    assertSpyCalls(writeTextFileStub, 1);
+  });
+
+  it("import map", async (t) => {
+    await FileUpdate.write(FileUpdate.collect(
+      await DependencyUpdate.collect(
+        "./test/data/import_map/mod.ts",
+        { importMap: "./test/data/import_map/deno.json" },
+      ),
+    ));
+    const call = assertFindSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/data/import_map/deno.json", import.meta.url),
+    );
+    await assertWriteTextFileSnapshot(t, call);
+    assertSpyCalls(writeTextFileStub, 1);
+  });
+
+  it("import map with no resolve", async (t) => {
+    await FileUpdate.write(FileUpdate.collect(
+      await DependencyUpdate.collect(
+        "./test/data/import_map_no_resolve/mod.ts",
+        { importMap: "./test/data/import_map_no_resolve/deno.json" },
+      ),
+    ));
+    const call = assertFindSpyCallArg(
+      writeTextFileStub,
+      0,
+      new URL("../test/data/import_map_no_resolve/mod.ts", import.meta.url),
     );
     await assertWriteTextFileSnapshot(t, call);
     assertSpyCalls(writeTextFileStub, 1);
   });
 
   it("unversioned specifiers", async (t) => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/unversioned/mod.ts"),
-    );
-    await FileUpdate.write(results);
-    const call_1 = assertFindSpyCallArg(
+    await FileUpdate.write(FileUpdate.collect(
+      await DependencyUpdate.collect("./test/data/unversioned.ts"),
+    ));
+    const call = assertFindSpyCallArg(
       writeTextFileStub,
       0,
-      new URL("../test/data/unversioned/mod.ts", import.meta.url),
+      new URL("../test/data/unversioned.ts", import.meta.url),
     );
-    await assertWriteTextFileSnapshot(t, call_1);
-    const call_2 = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/unversioned/lib.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call_2);
-    assertSpyCalls(writeTextFileStub, 2);
+    await assertWriteTextFileSnapshot(t, call);
+    assertSpyCalls(writeTextFileStub, 1);
   });
 });
-
-async function assertWriteTextFileSnapshot(
-  t: Deno.TestContext,
-  call: SpyCall,
-) {
-  await assertSnapshot(t, formatEOL(call.args[1], EOL.LF));
-}

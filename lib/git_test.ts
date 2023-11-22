@@ -28,7 +28,7 @@ describe("commitAll()", () => {
   beforeAll(async () => {
     LatestSemVerStub.create(LATEST);
     updates = await DependencyUpdate.collect(
-      "./test/data/direct-import/mod.ts",
+      "./test/data/multiple_modules/mod.ts",
     );
     fileSystemFake = new FileSystemFake();
     ReadTextFileStub.create(fileSystemFake, {
@@ -44,12 +44,12 @@ describe("commitAll()", () => {
   });
 
   const expected = [
-    `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
+    `import { assert } from "https://deno.land/std@${LATEST}/assert/assert.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@${LATEST}/mod.ts";
 import emoji from "npm:node-emoji@${LATEST}";
 import { noop } from "./lib.ts";
 `,
-    `import { assertExists } from "https://deno.land/std@${LATEST}/assert/assert_exists.ts";
+    `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
 export const noop = () => {};
 `,
   ];
@@ -69,9 +69,9 @@ export const noop = () => {};
       groupBy: (update) => update.to.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/multiple_modules/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update node-emoji");
-    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/multiple_modules/mod.ts");
     assertGitCommit(CommandStub, "build(deps): update deno.land/x/deno_graph");
     // TODO: Can't test this because of the order of targets is not guaranteed.
     // assertGitAdd(CommandStub, "src/data/lib.ts", "src/data/mod.ts");
@@ -89,15 +89,19 @@ export const noop = () => {};
         return `build(deps): update ${relative}`;
       },
     });
-    assertGitAdd(CommandStub, "test/data/direct-import/mod.ts");
+    assertGitAdd(CommandStub, "test/data/multiple_modules/mod.ts");
     assertGitCommit(
       CommandStub,
-      `build(deps): update ${normalizePath("test/data/direct-import/mod.ts")}`,
+      `build(deps): update ${
+        normalizePath("test/data/multiple_modules/mod.ts")
+      }`,
     );
-    assertGitAdd(CommandStub, "test/data/direct-import/lib.ts");
+    assertGitAdd(CommandStub, "test/data/multiple_modules/lib.ts");
     assertGitCommit(
       CommandStub,
-      `build(deps): update ${normalizePath("test/data/direct-import/lib.ts")}`,
+      `build(deps): update ${
+        normalizePath("test/data/multiple_modules/lib.ts")
+      }`,
     );
     assertSpyCalls(CommandStub, 4);
     assertArrayIncludes(Array.from(fileSystemFake.values()), expected);

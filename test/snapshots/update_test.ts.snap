@@ -1,66 +1,36 @@
 export const snapshot = {};
 
-snapshot[`DependencyUpdate > collect() > direct import 1`] = `
+snapshot[`DependencyUpdate > collect() > multiple imports 1`] = `
 {
   code: {
     span: {
       end: {
-        character: 84,
+        character: 71,
         line: 0,
       },
       start: {
-        character: 29,
+        character: 23,
         line: 0,
       },
     },
-    specifier: "https://deno.land/std@0.200.0/assert/assert_exists.ts",
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
   },
   from: {
     name: "deno.land/std",
-    path: "/assert/assert_exists.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
-    path: "/assert/assert_exists.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > direct import 2`] = `
-{
-  code: {
-    span: {
-      end: {
-        character: 84,
-        line: 0,
-      },
-      start: {
-        character: 29,
-        line: 0,
-      },
-    },
-    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
-  },
-  from: {
-    name: "deno.land/std",
-    path: "/assert/assert_equals.ts",
-    scheme: "https://",
-    version: "0.200.0",
-  },
-  to: {
-    name: "deno.land/std",
-    path: "/assert/assert_equals.ts",
-    scheme: "https://",
-    version: "123.456.789",
-  },
-}
-`;
-
-snapshot[`DependencyUpdate > collect() > direct import 3`] = `
+snapshot[`DependencyUpdate > collect() > multiple imports 2`] = `
 {
   code: {
     span: {
@@ -90,7 +60,7 @@ snapshot[`DependencyUpdate > collect() > direct import 3`] = `
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > direct import 4`] = `
+snapshot[`DependencyUpdate > collect() > multiple imports 3`] = `
 {
   code: {
     span: {
@@ -125,25 +95,25 @@ snapshot[`DependencyUpdate > collect() > import map 1`] = `
   code: {
     span: {
       end: {
-        character: 66,
+        character: 38,
         line: 0,
       },
       start: {
-        character: 24,
+        character: 23,
         line: 0,
       },
     },
-    specifier: "https://deno.land/std@0.200.0/version.ts",
+    specifier: "std/assert.ts",
   },
   from: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/",
     scheme: "https://",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/",
     scheme: "https://",
     version: "123.456.789",
   },
@@ -151,36 +121,6 @@ snapshot[`DependencyUpdate > collect() > import map 1`] = `
 `;
 
 snapshot[`DependencyUpdate > collect() > import map 2`] = `
-{
-  code: {
-    span: {
-      end: {
-        character: 40,
-        line: 0,
-      },
-      start: {
-        character: 24,
-        line: 0,
-      },
-    },
-    specifier: "std/version.ts",
-  },
-  from: {
-    name: "deno.land/std",
-    path: "/",
-    scheme: "https://",
-    version: "0.200.0",
-  },
-  to: {
-    name: "deno.land/std",
-    path: "/",
-    scheme: "https://",
-    version: "123.456.789",
-  },
-}
-`;
-
-snapshot[`DependencyUpdate > collect() > import map 3`] = `
 {
   code: {
     span: {
@@ -210,7 +150,7 @@ snapshot[`DependencyUpdate > collect() > import map 3`] = `
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > import map 4`] = `
+snapshot[`DependencyUpdate > collect() > import map 3`] = `
 {
   code: {
     span: {
@@ -245,25 +185,25 @@ snapshot[`DependencyUpdate > collect() > export 1`] = `
   code: {
     span: {
       end: {
-        character: 66,
+        character: 71,
         line: 0,
       },
       start: {
-        character: 24,
+        character: 23,
         line: 0,
       },
     },
-    specifier: "https://deno.land/std@0.200.0/version.ts",
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
   },
   from: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "123.456.789",
   },
@@ -275,25 +215,25 @@ snapshot[`DependencyUpdate > collect() > import and export 1`] = `
   code: {
     span: {
       end: {
-        character: 57,
+        character: 71,
         line: 0,
       },
       start: {
-        character: 15,
+        character: 23,
         line: 0,
       },
     },
-    specifier: "https://deno.land/std@0.200.0/version.ts",
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
   },
   from: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
-    path: "/version.ts",
+    path: "/assert/assert.ts",
     scheme: "https://",
     version: "123.456.789",
   },
@@ -305,11 +245,11 @@ snapshot[`DependencyUpdate > collect() > import and export 2`] = `
   code: {
     span: {
       end: {
-        character: 60,
+        character: 74,
         line: 1,
       },
       start: {
-        character: 14,
+        character: 28,
         line: 1,
       },
     },
@@ -335,25 +275,25 @@ snapshot[`DependencyUpdate > collect() > updated and outdated 1`] = `
   code: {
     span: {
       end: {
-        character: 56,
+        character: 84,
         line: 1,
       },
       start: {
-        character: 15,
+        character: 29,
         line: 1,
       },
     },
-    specifier: "https://deno.land/x/python@0.4.1/mod.ts",
+    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
   },
   from: {
-    name: "deno.land/x/python",
-    path: "/mod.ts",
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
     scheme: "https://",
-    version: "0.4.1",
+    version: "0.200.0",
   },
   to: {
-    name: "deno.land/x/python",
-    path: "/mod.ts",
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
     scheme: "https://",
     version: "123.456.789",
   },
@@ -365,25 +305,25 @@ snapshot[`DependencyUpdate > collect() > updated import and outdated export 1`] 
   code: {
     span: {
       end: {
-        character: 56,
+        character: 84,
         line: 1,
       },
       start: {
-        character: 15,
+        character: 29,
         line: 1,
       },
     },
-    specifier: "https://deno.land/x/python@0.4.1/mod.ts",
+    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
   },
   from: {
-    name: "deno.land/x/python",
-    path: "/mod.ts",
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
     scheme: "https://",
-    version: "0.4.1",
+    version: "0.200.0",
   },
   to: {
-    name: "deno.land/x/python",
-    path: "/mod.ts",
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
     scheme: "https://",
     version: "123.456.789",
   },

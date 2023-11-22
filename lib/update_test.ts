@@ -29,7 +29,7 @@ describe("DependencyUpdate", () => {
           span: {},
           specifier: "https://deno.land/std@0.1.0/version.ts",
         } as any,
-      }, URI.from("test/data/direct-import/mod.ts"));
+      }, URI.from("test/data/import.ts"));
       assertExists(update);
       assertObjectMatch(update, {
         from: {
@@ -47,7 +47,7 @@ describe("DependencyUpdate", () => {
         code: {
           specifier: "https://deno.land/std@0.1.0/version.ts",
         },
-        referrer: URI.from("test/data/direct-import/mod.ts"),
+        referrer: URI.from("test/data/import.ts"),
       });
     });
     it("https://deno.land/std - unversioned", async () => {
@@ -57,7 +57,7 @@ describe("DependencyUpdate", () => {
           span: {},
           specifier: "https://deno.land/std/version.ts",
         } as any,
-      }, URI.from("test/data/direct-import/mod.ts"));
+      }, URI.from("test/data/import.ts"));
       assertExists(update);
       assertObjectMatch(update, {
         from: {
@@ -82,7 +82,7 @@ describe("DependencyUpdate", () => {
           span: {},
           specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
         } as any,
-      }, URI.from("test/data/direct-import/mod.ts"));
+      }, URI.from("test/data/import.ts"));
       assertExists(update);
       assertObjectMatch(update, {
         from: {
@@ -109,7 +109,7 @@ describe("DependencyUpdate", () => {
           span: {},
           specifier: "npm:node-emoji@2.0.0",
         } as any,
-      }, URI.from("test/data/direct-import/mod.ts"));
+      }, URI.from("test/data/import.ts"));
       assertExists(update);
       assertObjectMatch(update, {
         from: {
@@ -134,7 +134,7 @@ describe("DependencyUpdate", () => {
           span: {},
           specifier: "npm:node-emoji",
         } as any,
-      }, URI.from("test/data/direct-import/mod.ts"));
+      }, URI.from("test/data/import.ts"));
       assertExists(update);
       assertObjectMatch(update, {
         from: {
@@ -158,7 +158,7 @@ describe("DependencyUpdate", () => {
 
     beforeAll(async () => {
       importMap = (await ImportMap.readFromJson(
-        URI.from("../test/data/import-map/deno.json", import.meta.url),
+        URI.from("../test/data/import_map/deno.json", import.meta.url),
       ))!;
     });
 
@@ -171,7 +171,7 @@ describe("DependencyUpdate", () => {
             specifier: "https://deno.land/std@0.200.0/version.ts",
           } as any,
         },
-        URI.from("test/data/import-map/mod.ts"),
+        URI.from("test/data/import_map/mod.ts"),
         { importMap },
       );
       assertExists(update);
@@ -191,9 +191,9 @@ describe("DependencyUpdate", () => {
         code: {
           specifier: "std/version.ts",
         },
-        referrer: URI.from("test/data/import-map/mod.ts"),
+        referrer: URI.from("test/data/import_map/mod.ts"),
         map: {
-          source: URI.from("test/data/import-map/deno.json"),
+          source: URI.from("test/data/import_map/deno.json"),
           from: "std/",
           to: "https://deno.land/std@0.200.0/",
         },
@@ -202,23 +202,23 @@ describe("DependencyUpdate", () => {
   });
 
   describe("collect()", () => {
-    it("direct import", async (t) => {
+    it("multiple imports", async (t) => {
       const updates = await DependencyUpdate.collect(
-        "./test/data/direct-import/mod.ts",
+        "./test/data/multiple_imports.ts",
       );
-      assertEquals(updates.length, 4);
+      assertEquals(updates.length, 3);
       for (const update of updates) {
         await assertUpdateSnapshot(t, update);
       }
     });
     it("import map", async (t) => {
       const updates = await DependencyUpdate.collect(
-        "./test/data/import-map/mod.ts",
+        "./test/data/import_map/mod.ts",
         {
-          importMap: "./test/data/import-map/deno.json",
+          importMap: "./test/data/import_map/deno.json",
         },
       );
-      assertEquals(updates.length, 4);
+      assertEquals(updates.length, 3);
       for (const update of updates) {
         await assertUpdateSnapshot(t, update);
       }

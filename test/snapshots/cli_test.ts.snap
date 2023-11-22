@@ -95,76 +95,67 @@ snapshot[`molt not_exist.ts 2`] = `
 '
 `;
 
-snapshot[`molt test/data/import-map/deno.json 1`] = `""`;
+snapshot[`molt test/data/import.ts 1`] = `
+"💡 Found an update:
 
-snapshot[`molt test/data/import-map/deno.json 2`] = `
-'❌ file must be javascript or typescript: "test/data/import-map/deno.json"
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/import.ts 0.200.0
+"
+`;
+
+snapshot[`molt test/data/import.ts 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/import_map/mod.ts 1`] = `
+"💡 Found updates:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/import_map/deno.json 0.200.0
+
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/data/import_map/deno.json 0.50.0
+
+📦 node-emoji 1.0.0 => 123.456.789
+  test/data/import_map/deno.json 1.0.0
+"
+`;
+
+snapshot[`molt test/data/import_map/mod.ts 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/import_map/mod.ts --import-map test/data/import_map/deno.json 1`] = `
+"💡 Found updates:
+
+📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/import_map/deno.json 0.200.0
+
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  test/data/import_map/deno.json 0.50.0
+
+📦 node-emoji 1.0.0 => 123.456.789
+  test/data/import_map/deno.json 1.0.0
+"
+`;
+
+snapshot[`molt test/data/import_map/mod.ts --import-map test/data/import_map/deno.json 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/import_map/deno.json 1`] = `""`;
+
+snapshot[`molt test/data/import_map/deno.json 2`] = `
+'❌ file must be javascript or typescript: "test/data/import_map/deno.json"
 '
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts 1`] = `
-"💡 Found updates:
+snapshot[`molt test/data/import_map/mod.ts --import-map not_exist.json 1`] = `""`;
 
-📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
-
-📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
-"
-`;
-
-snapshot[`molt test/data/direct-import/mod.ts 2`] = `
-"Checking for updates
-"
-`;
-
-snapshot[`molt test/data/import-map/mod.ts 1`] = `
-"💡 Found updates:
-
-📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/import-map/lib.ts 0.200.0
-  test/data/import-map/deno.json 0.200.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/import-map/deno.json 0.50.0
-
-📦 node-emoji 1.0.0 => 123.456.789
-  test/data/import-map/deno.json 1.0.0
-"
-`;
-
-snapshot[`molt test/data/import-map/mod.ts 2`] = `
-"Checking for updates
-"
-`;
-
-snapshot[`molt test/data/import-map/mod.ts --import-map test/data/import-map/deno.json 1`] = `
-"💡 Found updates:
-
-📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/import-map/lib.ts 0.200.0
-  test/data/import-map/deno.json 0.200.0
-
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/import-map/deno.json 0.50.0
-
-📦 node-emoji 1.0.0 => 123.456.789
-  test/data/import-map/deno.json 1.0.0
-"
-`;
-
-snapshot[`molt test/data/import-map/mod.ts --import-map test/data/import-map/deno.json 2`] = `
-"Checking for updates
-"
-`;
-
-snapshot[`molt test/data/import-map/mod.ts --import-map not_exist.json 1`] = `""`;
-
-snapshot[`molt test/data/import-map/mod.ts --import-map not_exist.json 2`] = `
+snapshot[`molt test/data/import_map/mod.ts --import-map not_exist.json 2`] = `
 "Import map not_exist.json does not exist.
 "
 `;
@@ -227,67 +218,67 @@ snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 2`]
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --write 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --write 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
-💾 test/data/direct-import/lib.ts
-💾 test/data/direct-import/mod.ts
+💾 test/data/multiple_modules/lib.ts
+💾 test/data/multiple_modules/mod.ts
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --write 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --write 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --write --summary title.txt --report body.md 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --write --summary title.txt --report body.md 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
-💾 test/data/direct-import/lib.ts
-💾 test/data/direct-import/mod.ts
+💾 test/data/multiple_modules/lib.ts
+💾 test/data/multiple_modules/mod.ts
 
 📄 title.txt
 📄 body.md
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --write --summary title.txt --report body.md 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --write --summary title.txt --report body.md 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
 📝 bump deno.land/std from 0.200.0 to 123.456.789
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -295,23 +286,23 @@ snapshot[`molt test/data/direct-import/mod.ts --commit 1`] = `
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --prefix :package: 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --prefix :package: 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
 📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -319,23 +310,23 @@ snapshot[`molt test/data/direct-import/mod.ts --commit --prefix :package: 1`] = 
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --prefix :package: 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --prefix :package: 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --pre-commit=fmt --post-commit=lint 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --pre-commit=fmt --post-commit=lint 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
 💾 bump deno.land/std from 0.200.0 to 123.456.789
 🔨 Running task fmt...
@@ -354,23 +345,23 @@ snapshot[`molt test/data/direct-import/mod.ts --commit --pre-commit=fmt --post-c
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --pre-commit=fmt --post-commit=lint 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --pre-commit=fmt --post-commit=lint 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --summary title.txt --report body.md 1`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --report body.md 1`] = `
 "💡 Found updates:
 
 📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/direct-import/lib.ts 0.200.0
-  test/data/direct-import/mod.ts 0.200.0
+  test/data/multiple_modules/lib.ts 0.200.0
+  test/data/multiple_modules/mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/direct-import/mod.ts 0.50.0
+  test/data/multiple_modules/mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/direct-import/mod.ts 2.0.0
+  test/data/multiple_modules/mod.ts 2.0.0
 
 📝 bump deno.land/std from 0.200.0 to 123.456.789
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -381,7 +372,7 @@ snapshot[`molt test/data/direct-import/mod.ts --commit --summary title.txt --rep
 "
 `;
 
-snapshot[`molt test/data/direct-import/mod.ts --commit --summary title.txt --report body.md 2`] = `
+snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --report body.md 2`] = `
 "Checking for updates
 "
 `;

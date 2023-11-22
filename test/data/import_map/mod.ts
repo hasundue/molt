@@ -1,4 +1,4 @@
-import { VERSION } from "std/version.ts";
+import { assert } from "std/assert.ts";
 import { createGraph } from "deno_graph";
 import { emojify } from "node-emoji";
-import { noop } from "/lib.ts";
+import { noop } from "/noop.ts";
