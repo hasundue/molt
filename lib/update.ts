@@ -1,4 +1,5 @@
 import { distinct } from "./std/collections.ts";
+import { fromFileUrl } from "./std/path.ts";
 import {
   createGraph,
   type CreateGraphOptions,
@@ -6,8 +7,8 @@ import {
   load as defaultLoad,
   type ModuleJson,
 } from "./x/deno_graph.ts";
-import { URI } from "./uri.ts";
-import { ImportMap } from "./import_map.ts";
+import { findFileUp, toUrl } from "./path.ts";
+import { ImportMap, readFromJson } from "./import_map.ts";
 import {
   type Dependency,
   parse,
@@ -17,36 +18,35 @@ import {
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
-/** Representation of an update to a dependency. */
+/**
+ * Representation of an update to a dependency.
+ */
 export interface DependencyUpdate {
   /** Properties of the dependency being updated. */
   from: Dependency;
-  /** Properties of the dependency after the update. */
+  /** Properties of the updated dependency. */
   to: UpdatedDependency;
-  /** The code of the dependency. Note that `type` in the DependencyJSON is
-   * merged into `code` here for convenience. */
+  /**
+   * The code of the dependency. Note that `type` in the DependencyJSON
+   * is merged into `code` here for convenience.
+   */
   code: {
     /** The original specifier of the dependency appeared in the code. */
     specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
   };
-  /** The specifier of the module that imports the dependency. */
-  referrer: URI<"file">;
+  /** The URL of the module that imports the dependency. */
+  referrer: URL;
   /** Information about the import map used to resolve the dependency. */
   map?: {
-    /** The path to the import map used to resolve the dependency. */
-    source: URI<"file">;
-    from: string;
-    /** The string in the dependency specifier being replaced by the import map.
-     * Mapping on a file specifier should not happen. */
-    to: URI<"http" | "https" | "npm">;
+    /** The URL of the import map used to resolve the dependency. */
+    source: URL;
+    /** The string in the dependency specifier being replaced */
+    key: string;
+    /** The fully resolved specifier of the dependency. */
+    value: string;
   };
 }
-
-export const DependencyUpdate = {
-  collect,
-  getVersionChange,
-};
 
 class DenoGraph {
   static #initialized = false;
@@ -61,40 +61,82 @@ class DenoGraph {
 }
 
 export interface CollectOptions {
-  /** The path to the import map used to resolve dependencies. */
-  importMap?: string;
-  /** A function to filter out dependencies. */
+  /**
+   * The path to the import map used to resolve dependencies.
+   * If not specified, deno.json or deno.jsonc in the root directory of the module is used.
+   *
+   * @example
+   * ```ts
+   * const updates = await DependencyUpdate.collect("mod.ts", {
+   *   importMap: "import_map.json"
+   *   // -> Use import_map.json in the current directory
+   * });
+   * ```
+   */
+  importMap?: string | URL;
+  /**
+   * A function to filter out dependencies.
+   *
+   * @example
+   * ```ts
+   * const updates = await DependencyUpdate.collect("mod.ts", {
+   *   ignore: (dep) => dep.name === "deno.land/std"
+   *   // -> Ignore all dependencies from deno.land/std
+   * });
+   * ```
+   */
   ignore?: (dependency: Dependency) => boolean;
-  /** A function to pick dependencies. */
+  /**
+   * A function to pick dependencies.
+   *
+   * @example
+   * ```ts
+   * const updates = await DependencyUpdate.collect("mod.ts", {
+   *   only: (dep) => dep.name === "deno.land/std"
+   *   // -> Only pick dependencies from deno.land/std
+   * });
+   * ```
+   */
   only?: (dependency: Dependency) => boolean;
 }
 
+/**
+ * Collect dependencies from the given module(s).
+ * @param from - The path(s) to the module(s) to collect dependencies from.
+ * @param options - Options to customize the behavior.
+ * @returns The list of dependencies.
+ */
 export async function collect(
-  entrypoints: string | string[],
+  from: string | URL | (string | URL)[],
   options: CollectOptions = {},
 ): Promise<DependencyUpdate[]> {
-  // This could throw if the entrypoints are not valid URIs.
-  const specifiers = [entrypoints].flat().map((path) => URI.from(path));
+  const urls = [from].flat().map((path) => toUrl(path));
 
-  // Ensure the deno_graph WASM module is initialized.
+  if (urls.length === 0) {
+    throw new Error("No module specified");
+  }
+
+  const importMapUrl = options.importMap
+    ? toUrl(options.importMap)
+    : (urls.length === 1
+      ? await findFileUp(urls[0], "deno.json", "deno.jsonc")
+      : undefined);
+
+  const importMap = importMapUrl ? await readFromJson(importMapUrl) : undefined;
+
   await DenoGraph.ensureInit();
-
-  const importMap = options.importMap
-    ? await ImportMap.readFromJson(URI.from(options.importMap))
-    : undefined;
-
-  const graph = await createGraph(specifiers, {
+  const graph = await createGraph(urls.map((url) => url.href), {
     load,
-    resolve: importMap ? importMap.resolveInner : undefined,
+    resolve: importMap?.resolveInner,
   });
 
   const updates: DependencyUpdate[] = [];
   await Promise.all(
     graph.modules.flatMap((m) =>
       m.dependencies?.map(async (dependency) => {
-        const update = await _create(
+        const update = await create(
           dependency,
-          URI.from(m.specifier),
+          new URL(m.specifier),
           { ...options, importMap },
         );
         return update ? updates.push(update) : undefined;
@@ -128,9 +170,9 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
   }
 };
 
-export async function _create(
+async function create(
   dependencyJson: DependencyJson,
-  referrer: URI<"file">,
+  referrer: URL,
   options?: Pick<CollectOptions, "ignore" | "only"> & {
     importMap?: ImportMap;
   },
@@ -140,7 +182,7 @@ export async function _create(
   if (!specifier) {
     throw new Error(
       `The dependency ${dependencyJson.specifier} in ${
-        URI.relative(referrer)
+        fromFileUrl(referrer)
       } has no resolved specifier.`,
     );
   }
@@ -148,7 +190,7 @@ export async function _create(
     dependencyJson.specifier,
     referrer,
   );
-  const dependency = parse(new URL(mapped?.to ?? specifier));
+  const dependency = parse(new URL(mapped?.value ?? specifier));
   if (options?.ignore?.(dependency)) {
     return;
   }
@@ -163,7 +205,7 @@ export async function _create(
   if (!span) {
     throw new Error(
       `The dependency ${dependencyJson.specifier} in ${
-        URI.relative(referrer)
+        fromFileUrl(referrer)
       } has no span.`,
     );
   }
@@ -178,9 +220,9 @@ export async function _create(
     referrer,
     map: mapped
       ? {
-        source: options!.importMap!.specifier,
-        from: mapped.from!,
-        to: URI.ensure("http", "https", "npm")(mapped.to!),
+        source: options!.importMap!.url,
+        key: mapped.key!,
+        value: mapped.value!,
       }
       : undefined,
   };

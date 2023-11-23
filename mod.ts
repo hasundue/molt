@@ -3,29 +3,36 @@
 /**
  * A module to update dependencies in Deno projects using deno_graph.
  *
- * ### Example
+ * ### Examples
  *
- * To update all dependencies in a module and write the changes to local files:
+ * To update all dependencies in a module and write the changes to files:
  *
  * ```ts
- * import {
- *   DependencyUpdate,
- *   writeAll,
- * } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { collect, writeAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
  *
- * const updates = await DependencyUpdate.collect("./mod.ts", {
- *   importMap: "./deno.json",
- * });
- *
+ * const updates = await collect("./mod.ts");
  * await writeAll(updates);
+ * ```
+ *
+ * To update all dependencies in a module and commit the changes to local git repository:
+ *
+ * ```ts
+ * import { collect, commitAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ *
+ * const updates = await collect("./mod.ts");
+ *
+ * await commitAll(updates, {
+ *   groupBy: (dependency) => dependency.name,
+ *   composeCommitMessage: ({ group, version }) =>
+ *     `build(deps): bump ${group} to ${version!.to}`,
+ * });
  * ```
  *
  * @module
  */
 
-export { DependencyUpdate } from "./lib/update.ts";
-export { FileUpdate, writeAll } from "./lib/file.ts";
-export type { Dependency, UpdatedDependency } from "./lib/dependency.ts";
-export type { SemVerString } from "./lib/semver.ts";
-export type { ImportMap } from "./lib/import_map.ts";
-export type { URI } from "./lib/uri.ts";
+export * from "./lib/update.ts";
+export * from "./lib/file.ts";
+export * from "./lib/git.ts";
+export * from "./lib/dependency.ts";
+export * from "./lib/semver.ts";

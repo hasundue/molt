@@ -1,15 +1,20 @@
 import { distinct, filterKeys, mapEntries } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
-import { dirname, extname, join } from "./lib/std/path.ts";
+import { extname, relative } from "./lib/std/path.ts";
 import { colors, Command } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
-import { URI } from "./lib/uri.ts";
-import { DependencyUpdate } from "./lib/update.ts";
-import { writeAll } from "./lib/file.ts";
-import { GitCommitSequence } from "./lib/git.ts";
-import * as Dependency from "./lib/dependency.ts";
+import { findFileUp } from "./lib/path.ts";
+import { parse, resolveLatestVersion } from "./lib/dependency.ts";
 import { SemVerString } from "./lib/semver.ts";
+import {
+  collect,
+  type CommitSequence,
+  createCommitSequence,
+  type DependencyUpdate,
+  execCommitSequence,
+  writeAll,
+} from "./mod.ts";
 
 const { gray, yellow, bold, cyan } = colors;
 
@@ -58,15 +63,15 @@ const main = new Command()
         Deno.exit(1);
       }
     }
-    _ensureJsFiles(entrypoints);
-    const updates = await _collect(entrypoints, options);
-    _list(updates);
+    ensureJsFiles(entrypoints);
+    const updates = await collectUpdates(entrypoints, options);
+    printUpdates(updates);
     if (options.write) {
-      return _write(updates, options);
+      return writeUpdates(updates, options);
     }
     if (options.commit) {
-      const tasks = await _getTasks();
-      return _commit(updates, {
+      const tasks = await getTasks();
+      return commitUpdates(updates, {
         ...options,
         preCommit: filterKeys(
           tasks,
@@ -83,15 +88,15 @@ const main = new Command()
 async function versionCommand() {
   const version = SemVerString.extract(import.meta.url) ??
     await $.progress("Fetching version info").with(async () => {
-      const latest = await Dependency.resolveLatestVersion(
-        Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),
+      const latest = await resolveLatestVersion(
+        parse(new URL("https://deno.land/x/molt/cli.ts")),
       );
       return latest ? latest.version : undefined;
     }) ?? "unknown";
   console.log(version);
 }
 
-async function _collect(
+async function collectUpdates(
   entrypoints: string[],
   options: {
     ignore?: string[];
@@ -102,11 +107,11 @@ async function _collect(
   return await $.progress("Checking for updates").with(async () => {
     const updates = await Promise.all(
       entrypoints.map(async (entrypoint) =>
-        await DependencyUpdate.collect(entrypoint, {
+        await collect(entrypoint, {
           ignore: options.ignore
             ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
             : undefined,
-          importMap: options.importMap ?? await _findDenoJson(entrypoint),
+          importMap: options.importMap,
           only: options.only
             ? (dep) => options.only!.some((it) => dep.name.includes(it))
             : undefined,
@@ -121,19 +126,15 @@ async function _collect(
   });
 }
 
-function _findDenoJson(entrypoint: string) {
-  return _findFileUp(entrypoint, "deno.json", "deno.jsonc");
-}
-
 type TaskRecord = Record<string, string[]>;
 
-async function _getTasks() {
+async function getTasks() {
   const tasks: TaskRecord = {
     fmt: ["fmt"],
     lint: ["lint"],
     test: ["test"],
   };
-  const config = await _findDenoJson(Deno.cwd());
+  const config = await findFileUp(Deno.cwd(), "deno.json", "deno.jsonc");
   if (!config) {
     return tasks;
   }
@@ -151,30 +152,36 @@ async function _getTasks() {
   }
 }
 
-function _list(updates: DependencyUpdate[]) {
-  console.log(`💡 Found ${updates.length > 1 ? "updates" : "an update"}:`);
+function toRelativePath(url: URL) {
+  return relative(Deno.cwd(), url.pathname);
+}
+
+function printUpdates(updates: DependencyUpdate[]) {
   const dependencies = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
     const list = dependencies.get(u.to.name) ?? [];
     list.push(u);
     dependencies.set(u.to.name, list);
   }
+  let count = 0;
   for (const [name, list] of dependencies.entries()) {
-    console.log();
     const froms = distinct(list.map((u) => u.from.version)).join(", ");
     console.log(
       `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].to.version)}`,
     );
     distinct(
       list.map((u) => {
-        const source = URI.relative(u.map?.source ?? u.referrer);
+        const source = toRelativePath(u.map?.source ?? u.referrer);
         return `  ${source} ` + gray(u.from.version ?? "");
       }),
     ).forEach((line) => console.log(line));
+    if (++count < dependencies.size) {
+      console.log();
+    }
   }
 }
 
-async function _write(
+async function writeUpdates(
   updates: DependencyUpdate[],
   options?: {
     summary?: string;
@@ -183,7 +190,7 @@ async function _write(
 ) {
   console.log();
   await writeAll(updates, {
-    onWrite: (module) => console.log(`💾 ${URI.relative(module.specifier)}`),
+    onWrite: (file) => console.log(`💾 ${toRelativePath(file.url)}`),
   });
   if (options?.summary || options?.report) {
     console.log();
@@ -201,7 +208,7 @@ async function _write(
   }
 }
 
-async function _commit(
+async function commitUpdates(
   updates: DependencyUpdate[],
   options: {
     preCommit?: TaskRecord;
@@ -211,47 +218,55 @@ async function _commit(
     report?: string;
   },
 ) {
+  console.log();
+
   const preCommitTasks = Object.entries(options?.preCommit ?? {});
-  const commits = GitCommitSequence.from(updates, {
+  const postCommitTasks = Object.entries(options?.postCommit ?? {});
+  const hasTask = preCommitTasks.length > 0 || postCommitTasks.length > 0;
+
+  let count = 0;
+
+  const commits = createCommitSequence(updates, {
     groupBy: (dependency) => dependency.to.name,
     composeCommitMessage: ({ group, version }) =>
-      _formatPrefix(options.prefix) + `bump ${group}` +
+      formatPrefix(options.prefix) + `bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
       (version?.to ? ` to ${version?.to}` : ""),
     preCommit: preCommitTasks.length > 0
       ? async (commit) => {
-        const tasks = Object.entries(options?.preCommit ?? {});
-        console.log(`\n💾 ${commit.message}`);
-        for (const t of tasks) {
-          await _task(t);
+        console.log(`💾 ${commit.message}`);
+        for (const t of preCommitTasks) {
+          await runTask(t);
         }
       }
       : undefined,
     postCommit: async (commit) => {
       console.log(`📝 ${commit.message}`);
-      for (const task of Object.entries(options?.postCommit ?? {})) {
-        await _task(task);
+      for (const task of postCommitTasks) {
+        await runTask(task);
+      }
+      if (hasTask && ++count < commits.commits.length) {
+        console.log();
       }
     },
   });
-  if (!commits.options.preCommit) {
-    console.log();
-  }
-  await GitCommitSequence.exec(commits);
+
+  await execCommitSequence(commits);
+
   if (options?.summary || options?.report) {
     console.log();
   }
   if (options?.summary) {
-    await Deno.writeTextFile(options.summary, _summary(commits, options));
+    await Deno.writeTextFile(options.summary, createSummary(commits, options));
     console.log(`📄 ${options.summary}`);
   }
   if (options?.report) {
-    await Deno.writeTextFile(options.report, _report(commits));
+    await Deno.writeTextFile(options.report, createReport(commits));
     console.log(`📄 ${options.report}`);
   }
 }
 
-async function _task([name, args]: [string, string[]]) {
+async function runTask([name, args]: [string, string[]]) {
   console.log(`🔨 Running task ${cyan(name)}...`);
   const { code } = await new Deno.Command("deno", {
     args,
@@ -263,58 +278,23 @@ async function _task([name, args]: [string, string[]]) {
   }
 }
 
-function _ensureJsFiles(paths: string[]) {
-  let errors = 0;
+function ensureJsFiles(paths: string[]) {
   for (const path of paths) {
-    const ext = extname(path);
-    if (
-      !(ext === "" || ext === ".js" || ext === ".ts" || ext === ".jsx" ||
-        ext === ".tsx")
-    ) {
-      console.error(`❌ file must be javascript or typescript: "${path}"`);
-      errors += 1;
-      continue;
+    if (!["", ".js", ".ts", ".jsx", ".tsx"].includes(extname(path))) {
+      throw new Error(`❌ file must be javascript or typescript: "${path}"`);
     }
     try {
       if (!Deno.statSync(path).isFile) {
-        console.error(`❌ not a file: "${path}"`);
-        errors += 1;
+        throw new Error(`❌ not a file: "${path}"`);
       }
     } catch {
-      console.error(`❌ path does not exist: "${path}"`);
-      errors += 1;
+      throw new Error(`❌ path does not exist: "${path}"`);
     }
-  }
-  if (errors != 0) Deno.exit(1);
-}
-
-/**
- * Recursively searches for a file with the specified name in parent directories
- * starting from the given entrypoint directory.
- *
- * @param entrypoint - The file to start the search from its parent dir.
- * @param files - The name of the files to search for.
- * @returns The first file path found or undefined if no file was found.
- */
-async function _findFileUp(entrypoint: string, ...files: string[]) {
-  let path = dirname(entrypoint);
-  for (;;) {
-    for await (const dirEntry of Deno.readDir(path)) {
-      if (files.includes(dirEntry.name)) {
-        return join(path, dirEntry.name);
-      }
-    }
-    const newPath = dirname(path);
-    if (newPath === path) {
-      // reached the system root
-      return undefined;
-    }
-    path = newPath;
   }
 }
 
-function _summary(
-  sequence: GitCommitSequence,
+function createSummary(
+  sequence: CommitSequence,
   options: { prefix?: string },
 ): string {
   if (sequence.commits.length === 0) {
@@ -324,17 +304,17 @@ function _summary(
     return sequence.commits[0].message;
   }
   const groups = sequence.commits.map((commit) => commit.group).join(", ");
-  const full = _formatPrefix(options.prefix) + `update ${groups}`;
+  const full = formatPrefix(options.prefix) + `update ${groups}`;
   return (full.length <= 50)
     ? full
-    : _formatPrefix(options.prefix) + "update dependencies";
+    : formatPrefix(options.prefix) + "update dependencies";
 }
 
-function _report(sequence: GitCommitSequence): string {
+function createReport(sequence: CommitSequence): string {
   return sequence.commits.map((commit) => `- ${commit.message}`).join("\n");
 }
 
-function _formatPrefix(prefix: string | undefined) {
+function formatPrefix(prefix: string | undefined) {
   return prefix ? prefix.trimEnd() + " " : "";
 }
 

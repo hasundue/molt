@@ -12,42 +12,40 @@ import {
 import { AssertionError } from "./std/assert.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
-import { URI } from "./uri.ts";
 import { SemVerString } from "./semver.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
 });
 
-export function createCommandStub(): ConstructorSpy<
-  Deno.Command,
-  ConstructorParameters<typeof Deno.Command>
-> {
-  const CommandSpy = spy(Deno.Command);
-  return class extends CommandSpy {
-    #output: Deno.CommandOutput = {
-      code: 0,
-      stdout: new Uint8Array(),
-      stderr: new Uint8Array(),
-      success: true,
-      signal: null,
+export const CommandStub = {
+  create(CommandSpy = spy(Deno.Command)) {
+    return class CommandStub extends CommandSpy {
+      #output: Deno.CommandOutput = {
+        code: 0,
+        stdout: new Uint8Array(),
+        stderr: new Uint8Array(),
+        success: true,
+        signal: null,
+      };
+      outputSync() {
+        return this.#output;
+      }
+      output() {
+        return Promise.resolve(this.#output);
+      }
+      spawn() {
+        return new Deno.ChildProcess();
+      }
+      static clear() {
+        this.calls = [];
+      }
     };
-    outputSync() {
-      return this.#output;
-    }
-    output() {
-      return Promise.resolve(this.#output);
-    }
-    spawn() {
-      return new Deno.ChildProcess();
-    }
-    static clear() {
-      this.calls = [];
-    }
-  };
-}
+  },
+};
+export type CommandStub = ReturnType<typeof CommandStub.create>;
 
-export class FileSystemFake extends Map<URI<"file">, string> {}
+export class FileSystemFake extends Map<string | URL, string> {}
 
 export const ReadTextFileStub = {
   create(
@@ -61,7 +59,7 @@ export const ReadTextFileStub = {
       Deno,
       "readTextFile",
       async (path) => {
-        return fs.get(URI.from(path)) ??
+        return fs.get(path.toString()) ??
           (options?.readThrough
             ? await original(path)
             : _throw(new Deno.errors.NotFound(`File not found: ${path}`)));
@@ -79,7 +77,7 @@ export const WriteTextFileStub = {
       Deno,
       "writeTextFile",
       (path, data) => {
-        fs.set(URI.from(path), formatEOL(data.toString(), EOL.LF));
+        fs.set(path.toString(), formatEOL(data.toString(), EOL.LF));
         return Promise.resolve();
       },
     );
@@ -152,7 +150,7 @@ export function enableTestMode() {
   ReadTextFileStub.create(fs, { readThrough: true });
   WriteTextFileStub.create(fs);
   LatestSemVerStub.create("123.456.789");
-  Deno.Command = createCommandStub();
+  Deno.Command = CommandStub.create();
 }
 
 /** Asserts that a spy is called as expected at any index. */
@@ -174,7 +172,9 @@ export function assertFindSpyCall<
   });
   if (!call) {
     throw new AssertionError(
-      `Expected spy call does not exist: ${JSON.stringify(expected)}`,
+      `Expected spy call ${Deno.inspect(expected)} does not exist in ${
+        Deno.inspect(spy.calls)
+      }`,
     );
   }
   return call;
@@ -199,7 +199,9 @@ export function assertFindSpyCallArg<
     }
   });
   if (!call) {
-    throw new AssertionError("Expected spy call does not exist");
+    throw new AssertionError(
+      "Expected spy call does not exist in " + Deno.inspect(spy.calls),
+    );
   }
   return call;
 }
