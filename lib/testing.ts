@@ -124,7 +124,7 @@ export const LatestSemVerStub = {
           }
           const response = await init.original(request);
           await response.arrayBuffer();
-          const semver = SemVerString.parse(response.url);
+          const semver = SemVerString.extract(response.url);
           if (!semver) {
             return response;
           }

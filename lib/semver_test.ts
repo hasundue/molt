@@ -3,15 +3,15 @@ import { SemVerString } from "./semver.ts";
 
 Deno.test("SemVerString.parse()", () => {
   assertEquals(
-    SemVerString.parse("https://deno.land/std@0.1.0"),
+    SemVerString.extract("https://deno.land/std@0.1.0"),
     "0.1.0",
   );
   assertEquals(
-    SemVerString.parse("https://deno.land/std"),
+    SemVerString.extract("https://deno.land/std"),
     undefined,
   );
   assertEquals(
-    SemVerString.parse("https://deno.land/std@1.0.0-rc.1"),
+    SemVerString.extract("https://deno.land/std@1.0.0-rc.1"),
     "1.0.0-rc.1",
   );
 });

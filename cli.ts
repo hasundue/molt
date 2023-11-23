@@ -81,7 +81,7 @@ const main = new Command()
   });
 
 async function versionCommand() {
-  const version = SemVerString.parse(import.meta.url) ??
+  const version = SemVerString.extract(import.meta.url) ??
     await $.progress("Fetching version info").with(async () => {
       const latest = await Dependency.resolveLatest(
         Dependency.parse(new URL("https://deno.land/x/molt/cli.ts")),

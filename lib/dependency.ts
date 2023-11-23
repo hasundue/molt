@@ -68,7 +68,7 @@ export const Dependency = {
   parse(url: URL): Dependency {
     const scheme = url.protocol === "npm:" ? "npm:" : url.protocol + "//";
     const body = url.hostname + url.pathname;
-    const semver = SemVerString.parse(url.href);
+    const semver = SemVerString.extract(url.href);
     if (!semver) {
       return { scheme, name: body } as Dependency;
     }
@@ -155,7 +155,7 @@ async function _resolveLatest(
         }),
         { message: `Invalid response from NPM registry: ${response.url}` },
       );
-      const latest = SemVerString.parse(pkg["dist-tags"].latest);
+      const latest = SemVerString.extract(pkg["dist-tags"].latest);
       if (
         latest === undefined || // The latest version is not a semver
         latest === dependency.version || // The dependency is already up to date
