@@ -9,7 +9,12 @@ import {
 import { URI } from "./uri.ts";
 import type { Maybe } from "./types.ts";
 import { ImportMap } from "./import_map.ts";
-import { Dependency, LatestDependency } from "./dependency.ts";
+import {
+  type Dependency,
+  parse,
+  resolveLatestVersion,
+  type UpdatedDependency,
+} from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
@@ -18,7 +23,7 @@ export interface DependencyUpdate {
   /** Properties of the dependency being updated. */
   from: Dependency;
   /** Properties of the dependency after the update. */
-  to: LatestDependency;
+  to: UpdatedDependency;
   /** The code of the dependency. Note that `type` in the DependencyJSON is
    * merged into `code` here for convenience. */
   code: {
@@ -144,14 +149,14 @@ export async function _create(
     dependencyJson.specifier,
     referrer,
   );
-  const dependency = Dependency.parse(new URL(mapped?.to ?? specifier));
+  const dependency = parse(new URL(mapped?.to ?? specifier));
   if (options?.ignore?.(dependency)) {
     return;
   }
   if (options?.only && !options.only(dependency)) {
     return;
   }
-  const latest = await Dependency.resolveLatest(dependency);
+  const latest = await resolveLatestVersion(dependency);
   if (!latest || latest.version === dependency.version) {
     return;
   }

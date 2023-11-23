@@ -1,7 +1,7 @@
 import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
-import { Dependency } from "./dependency.ts";
+import { toUrl } from "./dependency.ts";
 import { DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
 import { URI } from "./uri.ts";
@@ -113,7 +113,7 @@ async function writeToModule(
               dependency.code.span.start.character + 1,
               dependency.code.span.end.character - 1,
             ),
-            Dependency.toURI(dependency.to),
+            toUrl(dependency.to).href,
           )
           : line;
       })
@@ -130,8 +130,8 @@ async function writeToImportMap(
   for (const dependency of update.dependencies) {
     assertExists(dependency.map);
     json.imports[dependency.map.from] = dependency.map.to.replace(
-      Dependency.toURI(dependency.from),
-      Dependency.toURI(dependency.to),
+      toUrl(dependency.from).href,
+      toUrl(dependency.to).href,
     );
   }
   await Deno.writeTextFile(

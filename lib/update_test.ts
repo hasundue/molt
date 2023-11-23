@@ -33,13 +33,11 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "https://",
           name: "deno.land/std",
           version: "0.1.0",
           path: "/version.ts",
         },
         to: {
-          scheme: "https://",
           name: "deno.land/std",
           version: LATEST,
           path: "/version.ts",
@@ -61,11 +59,9 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "https://",
           name: "deno.land/std/version.ts",
         },
         to: {
-          scheme: "https://",
           name: "deno.land/std",
           version: LATEST,
           path: "/version.ts",
@@ -86,13 +82,11 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "https://",
           name: "deno.land/x/deno_graph",
           version: "0.50.0",
           path: "/mod.ts",
         },
         to: {
-          scheme: "https://",
           name: "deno.land/x/deno_graph",
           version: LATEST,
           path: "/mod.ts",
@@ -113,12 +107,10 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "npm:",
           name: "node-emoji",
           version: "2.0.0",
         },
         to: {
-          scheme: "npm:",
           name: "node-emoji",
           version: LATEST,
         },
@@ -138,11 +130,9 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "npm:",
           name: "node-emoji",
         },
         to: {
-          scheme: "npm:",
           name: "node-emoji",
           version: LATEST,
         },
@@ -177,13 +167,11 @@ describe("DependencyUpdate", () => {
       assertExists(update);
       assertObjectMatch(update, {
         from: {
-          scheme: "https://",
           name: "deno.land/std",
           version: "0.200.0",
           path: "/",
         },
         to: {
-          scheme: "https://",
           name: "deno.land/std",
           version: LATEST,
           path: "/",

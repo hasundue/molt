@@ -25,7 +25,7 @@
 
 export { DependencyUpdate } from "./lib/update.ts";
 export { FileUpdate, writeAll } from "./lib/file.ts";
-export type { Dependency, LatestDependency } from "./lib/dependency.ts";
+export type { Dependency, UpdatedDependency } from "./lib/dependency.ts";
 export type { SemVerString } from "./lib/semver.ts";
 export type { ImportMap } from "./lib/import_map.ts";
 export type { URI } from "./lib/uri.ts";
