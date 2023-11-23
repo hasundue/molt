@@ -7,7 +7,6 @@ import {
   type ModuleJson,
 } from "./x/deno_graph.ts";
 import { URI } from "./uri.ts";
-import type { Maybe } from "./types.ts";
 import { ImportMap } from "./import_map.ts";
 import {
   type Dependency,
@@ -135,7 +134,7 @@ export async function _create(
   options?: Pick<CollectOptions, "ignore" | "only"> & {
     importMap?: ImportMap;
   },
-): Promise<Maybe<DependencyUpdate>> {
+): Promise<DependencyUpdate | undefined> {
   const specifier = dependencyJson.code?.specifier ??
     dependencyJson.type?.specifier;
   if (!specifier) {
@@ -194,7 +193,7 @@ export type VersionChange = {
 
 export function getVersionChange(
   dependencies: DependencyUpdate[],
-): Maybe<VersionChange> {
+): VersionChange | undefined {
   const modules = distinct(dependencies.map((d) => d.to.name));
   if (modules.length > 1) {
     // Cannot provide a well-defined version prop

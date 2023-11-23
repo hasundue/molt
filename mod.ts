@@ -29,4 +29,3 @@ export type { Dependency, UpdatedDependency } from "./lib/dependency.ts";
 export type { SemVerString } from "./lib/semver.ts";
 export type { ImportMap } from "./lib/import_map.ts";
 export type { URI } from "./lib/uri.ts";
-export type { Path } from "./lib/types.ts";

@@ -1,7 +1,6 @@
 import { isAbsolute, relative, resolve, toFileUrl } from "./std/path.ts";
 import { assertEquals } from "./std/assert.ts";
 import { assert, is } from "./x/unknownutil.ts";
-import { Brand } from "./types.ts";
 
 export type DefaultProtocol<Scheme extends string> = Scheme extends
   "http" | "https" ? `${Scheme}://`
@@ -12,9 +11,6 @@ export type URI<
   Scheme extends string = string,
   Protocol extends string = DefaultProtocol<Scheme>,
 > = `${Protocol}${string}`;
-
-export type RelativePath = Brand<string, "RelativePath">;
-export type AbsolutePath = Brand<string, "AbsolutePath">;
 
 export const URI = {
   /**
@@ -40,11 +36,11 @@ export const URI = {
   get cwd(): URI<"file"> {
     return URI.from(Deno.cwd());
   },
-  relative(uri: URI<"file">): RelativePath {
-    return relative(URI.cwd, uri) as RelativePath;
+  relative(uri: URI<"file">): string {
+    return relative(URI.cwd, uri);
   },
-  absolute(uri: URI<"file">): AbsolutePath {
-    return new URL(uri).pathname as AbsolutePath;
+  absolute(uri: URI<"file">): string {
+    return new URL(uri).pathname;
   },
   ensure<S extends string>(...schemes: S[]): (uri: string) => URI<S> {
     return (uri) => {

@@ -2,7 +2,6 @@ import { maxBy } from "./std/collections.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
 import { is } from "./x/unknownutil.ts";
-import type { Maybe } from "./types.ts";
 import { URI } from "./uri.ts";
 
 export type { ImportMapJson };
@@ -20,7 +19,10 @@ export interface ImportMapResolveResult {
 export interface ImportMap {
   // TODO: Accept a remote URL
   specifier: URI<"file">;
-  resolve(specifier: string, referrer: string): Maybe<ImportMapResolveResult>;
+  resolve(
+    specifier: string,
+    referrer: string,
+  ): ImportMapResolveResult | undefined;
   resolveInner(specifier: string, referrer: string): string;
 }
 
@@ -38,7 +40,9 @@ const isImportMapReferrer = is.ObjectOf({
 
 // This implementation is ridiculously inefficient, but we prefer not to reimplement the whole
 // import_map module. Maybe we should rathre patch rust code of the import_map module.
-async function readFromJson(specifier: URI<"file">): Promise<Maybe<ImportMap>> {
+async function readFromJson(
+  specifier: URI<"file">,
+): Promise<ImportMap | undefined> {
   const data = await Deno.readTextFile(new URL(specifier));
   if (data.length === 0) {
     return;
