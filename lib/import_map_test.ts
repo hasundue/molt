@@ -1,18 +1,17 @@
-import { assertEquals, assertExists } from "./std/assert.ts";
+import { assertEquals, assertExists, assertRejects } from "./std/assert.ts";
 import { toFileUrl } from "./std/path.ts";
-import { beforeAll, describe, it } from "./std/testing.ts";
-import { type ImportMap, readFromJson } from "./import_map.ts";
+import { describe, it } from "./std/testing.ts";
+import { readFromJson } from "./import_map.ts";
 
 describe("readFromJson", () => {
-  it("empty deno.json", async () => {
+  it("throws for an empty deno.json", async () => {
     const f = await Deno.makeTempFile();
     // use this cool stuff once it lands in deno
     // using cleanup = new DisposableStack();
     // cleanup.defer(async () => {
     //   await Deno.remove(f);
     // });
-    const importMap = await readFromJson(toFileUrl(f));
-    assertEquals(importMap, undefined);
+    assertRejects(() => readFromJson(toFileUrl(f)));
     await Deno.remove(f);
   });
 
@@ -20,7 +19,7 @@ describe("readFromJson", () => {
     const url = new URL("../test/data/import_map/deno.json", import.meta.url);
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.url, url);
+    assertEquals(importMap.path, url.href);
   });
 
   it("test/data/import_map_referred/import_map.json", async () => {
@@ -30,7 +29,7 @@ describe("readFromJson", () => {
     );
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.url, url);
+    assertEquals(importMap.path, url.href);
   });
 });
 
@@ -44,7 +43,7 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("std/version.ts", referrer),
       {
-        url: new URL("https://deno.land/std@0.200.0/version.ts"),
+        resolved: "https://deno.land/std@0.200.0/version.ts",
         key: "std/",
         value: "https://deno.land/std@0.200.0/",
       },
@@ -52,7 +51,7 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("deno_graph", referrer),
       {
-        url: new URL("https://deno.land/x/deno_graph@0.50.0/mod.ts"),
+        resolved: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
         key: "deno_graph",
         value: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
       },
@@ -60,7 +59,7 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("node-emoji", referrer),
       {
-        url: new URL("npm:node-emoji@1.0.0"),
+        resolved: "npm:node-emoji@1.0.0",
         key: "node-emoji",
         value: "npm:node-emoji@1.0.0",
       },
@@ -68,7 +67,8 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("/lib.ts", referrer),
       {
-        url: new URL("../test/data/import_map/lib.ts", import.meta.url),
+        resolved:
+          new URL("../test/data/import_map/lib.ts", import.meta.url).href,
       },
     );
   });
@@ -107,7 +107,7 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("dax", referrer),
       {
-        url: new URL("https://deno.land/x/dax@0.17.0/mod.ts"),
+        resolved: "https://deno.land/x/dax@0.17.0/mod.ts",
         key: "dax",
         value: "https://deno.land/x/dax@0.17.0/mod.ts",
       },
@@ -115,24 +115,15 @@ describe("resolve()", () => {
   });
 });
 
-describe("resolveInner()", () => {
-  let importMap: ImportMap;
-
-  beforeAll(async () => {
-    const maybe = await readFromJson(
-      new URL("../test/data/import_map/deno.json", import.meta.url),
-    );
-    assertExists(maybe);
-    importMap = maybe;
-  });
-
-  it("resolve an absolute path", () => {
-    assertEquals(
-      importMap.resolveInner(
-        "/lib.ts",
-        new URL("../test/data/import_map/mod.ts", import.meta.url),
-      ),
-      new URL("../test/data/import_map/lib.ts", import.meta.url).href,
-    );
-  });
+Deno.test("resolveInner", async () => {
+  const { resolveInner } = await readFromJson(
+    new URL("../test/data/import_map/deno.json", import.meta.url),
+  );
+  assertEquals(
+    resolveInner(
+      "/lib.ts",
+      new URL("../test/data/import_map/mod.ts", import.meta.url),
+    ),
+    new URL("../test/data/import_map/lib.ts", import.meta.url).href,
+  );
 });

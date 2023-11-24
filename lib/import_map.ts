@@ -7,19 +7,27 @@ import { is } from "./x/unknownutil.ts";
 export type { ImportMapJson };
 
 export interface ImportMapResolveResult {
-  /** The fully-resolved URL of the dependency. */
-  url: URL;
+  /** The fully-resolved URL of the import specifier. */
+  resolved: string;
   /** The key of the import map that matched with the import specifier. */
   key?: string;
-  /** The value of the import map for the key. */
+  /** The value of the import map corresponding to the key. */
   value?: string;
 }
 
 export interface ImportMap {
-  url: URL;
+  /** The string URL of the import map. */
+  path: string;
+  /**
+   * Resolve the given specifier using the import map.
+   * @param specifier - The specifier to resolve.
+   * @param referrer - The URL of the module that imports the specifier.
+   * @return The result of the resolution or undefined if the specifier is not
+   * resolved by the import map.
+   */
   resolve(
     specifier: string,
-    referrer: URL,
+    referrer: string | URL,
   ): ImportMapResolveResult | undefined;
   /**
    * The original `ImportMap.resolve` from the `import_map` module.
@@ -37,26 +45,37 @@ const isImportMapReferrer = is.ObjectOf({
 
 /**
  * Read an import map from the given URL.
- * @param url - The URL of the import map.
+ * @param path - The URL of the import map.
  * @return The import map object if found.
+ * @throws {SyntaxError} If the import map is not a valid JSON.
  */
 export async function readFromJson(
-  url: URL,
-): Promise<ImportMap | undefined> {
-  const data = await Deno.readTextFile(url);
-  if (data.length === 0) {
-    return;
+  path: string | URL,
+): Promise<ImportMap> {
+  const data = await Deno.readTextFile(path);
+
+  function parseJsonc(data: string) {
+    try {
+      return parse(data);
+    } catch (e) {
+      if (e instanceof SyntaxError) {
+        throw new SyntaxError(`Invalid JSON or JSONC: ${path}`, { cause: e });
+      }
+      throw e;
+    }
   }
-  const json = parse(data);
+  const json = parseJsonc(data);
+
   if (isImportMapReferrer(json)) {
-    return readFromJson(new URL(json.importMap, url));
+    return readFromJson(new URL(json.importMap, path));
   }
   if (!isImportMapJson(json)) {
-    return;
+    throw new SyntaxError(`${path} is not a valid import map`);
   }
-  const inner = await parseFromJson(url, json);
+  const inner = await parseFromJson(path, json);
+
   return {
-    url,
+    path: path.toString(),
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
       // Return if the specifier is not resolved by the import map.
@@ -79,7 +98,7 @@ export async function readFromJson(
         assertEquals(url.protocol, "file:");
       }
       return {
-        url,
+        resolved,
         ...replacement,
       };
     },

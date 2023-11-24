@@ -44,7 +44,7 @@ export interface DependencyUpdate {
     /** The string in the dependency specifier being replaced */
     key: string;
     /** The fully resolved specifier of the dependency. */
-    value: string;
+    resolved: string;
   };
 }
 
@@ -190,7 +190,7 @@ async function create(
     dependencyJson.specifier,
     referrer,
   );
-  const dependency = parse(new URL(mapped?.value ?? specifier));
+  const dependency = parse(new URL(mapped?.resolved ?? specifier));
   if (options?.ignore?.(dependency)) {
     return;
   }
@@ -222,7 +222,7 @@ async function create(
       ? {
         source: options!.importMap!.url,
         key: mapped.key!,
-        value: mapped.value!,
+        resolved: mapped.resolved!,
       }
       : undefined,
   };
