@@ -7,11 +7,11 @@ import { is } from "./x/unknownutil.ts";
 export type { ImportMapJson };
 
 export interface ImportMapResolveResult {
-  /** The fully-resolved URL of the import specifier. */
+  /** The fully-resolved URL string of the import specifier. */
   resolved: string;
   /** The key of the import map that matched with the import specifier. */
   key?: string;
-  /** The value of the import map corresponding to the key. */
+  /** The mapped value by the import map corresponding to the key. */
   value?: string;
 }
 
@@ -44,8 +44,8 @@ const isImportMapReferrer = is.ObjectOf({
 });
 
 /**
- * Read an import map from the given URL.
- * @param path - The URL of the import map.
+ * Read an import map from the given file path or URL.
+ * @param path - The path to the import map.
  * @return The import map object if found.
  * @throws {SyntaxError} If the import map is not a valid JSON.
  */
