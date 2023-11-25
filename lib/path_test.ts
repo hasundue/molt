@@ -2,7 +2,7 @@ import { assertEquals, assertRejects } from "./std/assert.ts";
 import { dirname, resolve } from "./std/path.ts";
 import { findFileUp, toPath, toUrl } from "./path.ts";
 
-Deno.test("toUrl", () => {
+Deno.test("toUrl - URLs", () => {
   assertEquals(
     toUrl("https://example.com"),
     "https://example.com",

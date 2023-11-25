@@ -1,4 +1,4 @@
-import { dirname, join, resolve } from "./std/path.ts";
+import { dirname, isAbsolute, join, resolve } from "./std/path.ts";
 
 /**
  * Convert a path to a string URL
@@ -11,7 +11,7 @@ export function toUrl(path: string | URL): string {
     return path;
   }
   // Assume the path is a relative path from the current working directory.
-  return "file://" + resolve(path);
+  return "file://" + (isAbsolute(path) ? path : resolve(path));
 }
 
 /**
@@ -24,7 +24,7 @@ export function toPath(path: string | URL): string {
   if (URL.canParse(path)) {
     return path.startsWith("file://") ? path.slice(7) : path;
   }
-  return resolve(path);
+  return isAbsolute(path) ? path : resolve(path);
 }
 
 /**
