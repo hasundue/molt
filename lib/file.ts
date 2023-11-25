@@ -1,7 +1,6 @@
 import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
-import { toPath } from "./path.ts";
 import { toUrl } from "./dependency.ts";
 import { type DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
@@ -33,9 +32,9 @@ export function writeAll(
  * A collection of updates to dependencies associated with a file.
  */
 export interface FileUpdate {
-  /** The URL of the file to update. */
+  /** The full path to the file being updated. */
   path: string;
-  /** The type of the file to update. */
+  /** The type of the file being updated. */
   kind: "module" | "import_map";
   /** The updates to dependencies associated with the file. */
   dependencies: DependencyUpdate[];
@@ -99,11 +98,10 @@ async function writeToModule(
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
   );
-  const path = toPath(update.path);
-  const content = await Deno.readTextFile(path);
+  const content = await Deno.readTextFile(update.path);
   const eol = detectEOL(content) ?? "\n";
   await Deno.writeTextFile(
-    path,
+    update.path,
     content
       .split(eol)
       .map((line, index) => {
@@ -126,8 +124,7 @@ async function writeToImportMap(
   /** The dependency update to apply. */
   update: FileUpdate,
 ) {
-  const path = toPath(update.path);
-  const content = await Deno.readTextFile(path);
+  const content = await Deno.readTextFile(update.path);
   const json = parseJsonc(content) as unknown as ImportMapJson;
   for (const dependency of update.dependencies) {
     assertExists(dependency.map);
@@ -136,5 +133,5 @@ async function writeToImportMap(
       toUrl(dependency.to),
     );
   }
-  await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
+  await Deno.writeTextFile(update.path, JSON.stringify(json, null, 2));
 }

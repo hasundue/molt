@@ -108,6 +108,7 @@ async function collectUpdates(
     const updates = await Promise.all(
       entrypoints.map(async (entrypoint) =>
         await collect(entrypoint, {
+          findImportMap: options.importMap === undefined,
           ignore: options.ignore
             ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
             : undefined,
@@ -152,9 +153,7 @@ async function getTasks() {
   }
 }
 
-function toRelativePath(url: URL) {
-  return relative(Deno.cwd(), url.pathname);
-}
+const toRelativePath = (path: string) => relative(Deno.cwd(), path);
 
 function printUpdates(updates: DependencyUpdate[]) {
   const dependencies = new Map<string, DependencyUpdate[]>();
@@ -190,7 +189,7 @@ async function writeUpdates(
 ) {
   console.log();
   await writeAll(updates, {
-    onWrite: (file) => console.log(`💾 ${toRelativePath(file.url)}`),
+    onWrite: (file) => console.log(`💾 ${toRelativePath(file.path)}`),
   });
   if (options?.summary || options?.report) {
     console.log();
@@ -310,13 +309,11 @@ function createSummary(
     : formatPrefix(options.prefix) + "update dependencies";
 }
 
-function createReport(sequence: CommitSequence): string {
-  return sequence.commits.map((commit) => `- ${commit.message}`).join("\n");
-}
+const createReport = (sequence: CommitSequence): string =>
+  sequence.commits.map((commit) => `- ${commit.message}`).join("\n");
 
-function formatPrefix(prefix: string | undefined) {
-  return prefix ? prefix.trimEnd() + " " : "";
-}
+const formatPrefix = (prefix: string | undefined) =>
+  prefix ? prefix.trimEnd() + " " : "";
 
 try {
   const env = await Deno.permissions.query({ name: "env" });

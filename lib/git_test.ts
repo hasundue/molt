@@ -1,6 +1,6 @@
 import { assertArrayIncludes } from "./std/assert.ts";
 import { assertSpyCall } from "./std/testing.ts";
-import { relative } from "./std/path.ts";
+import { basename, relative } from "./std/path.ts";
 import {
   CommandStub,
   FileSystemFake,
@@ -97,16 +97,16 @@ Deno.test("commitAll", async (t) => {
 
   await t.step("group by module (file) name", async () => {
     await commitAll(updates, {
-      groupBy: (update) => update.referrer.pathname,
+      groupBy: (update) => basename(update.referrer),
       composeCommitMessage: ({ group }) => {
         const path = relative(Deno.cwd(), group);
         return `build(deps): update ${path}`;
       },
     });
     assertGitAdd(`${DIR}/lib.ts`);
-    assertGitCommit(`build(deps): update ${normalizePath(`${DIR}/lib.ts`)}`);
+    assertGitCommit(`build(deps): update lib.ts`);
     assertGitAdd(`${DIR}/mod.ts`);
-    assertGitCommit(`build(deps): update ${normalizePath(`${DIR}/mod.ts`)}`);
+    assertGitCommit(`build(deps): update mod.ts`);
     assertFileSystem(fs);
   });
 });

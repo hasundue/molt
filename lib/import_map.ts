@@ -3,6 +3,7 @@ import { maxBy } from "./std/collections.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
 import { is } from "./x/unknownutil.ts";
+import { toPath } from "./path.ts";
 
 export type { ImportMapJson };
 
@@ -16,8 +17,9 @@ export interface ImportMapResolveResult {
 }
 
 export interface ImportMap {
-  /** The string URL of the import map. */
-  url: string;
+  /** The full path to the source of the import map.
+   * @example "/path/to/import_map.json" */
+  path: string;
   /**
    * Resolve the given specifier using the import map.
    * @param specifier - The specifier to resolve.
@@ -65,7 +67,7 @@ export async function readFromJson(
   const inner = await parseFromJson(url, json);
 
   return {
-    url: url.toString(),
+    path: toPath(url),
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
       // Return if the specifier is not resolved by the import map.

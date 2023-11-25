@@ -7,7 +7,7 @@ import {
   load as defaultLoad,
   type ModuleJson,
 } from "./x/deno_graph.ts";
-import { findFileUp, toUrl, toPath } from "./path.ts";
+import { findFileUp, toPath, toUrl } from "./path.ts";
 import { ImportMap, tryReadFromJson } from "./import_map.ts";
 import {
   type Dependency,
@@ -35,15 +35,17 @@ export interface DependencyUpdate {
     specifier: string;
     span: NonNullable<DependencyJson["code"]>["span"];
   };
-  /** The URL of the module that imports the dependency. */
+  /** The full path to the module that imports the dependency.
+   * @example "/path/to/mod.ts" */
   referrer: string;
   /** Information about the import map used to resolve the dependency. */
   map?: {
-    /** The URL of the import map used to resolve the dependency. */
+    /** The full path to the import map used to resolve the dependency.
+     * @example "/path/to/import_map.json" */
     source: string;
     /** The string in the dependency specifier being replaced */
     key?: string;
-    /** The fully resolved specifier (URI) of the dependency. */
+    /** The fully resolved specifier (URL) of the dependency. */
     resolved: string;
   };
 }
@@ -118,8 +120,8 @@ export async function collect(
   const paths = froms.map((path) => toPath(path));
   const urls = froms.map((path) => toUrl(path));
 
-  const importMapPath = options.importMap
-    ?? (options.findImportMap
+  const importMapPath = options.importMap ??
+    (options.findImportMap
       ? await findFileUp(dirname(paths[0]), "deno.json", "deno.jsonc")
       : undefined);
 
@@ -173,6 +175,13 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
   }
 };
 
+/**
+ * Create a DependencyUpdate from the given dependency.
+ * @param dependencyJson - The dependency to create an update from.
+ * @param referrer - The URL of the module that imports the dependency.
+ * @param options - Options to customize the behavior.
+ * @returns The created DependencyUpdate.
+ */
 async function create(
   dependencyJson: DependencyJson,
   referrer: string,
@@ -221,10 +230,10 @@ async function create(
       specifier: dependencyJson.specifier,
       span,
     },
-    referrer,
+    referrer: toPath(referrer),
     map: mapped
       ? {
-        source: options!.importMap!.url,
+        source: options!.importMap!.path,
         key: mapped.key,
         resolved: mapped.resolved,
       }

@@ -4,7 +4,7 @@ import {
   getVersionChange,
   VersionChange,
 } from "./update.ts";
-import { type FileUpdate, mergeToFileUpdate, writeFileUpdate } from "./file.ts";
+import { associateByFile, type FileUpdate, write } from "./file.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -98,8 +98,8 @@ export async function execCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
-  const results = mergeToFileUpdate(commit.updates);
-  await writeFileUpdate(results);
+  const results = associateByFile(commit.updates);
+  await write(results);
   await options?.preCommit?.(commit);
   await _add(results, options?.gitAddOptions ?? []);
   await _commit(commit.message, options?.gitCommitOptions ?? []);
@@ -110,9 +110,7 @@ async function _add(
   results: FileUpdate[],
   options: string[],
 ) {
-  const files = results.map((result) =>
-    relative(Deno.cwd(), result.url.pathname)
-  );
+  const files = results.map((result) => relative(Deno.cwd(), result.path));
   const { code, stderr } = await new Deno.Command("git", {
     args: ["add", ...options, ...files],
   }).output();
