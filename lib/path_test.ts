@@ -28,7 +28,7 @@ Deno.test("toUrl - URLs", () => {
 Deno.test("toPath", () => {
   assertEquals(
     toPath("https://example.com"),
-    "https://example.com",
+    "https://example.com/",
   );
   assertEquals(
     toPath(new URL("https://example.com")),
@@ -45,6 +45,17 @@ Deno.test("toPath", () => {
   assertEquals(
     toPath("foo/bar"),
     resolve("foo/bar"),
+  );
+});
+
+Deno.test("toPath (Windows)", { ignore: Deno.build.os !== "windows" }, () => {
+  assertEquals(
+    toPath("file:///C:/foo/bar"),
+    "C:/foo/bar",
+  );
+  assertEquals(
+    toPath("C:/foo/bar"),
+    "C:/foo/bar",
   );
 });
 

@@ -18,13 +18,13 @@ export function toUrl(path: string | URL): string {
  * Convert a path to an absolute file path or a string URL.
  */
 export function toPath(path: string | URL): string {
-  if (path instanceof URL) {
-    return path.protocol === "file:" ? path.pathname : path.href;
+  try {
+    const url = new URL(path);
+    return url.protocol === "file:" ? url.pathname : url.href;
+  } catch {
+    // @ts-ignore path is not a URL
+    return isAbsolute(path) ? path : resolve(path);
   }
-  if (URL.canParse(path)) {
-    return path.startsWith("file://") ? path.slice(7) : path;
-  }
-  return isAbsolute(path) ? path : resolve(path);
 }
 
 /**

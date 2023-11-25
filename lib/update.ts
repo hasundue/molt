@@ -117,12 +117,11 @@ export async function collect(
   options: CollectOptions = {},
 ): Promise<DependencyUpdate[]> {
   const froms = [from].flat();
-  const paths = froms.map((path) => toPath(path));
   const urls = froms.map((path) => toUrl(path));
 
   const importMapPath = options.importMap ??
     (options.findImportMap
-      ? await findFileUp(dirname(paths[0]), "deno.json", "deno.jsonc")
+      ? await findFileUp(dirname(urls[0]), "deno.json", "deno.jsonc")
       : undefined);
 
   const importMap = importMapPath
