@@ -1,4 +1,4 @@
-import { dirname, fromFileUrl, join, resolve } from "./std/path.ts";
+import { dirname, fromFileUrl, join, resolve, toFileUrl } from "./std/path.ts";
 
 /**
  * Convert a path to a string URL
@@ -7,11 +7,12 @@ export function toUrl(path: string | URL): string {
   if (path instanceof URL) {
     return path.href;
   }
-  if (URL.canParse(path)) {
+  // Exclude Windows paths like "C:\foo\bar"
+  if (URL.canParse(path) && !path.match(/^[a-zA-Z]:/)) {
     return path;
   }
   // Assume the path is a relative path from the current working directory.
-  return "file://" + resolve(path);
+  return toFileUrl(resolve(path)).href;
 }
 
 /**

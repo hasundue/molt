@@ -4,7 +4,7 @@ import { findFileUp, toPath, toUrl } from "./path.ts";
 
 const isWindows = Deno.build.os === "windows";
 
-Deno.test("toUrl - URLs", () => {
+Deno.test("toUrl (common)", () => {
   assertEquals(
     toUrl("https://example.com"),
     "https://example.com",
@@ -17,6 +17,9 @@ Deno.test("toUrl - URLs", () => {
     toUrl("file:///foo/bar"),
     "file:///foo/bar",
   );
+});
+
+Deno.test("toUrl (UNIX)", { ignore: isWindows }, () => {
   assertEquals(
     toUrl("/foo/bar"),
     "file:///foo/bar",
@@ -24,6 +27,17 @@ Deno.test("toUrl - URLs", () => {
   assertEquals(
     toUrl("foo/bar"),
     "file://" + resolve("foo/bar"),
+  );
+});
+
+Deno.test("toUrl (Windows)", { ignore: !isWindows }, () => {
+  assertEquals(
+    toUrl("C:\\foo\\bar"),
+    "file:///C:/foo/bar",
+  );
+  assertEquals(
+    toUrl("foo\\bar"),
+    "file:///" + resolve("foo\\bar").replace(/\\/g, "/"),
   );
 });
 
