@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`collect - export.ts 1`] = `
+snapshot[`associateByFile - export.ts 1`] = `
 [
   {
     dependencies: [
@@ -45,7 +45,7 @@ snapshot[`write - export.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - multiple_imports.ts 1`] = `
+snapshot[`associateByFile - multiple_imports.ts 1`] = `
 [
   {
     dependencies: [
@@ -148,7 +148,7 @@ import emoji from "npm:node-emoji@123.456.789";
 ]
 `;
 
-snapshot[`collect - import_map_referred/mod.ts 1`] = `
+snapshot[`associateByFile - import_map_referred/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -174,7 +174,7 @@ snapshot[`collect - import_map_referred/mod.ts 1`] = `
         },
         map: {
           key: "dax",
-          value: "https://deno.land/x/dax@0.17.0/mod.ts",
+          resolved: "https://deno.land/x/dax@0.17.0/mod.ts",
         },
         to: {
           name: "deno.land/x/dax",
@@ -199,7 +199,7 @@ snapshot[`write - import_map_referred/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - updated_import_and_outdated_export.ts 1`] = `
+snapshot[`associateByFile - updated_import_and_outdated_export.ts 1`] = `
 [
   {
     dependencies: [
@@ -245,7 +245,7 @@ export { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_eq
 ]
 `;
 
-snapshot[`collect - import_map/mod.ts 1`] = `
+snapshot[`associateByFile - import_map/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -271,7 +271,7 @@ snapshot[`collect - import_map/mod.ts 1`] = `
         },
         map: {
           key: "std/",
-          value: "https://deno.land/std@0.200.0/",
+          resolved: "https://deno.land/std@0.200.0/assert.ts",
         },
         to: {
           name: "deno.land/std",
@@ -302,7 +302,7 @@ snapshot[`collect - import_map/mod.ts 1`] = `
         },
         map: {
           key: "deno_graph",
-          value: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+          resolved: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
         },
         to: {
           name: "deno.land/x/deno_graph",
@@ -333,7 +333,7 @@ snapshot[`collect - import_map/mod.ts 1`] = `
         },
         map: {
           key: "node-emoji",
-          value: "npm:node-emoji@1.0.0",
+          resolved: "npm:node-emoji@1.0.0",
         },
         to: {
           name: "node-emoji",
@@ -352,7 +352,7 @@ snapshot[`write - import_map/mod.ts 1`] = `
 [
   '{
   "imports": {
-    "std/": "https://deno.land/std@123.456.789/",
+    "std/": "https://deno.land/std@123.456.789/assert.ts",
     "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
     "node-emoji": "npm:node-emoji@123.456.789",
     "/": "./"
@@ -361,7 +361,7 @@ snapshot[`write - import_map/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - import_and_export.ts 1`] = `
+snapshot[`associateByFile - import_and_export.ts 1`] = `
 [
   {
     dependencies: [
@@ -435,7 +435,7 @@ export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 ]
 `;
 
-snapshot[`collect - import_map_no_resolve/mod.ts 1`] = `
+snapshot[`associateByFile - import_map_no_resolve/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -480,7 +480,7 @@ snapshot[`write - import_map_no_resolve/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - relative_import/mod.ts 1`] = `
+snapshot[`associateByFile - relative_import/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -525,7 +525,7 @@ snapshot[`write - relative_import/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - updated_and_outdated.ts 1`] = `
+snapshot[`associateByFile - updated_and_outdated.ts 1`] = `
 [
   {
     dependencies: [
@@ -571,7 +571,7 @@ import { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_eq
 ]
 `;
 
-snapshot[`collect - multiple_modules/mod.ts 1`] = `
+snapshot[`associateByFile - multiple_modules/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -711,7 +711,7 @@ import { noop } from "./lib.ts";
 ]
 `;
 
-snapshot[`collect - import.ts 1`] = `
+snapshot[`associateByFile - import.ts 1`] = `
 [
   {
     dependencies: [
@@ -756,7 +756,7 @@ snapshot[`write - import.ts 1`] = `
 ]
 `;
 
-snapshot[`collect - unversioned.ts 1`] = `
+snapshot[`associateByFile - unversioned.ts 1`] = `
 [
   {
     dependencies: [

@@ -1,6 +1,7 @@
 import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
+import { toPath } from "./path.ts";
 import { toUrl } from "./dependency.ts";
 import { type DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
@@ -25,7 +26,7 @@ export function writeAll(
     onWrite?: (file: FileUpdate) => void | Promise<void>;
   },
 ) {
-  return writeFileUpdate(mergeToFileUpdate(updates), options);
+  return write(associateByFile(updates), options);
 }
 
 /**
@@ -33,7 +34,7 @@ export function writeAll(
  */
 export interface FileUpdate {
   /** The URL of the file to update. */
-  url: URL;
+  path: string;
   /** The type of the file to update. */
   kind: "module" | "import_map";
   /** The updates to dependencies associated with the file. */
@@ -44,13 +45,13 @@ export interface FileUpdate {
  * Collect updates to files from the given updates to dependencies.
  * The collected updates are lexically sorted by the url of the file.
  */
-export function mergeToFileUpdate(
+export function associateByFile(
   dependencies: DependencyUpdate[],
 ): FileUpdate[] {
-  /** A map of module specifiers to the module content updates. */
+  /** A map from module URLs to dependency updates. */
   const fileToDepsMap = new Map<string, DependencyUpdate[]>();
   for (const dep of dependencies) {
-    const referrer = dep.map?.source.href ?? dep.referrer.href;
+    const referrer = dep.map?.source ?? dep.referrer;
     const deps = fileToDepsMap.get(referrer) ??
       fileToDepsMap.set(referrer, []).get(referrer)!;
     deps.push(dep);
@@ -58,28 +59,28 @@ export function mergeToFileUpdate(
   return Array.from(fileToDepsMap.entries()).map((
     [referrer, dependencies],
   ) => ({
-    url: new URL(referrer),
+    path: referrer,
     kind: dependencies[0].map ? "import_map" : "module",
     dependencies,
-  })).sort((a, b) => a.url.href.localeCompare(b.url.href)) as FileUpdate[];
+  })).sort((a, b) => a.path.localeCompare(b.path)) as FileUpdate[];
 }
 
 /**
  * Write the given (array of) FileUpdate to file system.
  */
-export async function writeFileUpdate(
+export async function write(
   updates: FileUpdate | FileUpdate[],
   options?: {
     onWrite?: (result: FileUpdate) => void | Promise<void>;
   },
 ) {
   for (const update of [updates].flat()) {
-    await write(update);
+    await _write(update);
     await options?.onWrite?.(update);
   }
 }
 
-function write(
+function _write(
   update: FileUpdate,
 ) {
   switch (update.kind) {
@@ -98,10 +99,11 @@ async function writeToModule(
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
   );
-  const content = await Deno.readTextFile(update.url);
+  const path = toPath(update.path);
+  const content = await Deno.readTextFile(path);
   const eol = detectEOL(content) ?? "\n";
   await Deno.writeTextFile(
-    update.url,
+    path,
     content
       .split(eol)
       .map((line, index) => {
@@ -112,7 +114,7 @@ async function writeToModule(
               dependency.code.span.start.character + 1,
               dependency.code.span.end.character - 1,
             ),
-            toUrl(dependency.to).href,
+            toUrl(dependency.to),
           )
           : line;
       })
@@ -124,17 +126,15 @@ async function writeToImportMap(
   /** The dependency update to apply. */
   update: FileUpdate,
 ) {
-  const content = await Deno.readTextFile(update.url);
+  const path = toPath(update.path);
+  const content = await Deno.readTextFile(path);
   const json = parseJsonc(content) as unknown as ImportMapJson;
   for (const dependency of update.dependencies) {
     assertExists(dependency.map);
-    json.imports[dependency.map.key] = dependency.map.value.replace(
-      toUrl(dependency.from).href,
-      toUrl(dependency.to).href,
+    json.imports[dependency.map.key!] = dependency.map.resolved.replace(
+      toUrl(dependency.from),
+      toUrl(dependency.to),
     );
   }
-  await Deno.writeTextFile(
-    update.url,
-    JSON.stringify(json, null, 2),
-  );
+  await Deno.writeTextFile(path, JSON.stringify(json, null, 2));
 }

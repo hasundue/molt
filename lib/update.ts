@@ -39,7 +39,7 @@ export interface DependencyUpdate {
   referrer: string;
   /** Information about the import map used to resolve the dependency. */
   map?: {
-    /** The path to the import map used to resolve the dependency. */
+    /** The URL of the import map used to resolve the dependency. */
     source: string;
     /** The string in the dependency specifier being replaced */
     key?: string;

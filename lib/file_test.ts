@@ -7,7 +7,7 @@ import {
 } from "./testing.ts";
 import { assertSnapshot } from "./testing.ts";
 import * as DependencyUpdate from "./update.ts";
-import { type FileUpdate, mergeToFileUpdate, writeFileUpdate } from "./file.ts";
+import { associateByFile, type FileUpdate, write } from "./file.ts";
 import { LatestSemVerStub } from "./testing.ts";
 import { SemVerString } from "./semver.ts";
 
@@ -19,7 +19,7 @@ function toName(path: string) {
   return base === "mod.ts" ? `${basename(dirname(path))}/mod.ts` : base;
 }
 
-async function assertCollectSnapshot(
+async function assertFileUpdateSnapshot(
   t: Deno.TestContext,
   results: FileUpdate[],
 ) {
@@ -32,7 +32,7 @@ async function assertCollectSnapshot(
         map: it.map
           ? {
             key: it.map.key,
-            value: it.map.value,
+            resolved: it.map.resolved,
           }
           : undefined,
         to: it.to,
@@ -52,24 +52,25 @@ async function assertFileSystemSnapshot(
   );
 }
 
+const fs = new FileSystemFake();
+ReadTextFileStub.create(fs, { readThrough: true });
+WriteTextFileStub.create(fs);
+
 async function test(path: string, name = toName(path)) {
   const updates = await DependencyUpdate.collect(
     new URL(path, import.meta.url),
+    { findImportMap: true },
   );
-  const results = mergeToFileUpdate(updates);
+  const results = associateByFile(updates);
 
-  Deno.test("collect - " + name, async (t) => {
-    await assertCollectSnapshot(t, results);
+  Deno.test("associateByFile - " + name, async (t) => {
+    await assertFileUpdateSnapshot(t, results);
   });
 
   Deno.test("write - " + name, async (t) => {
-    const fs = new FileSystemFake();
-    const readTextFileStub = ReadTextFileStub.create(fs, { readThrough: true });
-    const writeTextFileStub = WriteTextFileStub.create(fs);
-    await writeFileUpdate(results);
+    fs.clear();
+    await write(results);
     await assertFileSystemSnapshot(t, fs);
-    readTextFileStub.restore();
-    writeTextFileStub.restore();
   });
 }
 
