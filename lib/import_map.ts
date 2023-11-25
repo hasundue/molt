@@ -47,7 +47,7 @@ const isImportMapReferrer = is.ObjectOf({
  * Read an import map from the given file path or URL.
  * @param url - The URL of the import map.
  * @return The import map object if found.
- * @throws {SyntaxError} If the import map is not a valid JSON.
+ * @throws {SyntaxError} If the file does not have a valid import map.
  */
 export async function readFromJson(
   url: string | URL,

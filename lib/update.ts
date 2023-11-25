@@ -1,5 +1,5 @@
 import { distinct } from "./std/collections.ts";
-import { fromFileUrl } from "./std/path.ts";
+import { dirname, fromFileUrl } from "./std/path.ts";
 import {
   createGraph,
   type CreateGraphOptions,
@@ -7,8 +7,8 @@ import {
   load as defaultLoad,
   type ModuleJson,
 } from "./x/deno_graph.ts";
-import { findFileUp, toUrl } from "./path.ts";
-import { ImportMap, readFromJson } from "./import_map.ts";
+import { findFileUp, toUrl, toPath } from "./path.ts";
+import { ImportMap, tryReadFromJson } from "./import_map.ts";
 import {
   type Dependency,
   parse,
@@ -36,14 +36,14 @@ export interface DependencyUpdate {
     span: NonNullable<DependencyJson["code"]>["span"];
   };
   /** The URL of the module that imports the dependency. */
-  referrer: URL;
+  referrer: string;
   /** Information about the import map used to resolve the dependency. */
   map?: {
-    /** The URL of the import map used to resolve the dependency. */
-    source: URL;
+    /** The path to the import map used to resolve the dependency. */
+    source: string;
     /** The string in the dependency specifier being replaced */
-    key: string;
-    /** The fully resolved specifier of the dependency. */
+    key?: string;
+    /** The fully resolved specifier (URI) of the dependency. */
     resolved: string;
   };
 }
@@ -74,6 +74,10 @@ export interface CollectOptions {
    * ```
    */
   importMap?: string | URL;
+  /**
+   * If true, the import map is searched for in the parent directories of the first module specified.
+   */
+  findImportMap?: boolean;
   /**
    * A function to filter out dependencies.
    *
@@ -110,22 +114,21 @@ export async function collect(
   from: string | URL | (string | URL)[],
   options: CollectOptions = {},
 ): Promise<DependencyUpdate[]> {
-  const urls = [from].flat().map((path) => toUrl(path));
+  const froms = [from].flat();
+  const paths = froms.map((path) => toPath(path));
+  const urls = froms.map((path) => toUrl(path));
 
-  if (urls.length === 0) {
-    throw new Error("No module specified");
-  }
-
-  const importMapUrl = options.importMap
-    ? toUrl(options.importMap)
-    : (urls.length === 1
-      ? await findFileUp(urls[0], "deno.json", "deno.jsonc")
+  const importMapPath = options.importMap
+    ?? (options.findImportMap
+      ? await findFileUp(dirname(paths[0]), "deno.json", "deno.jsonc")
       : undefined);
 
-  const importMap = importMapUrl ? await readFromJson(importMapUrl) : undefined;
+  const importMap = importMapPath
+    ? await tryReadFromJson(toUrl(importMapPath))
+    : undefined;
 
   await DenoGraph.ensureInit();
-  const graph = await createGraph(urls.map((url) => url.href), {
+  const graph = await createGraph(urls, {
     load,
     resolve: importMap?.resolveInner,
   });
@@ -136,7 +139,7 @@ export async function collect(
       m.dependencies?.map(async (dependency) => {
         const update = await create(
           dependency,
-          new URL(m.specifier),
+          m.specifier,
           { ...options, importMap },
         );
         return update ? updates.push(update) : undefined;
@@ -172,7 +175,7 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
 
 async function create(
   dependencyJson: DependencyJson,
-  referrer: URL,
+  referrer: string,
   options?: Pick<CollectOptions, "ignore" | "only"> & {
     importMap?: ImportMap;
   },
@@ -184,13 +187,14 @@ async function create(
       `The dependency ${dependencyJson.specifier} in ${
         fromFileUrl(referrer)
       } has no resolved specifier.`,
+      { cause: dependencyJson },
     );
   }
   const mapped = options?.importMap?.resolve(
     dependencyJson.specifier,
     referrer,
   );
-  const dependency = parse(new URL(mapped?.resolved ?? specifier));
+  const dependency = parse(new URL(mapped?.value ?? specifier));
   if (options?.ignore?.(dependency)) {
     return;
   }
@@ -221,8 +225,8 @@ async function create(
     map: mapped
       ? {
         source: options!.importMap!.url,
-        key: mapped.key!,
-        resolved: mapped.resolved!,
+        key: mapped.key,
+        resolved: mapped.resolved,
       }
       : undefined,
   };

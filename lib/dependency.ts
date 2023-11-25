@@ -70,7 +70,8 @@ export interface UpdatedDependency extends Dependency {
  * // -> { name: "deno.land/std", version: "0.200.0", path: "/fs/mod.ts" }
  * ```
  */
-export function parse(url: URL): Dependency {
+export function parse(url: string | URL): Dependency {
+  url = new URL(url);
   const protocol = url.protocol;
   const body = url.hostname + url.pathname;
   const semver = SemVerString.extract(url.href);

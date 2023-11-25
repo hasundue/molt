@@ -8,7 +8,9 @@ import { collect, DependencyUpdate, getVersionChange } from "./update.ts";
 
 const test = (path: string, name = basename(path)) =>
   Deno.test("collect - " + name, async (t) => {
-    const updates = await collect(new URL(path, import.meta.url));
+    const updates = await collect(new URL(path, import.meta.url), {
+      findImportMap: true,
+    });
     for (const update of updates) {
       await assertUpdateSnapshot(t, update);
     }
