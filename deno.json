@@ -8,7 +8,7 @@
     "dev": "deno fmt && deno lint && deno task lock && deno task -q check && deno task -q test ./lib/*_test.ts ./test/specs/*_test.ts",
     "run": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
     "update": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno ./cli.ts ./lib/*/*.ts --ignore import_map",
-    "update:commit": "deno task -q update --commit --pre-commit=dev --prefix 'build(deps):'"
+    "update:commit": "deno task -q update --commit --pre-commit=fmt,lock --prefix 'build(deps):'"
   },
   "fmt": {
     "exclude": [
