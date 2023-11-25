@@ -1,15 +1,4 @@
-import {
-  assertSpyCall,
-  assertSpyCallArg,
-  ConstructorSpy,
-  createAssertSnapshot,
-  ExpectedSpyCall,
-  Spy,
-  spy,
-  Stub,
-  stub,
-} from "./std/testing.ts";
-import { AssertionError } from "./std/assert.ts";
+import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
 import { SemVerString } from "./semver.ts";
@@ -151,59 +140,6 @@ export function enableTestMode() {
   WriteTextFileStub.create(fs);
   LatestSemVerStub.create("123.456.789");
   Deno.Command = CommandStub.create();
-}
-
-/** Asserts that a spy is called as expected at any index. */
-export function assertFindSpyCall<
-  Self,
-  Args extends unknown[],
-  Return,
->(
-  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
-  expected: ExpectedSpyCall<Self, Args, Return>,
-) {
-  const call = spy.calls.find((_, index) => {
-    try {
-      assertSpyCall(spy, index, expected);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  if (!call) {
-    throw new AssertionError(
-      `Expected spy call ${Deno.inspect(expected)} does not exist in ${
-        Deno.inspect(spy.calls)
-      }`,
-    );
-  }
-  return call;
-}
-
-export function assertFindSpyCallArg<
-  Self,
-  Args extends unknown[],
-  Return,
-  ExpectedArg,
->(
-  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
-  argIndex: number,
-  expected: ExpectedArg,
-) {
-  const call = spy.calls.find((_, index) => {
-    try {
-      assertSpyCallArg(spy, index, argIndex, expected);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  if (!call) {
-    throw new AssertionError(
-      "Expected spy call does not exist in " + Deno.inspect(spy.calls),
-    );
-  }
-  return call;
 }
 
 /** Utility function to throw an error. */
