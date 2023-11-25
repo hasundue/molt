@@ -1,7 +1,7 @@
 import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
-import { SemVerString } from "./semver.ts";
+import * as SemVer from "./semver.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
@@ -93,7 +93,7 @@ export const FetchStub = {
 export type FetchStub = ReturnType<typeof FetchStub.create>;
 
 export const LatestSemVerStub = {
-  create(latest: string | SemVerString): FetchStub {
+  create(latest: string): FetchStub {
     return FetchStub.create(async (request, init) => {
       request = (request instanceof Request)
         ? request
@@ -111,7 +111,7 @@ export const LatestSemVerStub = {
           }
           const response = await init.original(request);
           await response.arrayBuffer();
-          const semver = SemVerString.extract(response.url);
+          const semver = SemVer.extract(response.url);
           if (!semver) {
             return response;
           }

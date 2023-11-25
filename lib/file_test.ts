@@ -9,9 +9,8 @@ import { assertSnapshot } from "./testing.ts";
 import * as DependencyUpdate from "./update.ts";
 import { associateByFile, type FileUpdate, write } from "./file.ts";
 import { LatestSemVerStub } from "./testing.ts";
-import { SemVerString } from "./semver.ts";
 
-const LATEST = "123.456.789" as SemVerString;
+const LATEST = "123.456.789";
 LatestSemVerStub.create(LATEST);
 
 function toName(path: string) {
