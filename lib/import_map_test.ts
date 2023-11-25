@@ -19,7 +19,7 @@ describe("readFromJson", () => {
     const url = new URL("../test/data/import_map/deno.json", import.meta.url);
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.path, url.href);
+    assertEquals(importMap.url, url.href);
   });
 
   it("test/data/import_map_referred/import_map.json", async () => {
@@ -29,7 +29,7 @@ describe("readFromJson", () => {
     );
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.path, url.href);
+    assertEquals(importMap.url, url.href);
   });
 });
 

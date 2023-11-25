@@ -1,6 +1,6 @@
 import { assertEquals } from "./std/assert.ts";
 import { maxBy } from "./std/collections.ts";
-import { parse } from "./std/jsonc.ts";
+import { parse as parseJsonc } from "./std/jsonc.ts";
 import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
 import { is } from "./x/unknownutil.ts";
 
@@ -17,7 +17,7 @@ export interface ImportMapResolveResult {
 
 export interface ImportMap {
   /** The string URL of the import map. */
-  path: string;
+  url: string;
   /**
    * Resolve the given specifier using the import map.
    * @param specifier - The specifier to resolve.
@@ -45,37 +45,27 @@ const isImportMapReferrer = is.ObjectOf({
 
 /**
  * Read an import map from the given file path or URL.
- * @param path - The path to the import map.
+ * @param url - The URL of the import map.
  * @return The import map object if found.
  * @throws {SyntaxError} If the import map is not a valid JSON.
  */
 export async function readFromJson(
-  path: string | URL,
+  url: string | URL,
 ): Promise<ImportMap> {
-  const data = await Deno.readTextFile(path);
-
-  function parseJsonc(data: string) {
-    try {
-      return parse(data);
-    } catch (e) {
-      if (e instanceof SyntaxError) {
-        throw new SyntaxError(`Invalid JSON or JSONC: ${path}`, { cause: e });
-      }
-      throw e;
-    }
-  }
+  url = new URL(url);
+  const data = await Deno.readTextFile(url);
   const json = parseJsonc(data);
 
   if (isImportMapReferrer(json)) {
-    return readFromJson(new URL(json.importMap, path));
+    return readFromJson(new URL(json.importMap, url));
   }
   if (!isImportMapJson(json)) {
-    throw new SyntaxError(`${path} is not a valid import map`);
+    throw new SyntaxError(`${url} does not have a valid import map`);
   }
-  const inner = await parseFromJson(path, json);
+  const inner = await parseFromJson(url, json);
 
   return {
-    path: path.toString(),
+    url: url.toString(),
     resolve(specifier, referrer) {
       const resolved = inner.resolve(specifier, referrer);
       // Return if the specifier is not resolved by the import map.
@@ -104,4 +94,14 @@ export async function readFromJson(
     },
     resolveInner: inner.resolve.bind(inner),
   };
+}
+
+export async function tryReadFromJson(
+  url: string | URL,
+): Promise<ImportMap | undefined> {
+  try {
+    return await readFromJson(url);
+  } catch {
+    return;
+  }
 }
