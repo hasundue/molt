@@ -87,20 +87,19 @@ export function parse(url: string | URL): Dependency {
 /**
  * Convert the given protocol to a URL scheme.
  */
-function toScheme(protocol: string): string {
+function addSeparator(protocol: string): string {
   switch (protocol) {
+    case "file:":
     case "http:":
     case "https:":
       return protocol + "//";
-    case "file:":
-      return protocol + "///";
     default:
       return protocol;
   }
 }
 
 /**
- * Convert the given dependency to a URL.
+ * Convert the given dependency to a URL string.
  * @example
  * ```ts
  * const uri = toURL({
@@ -108,15 +107,15 @@ function toScheme(protocol: string): string {
  *   name: "deno.land/std",
  *   version: "1.0.0",
  *   path: "/fs/mod.ts",
- * }).href;
+ * });
  * // -> "https://deno.land/std@1.0.0/fs/mod.ts"
  * ```
  */
-export function toUrl(dependency: Dependency): URL {
-  const scheme = toScheme(dependency.protocol);
+export function toUrl(dependency: Dependency): string {
+  const header = addSeparator(dependency.protocol);
   const version = dependency.version ? "@" + dependency.version : "";
   const path = dependency.path ?? "";
-  return new URL(`${scheme}${dependency.name}${version}${path}`);
+  return `${header}${dependency.name}${version}${path}`;
 }
 
 /**
@@ -220,7 +219,7 @@ async function _resolveLatestVersion(
     case "http:":
     case "https:": {
       const response = await fetch(
-        toScheme(dependency.protocol) + dependency.name +
+        addSeparator(dependency.protocol) + dependency.name +
           (dependency.path ?? ""),
         { method: "HEAD" },
       );
