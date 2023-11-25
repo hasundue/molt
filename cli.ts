@@ -12,7 +12,7 @@ import {
   type CommitSequence,
   createCommitSequence,
   type DependencyUpdate,
-  execCommitSequence,
+  exec,
   writeAll,
 } from "./mod.ts";
 
@@ -250,7 +250,7 @@ async function commitUpdates(
     },
   });
 
-  await execCommitSequence(commits);
+  await exec(commits);
 
   if (options?.summary || options?.report) {
     console.log();
