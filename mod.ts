@@ -35,4 +35,3 @@ export * from "./lib/update.ts";
 export * from "./lib/file.ts";
 export * from "./lib/git.ts";
 export * from "./lib/dependency.ts";
-export * from "./lib/semver.ts";
