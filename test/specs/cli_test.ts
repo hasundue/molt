@@ -70,3 +70,6 @@ test(
 test(
   `molt ${dir}/multiple_modules/mod.ts --commit --summary title.txt --report body.md`,
 );
+test(
+  `molt ${dir}/multiple_modules/mod.ts --commit --summary title.txt --pre-commit=fmt`,
+);

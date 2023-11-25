@@ -1,53 +1,40 @@
-import {
-  assertSpyCall,
-  assertSpyCallArg,
-  ConstructorSpy,
-  createAssertSnapshot,
-  ExpectedSpyCall,
-  Spy,
-  spy,
-  Stub,
-  stub,
-} from "./std/testing.ts";
-import { AssertionError } from "./std/assert.ts";
+import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
-import { URI } from "./uri.ts";
 import { SemVerString } from "./semver.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
 });
 
-export function createCommandStub(): ConstructorSpy<
-  Deno.Command,
-  ConstructorParameters<typeof Deno.Command>
-> {
-  const CommandSpy = spy(Deno.Command);
-  return class extends CommandSpy {
-    #output: Deno.CommandOutput = {
-      code: 0,
-      stdout: new Uint8Array(),
-      stderr: new Uint8Array(),
-      success: true,
-      signal: null,
+export const CommandStub = {
+  create(CommandSpy = spy(Deno.Command)) {
+    return class CommandStub extends CommandSpy {
+      #output: Deno.CommandOutput = {
+        code: 0,
+        stdout: new Uint8Array(),
+        stderr: new Uint8Array(),
+        success: true,
+        signal: null,
+      };
+      outputSync() {
+        return this.#output;
+      }
+      output() {
+        return Promise.resolve(this.#output);
+      }
+      spawn() {
+        return new Deno.ChildProcess();
+      }
+      static clear() {
+        this.calls = [];
+      }
     };
-    outputSync() {
-      return this.#output;
-    }
-    output() {
-      return Promise.resolve(this.#output);
-    }
-    spawn() {
-      return new Deno.ChildProcess();
-    }
-    static clear() {
-      this.calls = [];
-    }
-  };
-}
+  },
+};
+export type CommandStub = ReturnType<typeof CommandStub.create>;
 
-export class FileSystemFake extends Map<URI<"file">, string> {}
+export class FileSystemFake extends Map<string | URL, string> {}
 
 export const ReadTextFileStub = {
   create(
@@ -61,7 +48,7 @@ export const ReadTextFileStub = {
       Deno,
       "readTextFile",
       async (path) => {
-        return fs.get(URI.from(path)) ??
+        return fs.get(path.toString()) ??
           (options?.readThrough
             ? await original(path)
             : _throw(new Deno.errors.NotFound(`File not found: ${path}`)));
@@ -79,7 +66,7 @@ export const WriteTextFileStub = {
       Deno,
       "writeTextFile",
       (path, data) => {
-        fs.set(URI.from(path), formatEOL(data.toString(), EOL.LF));
+        fs.set(path.toString(), formatEOL(data.toString(), EOL.LF));
         return Promise.resolve();
       },
     );
@@ -124,7 +111,7 @@ export const LatestSemVerStub = {
           }
           const response = await init.original(request);
           await response.arrayBuffer();
-          const semver = SemVerString.parse(response.url);
+          const semver = SemVerString.extract(response.url);
           if (!semver) {
             return response;
           }
@@ -152,56 +139,7 @@ export function enableTestMode() {
   ReadTextFileStub.create(fs, { readThrough: true });
   WriteTextFileStub.create(fs);
   LatestSemVerStub.create("123.456.789");
-  Deno.Command = createCommandStub();
-}
-
-/** Asserts that a spy is called as expected at any index. */
-export function assertFindSpyCall<
-  Self,
-  Args extends unknown[],
-  Return,
->(
-  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
-  expected: ExpectedSpyCall<Self, Args, Return>,
-) {
-  const call = spy.calls.find((_, index) => {
-    try {
-      assertSpyCall(spy, index, expected);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  if (!call) {
-    throw new AssertionError(
-      `Expected spy call does not exist: ${JSON.stringify(expected)}`,
-    );
-  }
-  return call;
-}
-
-export function assertFindSpyCallArg<
-  Self,
-  Args extends unknown[],
-  Return,
-  ExpectedArg,
->(
-  spy: Spy<Self, Args, Return> | ConstructorSpy<Self, Args>,
-  argIndex: number,
-  expected: ExpectedArg,
-) {
-  const call = spy.calls.find((_, index) => {
-    try {
-      assertSpyCallArg(spy, index, argIndex, expected);
-      return true;
-    } catch {
-      return false;
-    }
-  });
-  if (!call) {
-    throw new AssertionError("Expected spy call does not exist");
-  }
-  return call;
+  Deno.Command = CommandStub.create();
 }
 
 /** Utility function to throw an error. */

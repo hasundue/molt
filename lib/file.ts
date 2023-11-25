@@ -1,10 +1,9 @@
 import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
-import { Dependency } from "./dependency.ts";
-import { DependencyUpdate } from "./update.ts";
+import { toUrl } from "./dependency.ts";
+import { type DependencyUpdate } from "./update.ts";
 import { ImportMapJson } from "./import_map.ts";
-import { URI } from "./uri.ts";
 
 /**
  * Write the given array of DependencyUpdate to files.
@@ -26,59 +25,59 @@ export function writeAll(
     onWrite?: (file: FileUpdate) => void | Promise<void>;
   },
 ) {
-  return FileUpdate.write(FileUpdate.collect(updates), options);
+  return write(associateByFile(updates), options);
 }
 
 /**
  * A collection of updates to dependencies associated with a file.
  */
 export interface FileUpdate {
-  /** The specifier of the file to update. */
-  specifier: URI<"file">;
-  /** The type of the file to update. */
-  kind: "module" | "import-map";
+  /** The full path to the file being updated. */
+  path: string;
+  /** The type of the file being updated. */
+  kind: "module" | "import_map";
   /** The updates to dependencies associated with the file. */
   dependencies: DependencyUpdate[];
 }
-export const FileUpdate = {
-  /**
-   * Collect updates to files from the given updates to dependencies.
-   * The collected updates are lexically sorted by the specifier of the file.
-   */
-  collect(
-    from: DependencyUpdate[],
-  ): FileUpdate[] {
-    /** A map of module specifiers to the module content updates. */
-    const fileToDepsMap = new Map<URI<"file">, DependencyUpdate[]>();
-    for (const dependency of from) {
-      const referrer = dependency.map?.source ?? dependency.referrer;
-      const deps = fileToDepsMap.get(referrer) ??
-        fileToDepsMap.set(referrer, []).get(referrer)!;
-      deps.push(dependency);
-    }
-    return Array.from(fileToDepsMap.entries()).map((
-      [specifier, dependencies],
-    ) => ({
-      kind: dependencies[0].map ? "import-map" : "module",
-      specifier,
-      dependencies,
-    })).sort((a, b) => a.specifier.localeCompare(b.specifier)) as FileUpdate[];
+
+/**
+ * Collect updates to files from the given updates to dependencies.
+ * The collected updates are lexically sorted by the url of the file.
+ */
+export function associateByFile(
+  dependencies: DependencyUpdate[],
+): FileUpdate[] {
+  /** A map from module URLs to dependency updates. */
+  const fileToDepsMap = new Map<string, DependencyUpdate[]>();
+  for (const dep of dependencies) {
+    const referrer = dep.map?.source ?? dep.referrer;
+    const deps = fileToDepsMap.get(referrer) ??
+      fileToDepsMap.set(referrer, []).get(referrer)!;
+    deps.push(dep);
+  }
+  return Array.from(fileToDepsMap.entries()).map((
+    [referrer, dependencies],
+  ) => ({
+    path: referrer,
+    kind: dependencies[0].map ? "import_map" : "module",
+    dependencies,
+  })).sort((a, b) => a.path.localeCompare(b.path)) as FileUpdate[];
+}
+
+/**
+ * Write the given (array of) FileUpdate to file system.
+ */
+export async function write(
+  updates: FileUpdate | FileUpdate[],
+  options?: {
+    onWrite?: (result: FileUpdate) => void | Promise<void>;
   },
-  /**
-   * Write the given (array of) FileUpdate to file system.
-   */
-  async write(
-    updates: FileUpdate | FileUpdate[],
-    options?: {
-      onWrite?: (result: FileUpdate) => void | Promise<void>;
-    },
-  ) {
-    for (const update of [updates].flat()) {
-      await _write(update);
-      await options?.onWrite?.(update);
-    }
-  },
-};
+) {
+  for (const update of [updates].flat()) {
+    await _write(update);
+    await options?.onWrite?.(update);
+  }
+}
 
 function _write(
   update: FileUpdate,
@@ -86,7 +85,7 @@ function _write(
   switch (update.kind) {
     case "module":
       return writeToModule(update);
-    case "import-map":
+    case "import_map":
       return writeToImportMap(update);
   }
 }
@@ -99,10 +98,10 @@ async function writeToModule(
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
   );
-  const content = await Deno.readTextFile(new URL(update.specifier));
+  const content = await Deno.readTextFile(update.path);
   const eol = detectEOL(content) ?? "\n";
   await Deno.writeTextFile(
-    new URL(update.specifier),
+    update.path,
     content
       .split(eol)
       .map((line, index) => {
@@ -113,7 +112,7 @@ async function writeToModule(
               dependency.code.span.start.character + 1,
               dependency.code.span.end.character - 1,
             ),
-            Dependency.toURI(dependency.to),
+            toUrl(dependency.to),
           )
           : line;
       })
@@ -124,18 +123,15 @@ async function writeToModule(
 async function writeToImportMap(
   /** The dependency update to apply. */
   update: FileUpdate,
-): Promise<void> {
-  const content = await Deno.readTextFile(new URL(update.specifier));
+) {
+  const content = await Deno.readTextFile(update.path);
   const json = parseJsonc(content) as unknown as ImportMapJson;
   for (const dependency of update.dependencies) {
     assertExists(dependency.map);
-    json.imports[dependency.map.from] = dependency.map.to.replace(
-      Dependency.toURI(dependency.from),
-      Dependency.toURI(dependency.to),
+    json.imports[dependency.map.key!] = dependency.map.resolved.replace(
+      toUrl(dependency.from),
+      toUrl(dependency.to),
     );
   }
-  await Deno.writeTextFile(
-    new URL(update.specifier),
-    JSON.stringify(json, null, 2),
-  );
+  await Deno.writeTextFile(update.path, JSON.stringify(json, null, 2));
 }

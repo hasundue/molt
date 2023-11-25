@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`DependencyUpdate > collect() > multiple imports 1`] = `
+snapshot[`collect - export.ts 1`] = `
 {
   code: {
     span: {
@@ -18,19 +18,49 @@ snapshot[`DependencyUpdate > collect() > multiple imports 1`] = `
   from: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > multiple imports 2`] = `
+snapshot[`collect - multiple_imports.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 71,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - multiple_imports.ts 2`] = `
 {
   code: {
     span: {
@@ -48,19 +78,19 @@ snapshot[`DependencyUpdate > collect() > multiple imports 2`] = `
   from: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.50.0",
   },
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > multiple imports 3`] = `
+snapshot[`collect - multiple_imports.ts 3`] = `
 {
   code: {
     span: {
@@ -78,19 +108,79 @@ snapshot[`DependencyUpdate > collect() > multiple imports 3`] = `
   from: {
     name: "node-emoji",
     path: "",
-    scheme: "npm:",
+    protocol: "npm:",
     version: "2.0.0",
   },
   to: {
     name: "node-emoji",
     path: "",
-    scheme: "npm:",
+    protocol: "npm:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > import map 1`] = `
+snapshot[`collect - import_map_referred 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 19,
+        line: 0,
+      },
+      start: {
+        character: 14,
+        line: 0,
+      },
+    },
+    specifier: "dax",
+  },
+  from: {
+    name: "deno.land/x/dax",
+    path: "/mod.ts",
+    protocol: "https:",
+    version: "0.17.0",
+  },
+  to: {
+    name: "deno.land/x/dax",
+    path: "/mod.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - updated_import_and_outdated_export.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 84,
+        line: 1,
+      },
+      start: {
+        character: 29,
+        line: 1,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
+    protocol: "https:",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert_equals.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - import_map 1`] = `
 {
   code: {
     span: {
@@ -108,19 +198,19 @@ snapshot[`DependencyUpdate > collect() > import map 1`] = `
   from: {
     name: "deno.land/std",
     path: "/",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > import map 2`] = `
+snapshot[`collect - import_map 2`] = `
 {
   code: {
     span: {
@@ -138,19 +228,19 @@ snapshot[`DependencyUpdate > collect() > import map 2`] = `
   from: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.50.0",
   },
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > import map 3`] = `
+snapshot[`collect - import_map 3`] = `
 {
   code: {
     span: {
@@ -168,19 +258,19 @@ snapshot[`DependencyUpdate > collect() > import map 3`] = `
   from: {
     name: "node-emoji",
     path: "",
-    scheme: "npm:",
+    protocol: "npm:",
     version: "1.0.0",
   },
   to: {
     name: "node-emoji",
     path: "",
-    scheme: "npm:",
+    protocol: "npm:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > export 1`] = `
+snapshot[`collect - import_and_export.ts 1`] = `
 {
   code: {
     span: {
@@ -198,49 +288,19 @@ snapshot[`DependencyUpdate > collect() > export 1`] = `
   from: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > import and export 1`] = `
-{
-  code: {
-    span: {
-      end: {
-        character: 71,
-        line: 0,
-      },
-      start: {
-        character: 23,
-        line: 0,
-      },
-    },
-    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
-  },
-  from: {
-    name: "deno.land/std",
-    path: "/assert/assert.ts",
-    scheme: "https://",
-    version: "0.200.0",
-  },
-  to: {
-    name: "deno.land/std",
-    path: "/assert/assert.ts",
-    scheme: "https://",
-    version: "123.456.789",
-  },
-}
-`;
-
-snapshot[`DependencyUpdate > collect() > import and export 2`] = `
+snapshot[`collect - import_and_export.ts 2`] = `
 {
   code: {
     span: {
@@ -258,19 +318,79 @@ snapshot[`DependencyUpdate > collect() > import and export 2`] = `
   from: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.50.0",
   },
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > updated and outdated 1`] = `
+snapshot[`collect - import_map_no_resolve 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 71,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - relative_import 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 71,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - updated_and_outdated.ts 1`] = `
 {
   code: {
     span: {
@@ -288,29 +408,29 @@ snapshot[`DependencyUpdate > collect() > updated and outdated 1`] = `
   from: {
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > updated import and outdated export 1`] = `
+snapshot[`collect - multiple_modules 1`] = `
 {
   code: {
     span: {
       end: {
         character: 84,
-        line: 1,
+        line: 0,
       },
       start: {
         character: 29,
-        line: 1,
+        line: 0,
       },
     },
     specifier: "https://deno.land/std@0.200.0/assert/assert_equals.ts",
@@ -318,19 +438,19 @@ snapshot[`DependencyUpdate > collect() > updated import and outdated export 1`] 
   from: {
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/assert/assert_equals.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > ignore a dependency 1`] = `
+snapshot[`collect - multiple_modules 2`] = `
 {
   code: {
     span: {
@@ -348,19 +468,19 @@ snapshot[`DependencyUpdate > collect() > ignore a dependency 1`] = `
   from: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.200.0",
   },
   to: {
     name: "deno.land/std",
     path: "/assert/assert.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > ignore a dependency 2`] = `
+snapshot[`collect - multiple_modules 3`] = `
 {
   code: {
     span: {
@@ -378,43 +498,101 @@ snapshot[`DependencyUpdate > collect() > ignore a dependency 2`] = `
   from: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "0.50.0",
   },
   to: {
     name: "deno.land/x/deno_graph",
     path: "/mod.ts",
-    scheme: "https://",
+    protocol: "https:",
     version: "123.456.789",
   },
 }
 `;
 
-snapshot[`DependencyUpdate > collect() > only update a specified dependency 1`] = `
+snapshot[`collect - multiple_modules 4`] = `
 {
   code: {
     span: {
       end: {
-        character: 74,
-        line: 1,
+        character: 40,
+        line: 2,
       },
       start: {
-        character: 28,
-        line: 1,
+        character: 18,
+        line: 2,
       },
     },
-    specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+    specifier: "npm:node-emoji@2.0.0",
   },
   from: {
-    name: "deno.land/x/deno_graph",
-    path: "/mod.ts",
-    scheme: "https://",
-    version: "0.50.0",
+    name: "node-emoji",
+    path: "",
+    protocol: "npm:",
+    version: "2.0.0",
   },
   to: {
-    name: "deno.land/x/deno_graph",
-    path: "/mod.ts",
-    scheme: "https://",
+    name: "node-emoji",
+    path: "",
+    protocol: "npm:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - import.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 71,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "0.200.0",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - unversioned.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 63,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "https://deno.land/std/assert/assert.ts",
+  },
+  from: {
+    name: "deno.land/std/assert/assert.ts",
+    protocol: "https:",
+  },
+  to: {
+    name: "deno.land/std",
+    path: "/assert/assert.ts",
+    protocol: "https:",
     version: "123.456.789",
   },
 }

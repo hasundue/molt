@@ -1,168 +1,95 @@
-import {
-  afterEach,
-  assertSpyCalls,
-  beforeEach,
-  describe,
-  it,
-  SpyCall,
-} from "./std/testing.ts";
-import { assertEquals } from "./std/assert.ts";
+import { basename, dirname } from "./std/path.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import {
-  assertFindSpyCallArg,
   FileSystemFake,
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
 import { assertSnapshot } from "./testing.ts";
-import { DependencyUpdate } from "./update.ts";
-import { FileUpdate } from "./file.ts";
+import * as DependencyUpdate from "./update.ts";
+import { associateByFile, type FileUpdate, write } from "./file.ts";
 import { LatestSemVerStub } from "./testing.ts";
 import { SemVerString } from "./semver.ts";
 
 const LATEST = "123.456.789" as SemVerString;
 LatestSemVerStub.create(LATEST);
 
-function assertCollected(
-  actual: FileUpdate[],
-  expected: string[],
-) {
-  const names = actual.map(
-    (f) => f.dependencies.map((d) => d.from.name),
-  ).flat();
-  assertEquals(names, expected);
+function toName(path: string) {
+  const base = basename(path);
+  return base === "mod.ts" ? `${basename(dirname(path))}/mod.ts` : base;
 }
 
-describe("FileUpdate.collect()", () => {
-  it("direct import", async () => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/import.ts"),
-    );
-    assertCollected(results, ["deno.land/std"]);
-  });
-
-  it("relative import", async () => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/relative_import/mod.ts"),
-    );
-    assertCollected(results, ["deno.land/std"]);
-  });
-
-  it("import map", async () => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import_map/mod.ts",
-        { importMap: "./test/data/import_map/deno.json" },
-      ),
-    );
-    assertCollected(results, [
-      "deno.land/std",
-      "deno.land/x/deno_graph",
-      "node-emoji",
-    ]);
-  });
-
-  it("import map with no resolve", async () => {
-    const results = FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import_map_no_resolve/mod.ts",
-        { importMap: "./test/data/import_map_no_resolve/deno.json" },
-      ),
-    );
-    assertCollected(results, ["deno.land/std"]);
-  });
-});
-
-async function assertWriteTextFileSnapshot(
+async function assertFileUpdateSnapshot(
   t: Deno.TestContext,
-  call: SpyCall,
+  results: FileUpdate[],
 ) {
-  await assertSnapshot(t, formatEOL(call.args[1], EOL.LF));
+  await assertSnapshot(
+    t,
+    results.map((file) => ({
+      dependencies: file.dependencies.map((it) => ({
+        code: it.code,
+        from: it.from,
+        map: it.map
+          ? {
+            key: it.map.key,
+            resolved: it.map.resolved,
+          }
+          : undefined,
+        to: it.to,
+      })),
+      kind: file.kind,
+    })),
+  );
 }
 
-describe("FileUpdate.write()", () => {
-  let fs: FileSystemFake;
-  let readTextFileStub: ReadTextFileStub;
-  let writeTextFileStub: WriteTextFileStub;
+async function assertFileSystemSnapshot(
+  t: Deno.TestContext,
+  fs: FileSystemFake,
+) {
+  await assertSnapshot(
+    t,
+    Array.from(fs.entries()).map(([, content]) => formatEOL(content, EOL.LF)),
+  );
+}
 
-  beforeEach(() => {
-    fs = new FileSystemFake();
-    readTextFileStub = ReadTextFileStub.create(fs, { readThrough: true });
-    writeTextFileStub = WriteTextFileStub.create(fs);
-  });
-  afterEach(() => {
-    readTextFileStub.restore();
-    writeTextFileStub.restore();
-  });
+const fs = new FileSystemFake();
+ReadTextFileStub.create(fs, { readThrough: true });
+WriteTextFileStub.create(fs);
 
-  it("direct import", async (t) => {
-    await FileUpdate.write(FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/import.ts"),
-    ));
-    const call = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/import.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call);
-    assertSpyCalls(writeTextFileStub, 1);
+async function test(path: string, name = toName(path)) {
+  const updates = await DependencyUpdate.collect(
+    new URL(path, import.meta.url),
+    { findImportMap: true },
+  );
+  const results = associateByFile(updates);
+
+  Deno.test("associateByFile - " + name, async (t) => {
+    await assertFileUpdateSnapshot(t, results);
   });
 
-  it("relative import", async (t) => {
-    await FileUpdate.write(FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/relative_import/mod.ts"),
-    ));
-    const call = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/relative_import/assert.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call);
-    assertSpyCalls(writeTextFileStub, 1);
+  Deno.test("write - " + name, async (t) => {
+    fs.clear();
+    await write(results);
+    await assertFileSystemSnapshot(t, fs);
   });
+}
 
-  it("import map", async (t) => {
-    await FileUpdate.write(FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import_map/mod.ts",
-        { importMap: "./test/data/import_map/deno.json" },
-      ),
-    ));
-    const call = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/import_map/deno.json", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call);
-    assertSpyCalls(writeTextFileStub, 1);
-  });
-
-  it("import map with no resolve", async (t) => {
-    await FileUpdate.write(FileUpdate.collect(
-      await DependencyUpdate.collect(
-        "./test/data/import_map_no_resolve/mod.ts",
-        { importMap: "./test/data/import_map_no_resolve/deno.json" },
-      ),
-    ));
-    const call = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/import_map_no_resolve/mod.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call);
-    assertSpyCalls(writeTextFileStub, 1);
-  });
-
-  it("unversioned specifiers", async (t) => {
-    await FileUpdate.write(FileUpdate.collect(
-      await DependencyUpdate.collect("./test/data/unversioned.ts"),
-    ));
-    const call = assertFindSpyCallArg(
-      writeTextFileStub,
-      0,
-      new URL("../test/data/unversioned.ts", import.meta.url),
-    );
-    await assertWriteTextFileSnapshot(t, call);
-    assertSpyCalls(writeTextFileStub, 1);
-  });
-});
+// Test the all cases in test/data
+for await (
+  const testCase of Deno.readDir(new URL("../test/data", import.meta.url))
+) {
+  if (testCase.isFile && testCase.name.endsWith(".ts")) {
+    await test(`../test/data/${testCase.name}`);
+  }
+  if (testCase.isDirectory) {
+    for await (
+      const entry of Deno.readDir(
+        new URL("../test/data/" + testCase.name, import.meta.url),
+      )
+    ) {
+      if (entry.isFile && entry.name === "mod.ts") {
+        await test(`../test/data/${testCase.name}/mod.ts`);
+      }
+    }
+  }
+}

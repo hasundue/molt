@@ -1,6 +1,10 @@
-import { DependencyUpdate, VersionChange } from "./update.ts";
-import { FileUpdate } from "./file.ts";
-import { URI } from "./uri.ts";
+import { relative } from "./std/path.ts";
+import {
+  type DependencyUpdate,
+  getVersionChange,
+  VersionChange,
+} from "./update.ts";
+import { associateByFile, type FileUpdate, write } from "./file.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -38,36 +42,27 @@ export interface GitCommit extends CommitProps {
   updates: DependencyUpdate[];
 }
 
-export const GitCommit = {
-  exec: execGitCommit,
-};
-
-export interface GitCommitSequence {
+export interface CommitSequence {
   commits: GitCommit[];
   options: CommitOptions;
 }
-
-export const GitCommitSequence = {
-  from: createGitCommitSequence,
-  exec: execGitCommitSequence,
-};
 
 export function commitAll(
   updates: DependencyUpdate[],
   options?: CommitOptions,
 ) {
-  return execGitCommitSequence(
-    createGitCommitSequence(updates, {
+  return execCommitSequence(
+    createCommitSequence(updates, {
       ...defaultCommitOptions,
       ...options,
     }),
   );
 }
 
-function createGitCommitSequence(
+export function createCommitSequence(
   updates: DependencyUpdate[],
   options?: Partial<CommitOptions>,
-): GitCommitSequence {
+): CommitSequence {
   const _options = { ...defaultCommitOptions, ...options };
   const groups = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
@@ -80,7 +75,7 @@ function createGitCommitSequence(
   const commits: GitCommit[] = Array.from(groups.entries()).map((
     [group, updates],
   ) => {
-    const version = DependencyUpdate.getVersionChange(updates);
+    const version = getVersionChange(updates);
     return ({
       group,
       version,
@@ -91,20 +86,20 @@ function createGitCommitSequence(
   return { commits, options: _options };
 }
 
-async function execGitCommitSequence(
-  sequence: GitCommitSequence,
+export async function execCommitSequence(
+  sequence: CommitSequence,
 ) {
   for (const commit of sequence.commits) {
-    await execGitCommit(commit, sequence.options);
+    await execCommit(commit, sequence.options);
   }
 }
 
-async function execGitCommit(
+export async function execCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
-  const results = FileUpdate.collect(commit.updates);
-  await FileUpdate.write(results);
+  const results = associateByFile(commit.updates);
+  await write(results);
   await options?.preCommit?.(commit);
   await _add(results, options?.gitAddOptions ?? []);
   await _commit(commit.message, options?.gitCommitOptions ?? []);
@@ -115,7 +110,7 @@ async function _add(
   results: FileUpdate[],
   options: string[],
 ) {
-  const files = results.map((result) => URI.relative(result.specifier));
+  const files = results.map((result) => relative(Deno.cwd(), result.path));
   const { code, stderr } = await new Deno.Command("git", {
     args: ["add", ...options, ...files],
   }).output();

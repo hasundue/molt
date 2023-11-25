@@ -7,11 +7,11 @@
 > Molt is still being developed actively. The API is not stable yet and may
 > change frequently.
 
-Molt is a [Deno] module to bump semvers in import specifiers, like
+Molt is a [Deno] module to bump versions in import specifiers, like
 [udd][deno-udd], but with a few different goals:
 
 **Consistent** - Molt uses [deno_graph] for dependency resolution, and utilizes
-fetch redirects for unversioned dependencies to get latest semvers. This should
+fetch redirects for unversioned dependencies to get latest versions. This should
 make it support as many module registries as Deno runtime does, with a minimum
 maintenance cost.
 
@@ -26,25 +26,16 @@ provided.
 
 ### Deno Module
 
-#### API Reference (WIP)
-
-- [mod.ts](https://deno.land/x/molt/mod.ts) - Main module
-- [git.ts](https://deno.land/x/molt/git.ts) - Sub-module for Git operations
-- [lib/uri.ts](https://deno.land/x/molt/lib/uri.ts) - Library for handling URIs
+#### [API Reference](https://deno.land/x/molt/mod.ts)
 
 #### Examples
 
 ##### Update all dependencies in a module and write the changes to local files
 
 ```ts
-import {
-  DependencyUpdate,
-  writeAll,
-} from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { collect, writeAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await DependencyUpdate.collect("./mod.ts", {
-  importMap: "./deno.json",
-});
+const updates = await collect("./mod.ts", { importMap: "./deno.json" });
 
 await writeAll(updates, {
   onWrite: (file) => console.log(`💾 ${file.specifier}`),
@@ -54,10 +45,9 @@ await writeAll(updates, {
 ##### Update all dependencies in a module and commit the changes to local git repository
 
 ```ts
-import { DependencyUpdate } from "https://deno.land/x/molt@{VERSION}/mod.ts";
-import { commitAll } from "https://deno.land/x/molt@{VERSION}/git.ts";
+import { collect, commitAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await DependencyUpdate.collect("./mod.ts");
+const updates = await collect("./mod.ts", { findImportMap: true });
 
 await commitAll(updates, {
   groupBy: (dependency) => dependency.name,
