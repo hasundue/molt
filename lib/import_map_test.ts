@@ -1,5 +1,5 @@
 import { assertEquals, assertExists, assertRejects } from "./std/assert.ts";
-import { toFileUrl } from "./std/path.ts";
+import { fromFileUrl, toFileUrl } from "./std/path.ts";
 import { describe, it } from "./std/testing.ts";
 import { readFromJson } from "./import_map.ts";
 
@@ -19,7 +19,7 @@ describe("readFromJson", () => {
     const url = new URL("../test/data/import_map/deno.json", import.meta.url);
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.path, url.pathname);
+    assertEquals(importMap.path, fromFileUrl(url));
   });
 
   it("test/data/import_map_referred/import_map.json", async () => {
@@ -29,7 +29,7 @@ describe("readFromJson", () => {
     );
     const importMap = await readFromJson(url);
     assertExists(importMap);
-    assertEquals(importMap.path, url.pathname);
+    assertEquals(importMap.path, fromFileUrl(url));
   });
 });
 

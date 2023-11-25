@@ -1,6 +1,8 @@
 import { assertEquals, assertRejects } from "./std/assert.ts";
-import { dirname, resolve } from "./std/path.ts";
+import { dirname, fromFileUrl, resolve } from "./std/path.ts";
 import { findFileUp, toPath, toUrl } from "./path.ts";
+
+const isWindows = Deno.build.os === "windows";
 
 Deno.test("toUrl - URLs", () => {
   assertEquals(
@@ -25,15 +27,18 @@ Deno.test("toUrl - URLs", () => {
   );
 });
 
-Deno.test("toPath", () => {
+Deno.test("toPath (common)", () => {
   assertEquals(
     toPath("https://example.com"),
-    "https://example.com/",
+    "https://example.com",
   );
   assertEquals(
     toPath(new URL("https://example.com")),
     "https://example.com/",
   );
+});
+
+Deno.test("toPath (UNIX)", { ignore: isWindows }, () => {
   assertEquals(
     toPath("file:///foo/bar"),
     "/foo/bar",
@@ -48,14 +53,18 @@ Deno.test("toPath", () => {
   );
 });
 
-Deno.test("toPath (Windows)", { ignore: Deno.build.os !== "windows" }, () => {
+Deno.test("toPath (Windows)", { ignore: !isWindows }, () => {
   assertEquals(
-    toPath("file:///C:/foo/bar"),
-    "C:/foo/bar",
+    toPath("file:///C:\\foo\\bar"),
+    "C:\\foo\\bar",
   );
   assertEquals(
-    toPath("C:/foo/bar"),
-    "C:/foo/bar",
+    toPath("C:\\foo\\bar"),
+    "C:\\foo\\bar",
+  );
+  assertEquals(
+    toPath("foo\\bar"),
+    resolve("foo\\bar"),
   );
 });
 
@@ -63,7 +72,7 @@ Deno.test("findFileUp", async () => {
   const dir = dirname(toPath(import.meta.url));
   assertEquals(
     await findFileUp(dir, "deno.json"),
-    new URL("../deno.json", import.meta.url).pathname,
+    fromFileUrl(new URL("../deno.json", import.meta.url)),
   );
   // Throws for a non-directory path
   assertRejects(
