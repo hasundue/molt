@@ -86,7 +86,20 @@ export function createCommitSequence(
   return { commits, options: _options };
 }
 
-export async function execCommitSequence(
+export function exec(commit: GitCommit, options?: CommitOptions): Promise<void>;
+export function exec(sequence: CommitSequence): Promise<void>;
+
+export function exec(
+  commit: GitCommit | CommitSequence,
+  options?: CommitOptions,
+): Promise<void> {
+  if ("commits" in commit) {
+    return execCommitSequence(commit);
+  }
+  return execCommit(commit, options);
+}
+
+async function execCommitSequence(
   sequence: CommitSequence,
 ) {
   for (const commit of sequence.commits) {
@@ -94,19 +107,19 @@ export async function execCommitSequence(
   }
 }
 
-export async function execCommit(
+async function execCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
   const results = associateByFile(commit.updates);
   await write(results);
   await options?.preCommit?.(commit);
-  await _add(results, options?.gitAddOptions ?? []);
-  await _commit(commit.message, options?.gitCommitOptions ?? []);
+  await addCommand(results, options?.gitAddOptions ?? []);
+  await commitCommand(commit.message, options?.gitCommitOptions ?? []);
   await options?.postCommit?.(commit);
 }
 
-async function _add(
+async function addCommand(
   results: FileUpdate[],
   options: string[],
 ) {
@@ -119,7 +132,7 @@ async function _add(
   }
 }
 
-async function _commit(
+async function commitCommand(
   message: string,
   options: string[],
 ) {
