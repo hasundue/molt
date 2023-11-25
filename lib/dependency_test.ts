@@ -1,6 +1,5 @@
 import { afterAll, beforeAll, describe, it } from "./std/testing.ts";
 import { assertEquals, assertExists, assertObjectMatch } from "./std/assert.ts";
-import type { SemVerString } from "./semver.ts";
 import { parse, resolveLatestVersion } from "./dependency.ts";
 import { LatestSemVerStub } from "./testing.ts";
 
@@ -12,7 +11,7 @@ describe("parse()", () => {
       ),
       {
         name: "deno.land/std",
-        version: "0.1.0" as SemVerString,
+        version: "0.1.0",
         path: "/version.ts",
       },
     ));
@@ -34,7 +33,7 @@ describe("parse()", () => {
       ),
       {
         name: "deno.land/x/hono",
-        version: "v0.1.0" as SemVerString,
+        version: "v0.1.0",
         path: "",
       },
     ));
@@ -46,14 +45,14 @@ describe("parse()", () => {
       ),
       {
         name: "node-emoji",
-        version: "1.0.0" as SemVerString,
+        version: "1.0.0",
         path: "",
       },
     ));
 });
 
 describe("resolveLatestVersion()", () => {
-  const LATEST = "123.456.789" as SemVerString;
+  const LATEST = "123.456.789";
   let stub: LatestSemVerStub;
 
   beforeAll(() => {
@@ -105,7 +104,7 @@ describe("resolveLatest() - pre-release", () => {
   let stub: LatestSemVerStub;
 
   beforeAll(() => {
-    stub = LatestSemVerStub.create("123.456.789-alpha.1" as SemVerString);
+    stub = LatestSemVerStub.create("123.456.789-alpha.1");
   });
 
   afterAll(() => {

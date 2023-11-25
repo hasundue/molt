@@ -1,7 +1,7 @@
 import { assertExists } from "./std/assert.ts";
 import { Mutex } from "./x/async.ts";
 import { ensure, is } from "./x/unknownutil.ts";
-import { SemVerString } from "./semver.ts";
+import * as SemVer from "./semver.ts";
 
 /**
  * Properties of a dependency parsed from an import specifier.
@@ -29,7 +29,7 @@ export interface Dependency {
    */
   name: string;
   /**
-   * The semver string of the dependency.
+   * The version string of the dependency.
    * @example
    * ```ts
    * const { version } = Dependency.parse(
@@ -38,7 +38,7 @@ export interface Dependency {
    * // -> "0.205.0"
    * ```
    */
-  version?: SemVerString;
+  version?: string;
   /**
    * The subpath of the dependency.
    * @example
@@ -54,10 +54,10 @@ export interface Dependency {
 
 /**
  * Properties of a dependency parsed from an updated import specifier.
- * The `version` property is guaranteed to be a semver string.
+ * The `version` property is guaranteed to be present.
  */
 export interface UpdatedDependency extends Dependency {
-  version: SemVerString;
+  version: string;
 }
 
 /**
@@ -74,7 +74,7 @@ export function parse(url: string | URL): Dependency {
   url = new URL(url);
   const protocol = url.protocol;
   const body = url.hostname + url.pathname;
-  const semver = SemVerString.extract(url.href);
+  const semver = SemVer.extract(url.href);
   if (!semver) {
     return { protocol, name: body };
   }
@@ -202,11 +202,11 @@ async function _resolveLatestVersion(
         }),
         { message: `Invalid response from NPM registry: ${response.url}` },
       );
-      const latest = SemVerString.extract(pkg["dist-tags"].latest);
+      const latest = SemVer.extract(pkg["dist-tags"].latest);
       if (
         latest === undefined || // The latest version is not a semver
         latest === dependency.version || // The dependency is already up to date
-        SemVerString.isPreRelease(latest)
+        SemVer.isPreRelease(latest)
       ) {
         LatestVersionCache.set(dependency.name, null);
         return;
@@ -232,7 +232,7 @@ async function _resolveLatestVersion(
       const latest = parse(new URL(response.url));
       if (
         latest.version === undefined || // The redirected URL has no semver
-        SemVerString.isPreRelease(latest.version)
+        SemVer.isPreRelease(latest.version)
       ) {
         LatestVersionCache.set(dependency.name, null);
         return;

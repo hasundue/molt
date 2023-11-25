@@ -8,14 +8,13 @@ import {
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
-import { SemVerString } from "./semver.ts";
 import { collect } from "./update.ts";
 import { commitAll } from "./git.ts";
 
 const normalizePath = (path: string) =>
   Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
 
-const LATEST = "123.456.789" as SemVerString;
+const LATEST = "123.456.789";
 
 const EXPECTED = [
   `import { assert } from "https://deno.land/std@${LATEST}/assert/assert.ts";

@@ -6,7 +6,7 @@ import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
 import { findFileUp } from "./lib/path.ts";
 import { parse, resolveLatestVersion } from "./lib/dependency.ts";
-import { SemVerString } from "./lib/semver.ts";
+import * as SemVer from "./lib/semver.ts";
 import {
   collect,
   type CommitSequence,
@@ -86,7 +86,7 @@ const main = new Command()
   });
 
 async function versionCommand() {
-  const version = SemVerString.extract(import.meta.url) ??
+  const version = SemVer.extract(import.meta.url) ??
     await $.progress("Fetching version info").with(async () => {
       const latest = await resolveLatestVersion(
         parse(new URL("https://deno.land/x/molt/cli.ts")),

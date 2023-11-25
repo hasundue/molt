@@ -3,7 +3,6 @@ import { filterKeys } from "./std/collections.ts";
 import { basename } from "./std/path.ts";
 import { assertSnapshot } from "./testing.ts";
 import { LatestSemVerStub } from "./testing.ts";
-import { type SemVerString } from "./semver.ts";
 import { collect, DependencyUpdate, getVersionChange } from "./update.ts";
 
 const test = (path: string, name = basename(path)) =>
@@ -30,7 +29,7 @@ async function assertUpdateSnapshot(
   );
 }
 
-const LATEST = "123.456.789" as SemVerString;
+const LATEST = "123.456.789";
 LatestSemVerStub.create(LATEST);
 
 // Test collect() for all cases in test/data

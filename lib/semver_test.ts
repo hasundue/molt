@@ -1,32 +1,32 @@
 import { assertEquals } from "./std/assert.ts";
-import { SemVerString } from "./semver.ts";
+import { extract, isPreRelease } from "./semver.ts";
 
-Deno.test("SemVerString.parse()", () => {
+Deno.test("extract", () => {
   assertEquals(
-    SemVerString.extract("https://deno.land/std@0.1.0"),
+    extract("https://deno.land/std@0.1.0"),
     "0.1.0",
   );
   assertEquals(
-    SemVerString.extract("https://deno.land/std"),
+    extract("https://deno.land/std"),
     undefined,
   );
   assertEquals(
-    SemVerString.extract("https://deno.land/std@1.0.0-rc.1"),
+    extract("https://deno.land/std@1.0.0-rc.1"),
     "1.0.0-rc.1",
   );
 });
 
-Deno.test("SemVerString.isPreRelease()", () => {
+Deno.test("isPreRelease()", () => {
   assertEquals(
-    SemVerString.isPreRelease("0.1.0" as SemVerString),
+    isPreRelease("0.1.0"),
     false,
   );
   assertEquals(
-    SemVerString.isPreRelease("0.1.0-alpha.1" as SemVerString),
+    isPreRelease("0.1.0-alpha.1"),
     true,
   );
   assertEquals(
-    SemVerString.isPreRelease("0.1.0-rc.1" as SemVerString),
+    isPreRelease("0.1.0-rc.1"),
     true,
   );
 });
