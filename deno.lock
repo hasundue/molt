@@ -173,6 +173,7 @@
     "https://deno.land/std@0.208.0/semver/constants.ts": "bb0c7652c433c7ec1dad5bf18c7e7e1557efe9ddfd5e70aa6305153e76dc318c",
     "https://deno.land/std@0.208.0/semver/is_semver.ts": "666f4e1d8e41994150d4326d515046bc5fc72e59cbbd6e756a0b60548dcd00b5",
     "https://deno.land/std@0.208.0/semver/parse.ts": "5d24ec0c5f681db1742c31332f6007395c84696c88ff4b58287485ed3f6d8c84",
+    "https://deno.land/std@0.208.0/semver/try_parse.ts": "1ced8739d2b04b1dd06dac10c558ada8dbcf3d8aa838f6648049b24e7e376614",
     "https://deno.land/std@0.208.0/semver/types.ts": "d44f442c2f27dd89bd6695b369e310b80549746f03c38f241fe28a83b33dd429",
     "https://deno.land/std@0.208.0/testing/_test_suite.ts": "30f018feeb3835f12ab198d8a518f9089b1bcb2e8c838a8b615ab10d5005465c",
     "https://deno.land/std@0.208.0/testing/bdd.ts": "c41f019786c4a9112aadb7e5a7bbcc711f58429ac5904b3855fa248ba5fa0ba6",

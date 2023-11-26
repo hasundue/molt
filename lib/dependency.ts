@@ -1,7 +1,7 @@
 import { assertExists } from "./std/assert.ts";
+import * as SemVer from "./std/semver.ts";
 import { Mutex } from "./x/async.ts";
 import { ensure, is } from "./x/unknownutil.ts";
-import * as SemVer from "./semver.ts";
 
 /**
  * Properties of a dependency parsed from an import specifier.
@@ -47,9 +47,14 @@ export interface Dependency {
    *   new URL("https://deno.land/std@0.205.0/fs/mod.ts")
    * );
    * // -> "/fs/mod.ts"
+   *
+   * const { path } = Dependency.parse(
+   *   new URL("npm:node-emoji@2.0.0")
+   * );
+   * // -> ""
    * ```
    */
-  path?: string;
+  path: string;
 }
 
 /**
@@ -74,14 +79,20 @@ export function parse(url: string | URL): Dependency {
   url = new URL(url);
   const protocol = url.protocol;
   const body = url.hostname + url.pathname;
-  const semver = SemVer.extract(url.href);
-  if (!semver) {
-    return { protocol, name: body };
+
+  // Try to find a path segment like "<name>@<version>/"
+  const matched = body.match(
+    /^(?<name>.+)@(?<version>[^/]+)(?<path>\/.*)?$/,
+  );
+
+  if (matched) {
+    assertExists(matched.groups);
+    const { name, version } = matched.groups;
+    const path = matched.groups.path ?? "";
+    return { protocol, name, version, path };
   }
-  const atSemver = "@" + semver;
-  const name = body.split(atSemver)[0];
-  const path = body.slice(name.length + atSemver.length);
-  return { protocol, name, version: semver, path };
+
+  return { protocol, name: body, path: "" };
 }
 
 /**
@@ -114,7 +125,7 @@ function addSeparator(protocol: string): string {
 export function toUrl(dependency: Dependency): string {
   const header = addSeparator(dependency.protocol);
   const version = dependency.version ? "@" + dependency.version : "";
-  const path = dependency.path ?? "";
+  const path = dependency.path;
   return `${header}${dependency.name}${version}${path}`;
 }
 
@@ -202,12 +213,8 @@ async function _resolveLatestVersion(
         }),
         { message: `Invalid response from NPM registry: ${response.url}` },
       );
-      const latest = SemVer.extract(pkg["dist-tags"].latest);
-      if (
-        latest === undefined || // The latest version is not a semver
-        latest === dependency.version || // The dependency is already up to date
-        SemVer.isPreRelease(latest)
-      ) {
+      const latest = pkg["dist-tags"].latest;
+      if (latest === dependency.version || isPreRelease(latest)) {
         LatestVersionCache.set(dependency.name, null);
         return;
       }
@@ -219,8 +226,7 @@ async function _resolveLatestVersion(
     case "http:":
     case "https:": {
       const response = await fetch(
-        addSeparator(dependency.protocol) + dependency.name +
-          (dependency.path ?? ""),
+        addSeparator(dependency.protocol) + dependency.name + dependency.path,
         { method: "HEAD" },
       );
       await response.arrayBuffer();
@@ -230,10 +236,7 @@ async function _resolveLatestVersion(
         return;
       }
       const latest = parse(new URL(response.url));
-      if (
-        latest.version === undefined || // The redirected URL has no semver
-        SemVer.isPreRelease(latest.version)
-      ) {
+      if (latest.version === undefined || isPreRelease(latest.version)) {
         LatestVersionCache.set(dependency.name, null);
         return;
       }
@@ -246,4 +249,18 @@ async function _resolveLatestVersion(
       // TODO: throw an error?
       return;
   }
+}
+
+/**
+ * Check if the given version string represents a pre-release.
+ *
+ * @example
+ * ```ts
+ * isPreRelease("0.1.0"); // -> false
+ * isPreRelease("0.1.0-alpha.1"); // -> true
+ * ```
+ */
+export function isPreRelease(version: string): boolean {
+  const parsed = SemVer.tryParse(version);
+  return parsed !== undefined && parsed.prerelease.length > 0;
 }
