@@ -1,7 +1,7 @@
 import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
-import * as SemVer from "./semver.ts";
+import { parse } from "./dependency.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
@@ -111,17 +111,15 @@ export const LatestSemVerStub = {
           }
           const response = await init.original(request);
           await response.arrayBuffer();
-          const semver = SemVer.extract(response.url);
-          if (!semver) {
-            return response;
-          }
-          const url = new URL(response.url.replace(semver, latest));
-          return {
-            arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-            redirected: true,
-            status: 302,
-            url: url.href,
-          } as Response;
+          const { version } = parse(response.url);
+          return version
+            ? {
+              arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+              redirected: true,
+              status: 302,
+              url: response.url.replace(version, latest),
+            } as Response
+            : response;
         }
         default:
           return init.original(request, init);

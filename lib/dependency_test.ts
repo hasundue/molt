@@ -1,9 +1,9 @@
 import { afterAll, beforeAll, describe, it } from "./std/testing.ts";
 import { assertEquals, assertExists, assertObjectMatch } from "./std/assert.ts";
-import { parse, resolveLatestVersion } from "./dependency.ts";
+import { isPreRelease, parse, resolveLatestVersion } from "./dependency.ts";
 import { LatestSemVerStub } from "./testing.ts";
 
-describe("parse()", () => {
+describe("parse", () => {
   it("https://deno.land/std", () =>
     assertObjectMatch(
       parse(
@@ -51,7 +51,22 @@ describe("parse()", () => {
     ));
 });
 
-describe("resolveLatestVersion()", () => {
+Deno.test("isPreRelease", () => {
+  assertEquals(
+    isPreRelease("0.1.0"),
+    false,
+  );
+  assertEquals(
+    isPreRelease("0.1.0-alpha.1"),
+    true,
+  );
+  assertEquals(
+    isPreRelease("0.1.0-rc.1"),
+    true,
+  );
+});
+
+describe("resolveLatestVersion", () => {
   const LATEST = "123.456.789";
   let stub: LatestSemVerStub;
 
@@ -100,7 +115,7 @@ describe("resolveLatestVersion()", () => {
   });
 });
 
-describe("resolveLatest() - pre-release", () => {
+describe("resolveLatestVersion - pre-release", () => {
   let stub: LatestSemVerStub;
 
   beforeAll(() => {
