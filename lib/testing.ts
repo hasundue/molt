@@ -1,7 +1,6 @@
 import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { EOL, formatEOL } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
-import { parse } from "./dependency.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
@@ -94,7 +93,7 @@ export type FetchStub = ReturnType<typeof FetchStub.create>;
 
 export const LatestSemVerStub = {
   create(latest: string): FetchStub {
-    return FetchStub.create(async (request, init) => {
+    return FetchStub.create((request, init) => {
       request = (request instanceof Request)
         ? request
         : new Request(request, init);
@@ -109,17 +108,13 @@ export const LatestSemVerStub = {
           if (request.method !== "HEAD") {
             return init.original(request);
           }
-          const response = await init.original(request);
-          await response.arrayBuffer();
-          const { version } = parse(response.url);
-          return version
-            ? {
-              arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
-              redirected: true,
-              status: 302,
-              url: response.url.replace(version, latest),
-            } as Response
-            : response;
+          const { name, path } = parseDenoLandUrl(url);
+          return {
+            arrayBuffer: () => Promise.resolve(new ArrayBuffer(0)),
+            redirected: true,
+            status: 302,
+            url: `https://${name}@${latest}${path}`,
+          } as Response;
         }
         default:
           return init.original(request, init);
@@ -128,6 +123,26 @@ export const LatestSemVerStub = {
   },
 };
 export type LatestSemVerStub = ReturnType<typeof LatestSemVerStub.create>;
+
+function parseDenoLandUrl(url: URL) {
+  const std = url.pathname.startsWith("/std");
+  const matched = std
+    ? url.pathname.match(
+      /^\/std(?:@(?<version>[^/]+))?(?<path>\/(.*)$)/,
+    )
+    : url.pathname.match(
+      /^\/x\/(?<name>[^/]+)(?:@(?<version>[^/]+))?(?<path>\/(.*)$)/,
+    );
+  if (!matched) {
+    throw new Error(`Unexpected URL: ${url}`);
+  }
+  const { name, version, path } = matched.groups!;
+  return {
+    name: std ? "deno.land/std" : `deno.land/x/${name}`,
+    version,
+    path,
+  };
+}
 
 /**
  * Enables all test stubs.
