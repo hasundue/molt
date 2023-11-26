@@ -4,7 +4,7 @@ import { isPreRelease, parse, resolveLatestVersion } from "./dependency.ts";
 import { LatestSemVerStub } from "./testing.ts";
 
 describe("parse", () => {
-  it("https://deno.land/std", () =>
+  it("deno.land/std", () =>
     assertObjectMatch(
       parse(
         new URL("https://deno.land/std@0.1.0/version.ts"),
@@ -16,7 +16,7 @@ describe("parse", () => {
       },
     ));
 
-  it("https://deno.land/std (no semver)", () =>
+  it("deno.land/std (no semver)", () =>
     assertObjectMatch(
       parse(
         new URL("https://deno.land/std/version.ts"),
@@ -26,7 +26,7 @@ describe("parse", () => {
       },
     ));
 
-  it("https://deno.land/x/hono (with a leading 'v')", () =>
+  it("deno.land/x/ (with a leading 'v')", () =>
     assertObjectMatch(
       parse(
         new URL("https://deno.land/x/hono@v0.1.0"),
@@ -38,7 +38,7 @@ describe("parse", () => {
       },
     ));
 
-  it("npm:node-emoji", () =>
+  it("npm:", () =>
     assertObjectMatch(
       parse(
         new URL("npm:node-emoji@1.0.0"),
@@ -47,6 +47,18 @@ describe("parse", () => {
         name: "node-emoji",
         version: "1.0.0",
         path: "",
+      },
+    ));
+
+  it("cdn.jsdelivr.net/gh", () =>
+    assertObjectMatch(
+      parse(
+        new URL("https://cdn.jsdelivr.net/gh/hasundue/molt@e4509a9/mod.ts"),
+      ),
+      {
+        name: "cdn.jsdelivr.net/gh/hasundue/molt",
+        version: "e4509a9",
+        path: "/mod.ts",
       },
     ));
 });
