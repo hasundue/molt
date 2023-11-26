@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.14.0](https://github.com/hasundue/molt/compare/0.13.0...0.14.0) (2023-11-26)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mod:** merge `execCommitSequence` and `execCommit` into `exec`
+
+### Features
+
+* **lib:** add `lib/entropy.ts` ([236f2df](https://github.com/hasundue/molt/commit/236f2df2bc60d8b8e257fe1b9216828118e9214b))
+* support non-semver version specifiers ([c0d3829](https://github.com/hasundue/molt/commit/c0d3829ca08be63c42a96dda52f4366f699cc2a7))
+
+
+### Performance Improvements
+
+* **lib/testing:** suppress network access to deno.land ([beeb4d4](https://github.com/hasundue/molt/commit/beeb4d4f4e2b5b4171f8fee3203cadbae08092fd))
+
+
+### Code Refactoring
+
+* **mod:** merge `execCommitSequence` and `execCommit` into `exec` ([4eb27de](https://github.com/hasundue/molt/commit/4eb27dea63a1719d59e6f9dd964d0ccc1f873530))
+
 ## [0.13.0](https://github.com/hasundue/molt/compare/0.12.0...0.13.0) (2023-11-25)
 
 
