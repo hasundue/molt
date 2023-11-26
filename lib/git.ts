@@ -51,12 +51,10 @@ export function commitAll(
   updates: DependencyUpdate[],
   options?: CommitOptions,
 ) {
-  return execCommitSequence(
-    createCommitSequence(updates, {
-      ...defaultCommitOptions,
-      ...options,
-    }),
-  );
+  return exec(createCommitSequence(updates, {
+    ...defaultCommitOptions,
+    ...options,
+  }));
 }
 
 export function createCommitSequence(
