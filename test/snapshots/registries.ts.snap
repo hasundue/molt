@@ -18,21 +18,21 @@ snapshot[`npm: 2`] = `true`;
 
 snapshot[`npm: 3`] = `true`;
 
-snapshot[`cdn.jsdelivr.net/gh 1`] = `true`;
-
-snapshot[`cdn.jsdelivr.net/gh 2`] = `false`;
-
-snapshot[`cdn.jsdelivr.net/gh 3`] = `false`;
-
 snapshot[`cdn.jsdelivr.net/npm 1`] = `true`;
 
-snapshot[`cdn.jsdelivr.net/npm 2`] = `false`;
+snapshot[`cdn.jsdelivr.net/npm 2`] = `true`;
 
 snapshot[`cdn.jsdelivr.net/npm 3`] = `false`;
 
+snapshot[`cdn.jsdelivr.net/gh 1`] = `true`;
+
+snapshot[`cdn.jsdelivr.net/gh 2`] = `true`;
+
+snapshot[`cdn.jsdelivr.net/gh 3`] = `false`;
+
 snapshot[`cdn.skypack.dev 1`] = `true`;
 
-snapshot[`cdn.skypack.dev 2`] = `false`;
+snapshot[`cdn.skypack.dev 2`] = `true`;
 
 snapshot[`cdn.skypack.dev 3`] = `false`;
 
@@ -42,15 +42,15 @@ snapshot[`denopkg.com 2`] = `true`;
 
 snapshot[`denopkg.com 3`] = `true`;
 
-snapshot[`dev.jspm.io 1`] = `true`;
+snapshot[`ga.jspm.io 1`] = `true`;
 
-snapshot[`dev.jspm.io 2`] = `false`;
+snapshot[`ga.jspm.io 2`] = `true`;
 
-snapshot[`dev.jspm.io 3`] = `false`;
+snapshot[`ga.jspm.io 3`] = `false`;
 
 snapshot[`esm.run 1`] = `true`;
 
-snapshot[`esm.run 2`] = `false`;
+snapshot[`esm.run 2`] = `true`;
 
 snapshot[`esm.run 3`] = `false`;
 
@@ -62,17 +62,17 @@ snapshot[`esm.sh 3`] = `true`;
 
 snapshot[`x.nest.land 1`] = `true`;
 
-snapshot[`x.nest.land 2`] = `false`;
+snapshot[`x.nest.land 2`] = `true`;
 
 snapshot[`x.nest.land 3`] = `false`;
 
 snapshot[`pax.deno.dev 1`] = `true`;
 
-snapshot[`pax.deno.dev 2`] = `false`;
+snapshot[`pax.deno.dev 2`] = `true`;
 
 snapshot[`pax.deno.dev 3`] = `false`;
 
-snapshot[`raw.githubusercontent.com 1`] = `false`;
+snapshot[`raw.githubusercontent.com 1`] = `true`;
 
 snapshot[`raw.githubusercontent.com 2`] = `false`;
 

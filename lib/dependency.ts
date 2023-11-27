@@ -200,9 +200,7 @@ async function _resolveLatestVersion(
         `https://registry.npmjs.org/${dependency.name}`,
       );
       if (!response.ok) {
-        throw new Error(
-          `Failed to fetch npm registry: ${response.statusText}`,
-        );
+        break;
       }
       const pkg = ensure(
         await response.json(),
@@ -215,8 +213,7 @@ async function _resolveLatestVersion(
       );
       const latest = pkg["dist-tags"].latest;
       if (latest === dependency.version || isPreRelease(latest)) {
-        LatestVersionCache.set(dependency.name, null);
-        return;
+        break;
       }
       return LatestVersionCache.set(
         dependency.name,
@@ -231,24 +228,19 @@ async function _resolveLatestVersion(
       );
       await response.arrayBuffer();
       if (!response.redirected) {
-        // The host did not redirect
-        LatestVersionCache.set(dependency.name, null);
-        return;
+        break;
       }
-      const latest = parse(new URL(response.url));
-      if (latest.version === undefined || isPreRelease(latest.version)) {
-        LatestVersionCache.set(dependency.name, null);
-        return;
+      const latest = parse(response.url);
+      if (!latest.version || isPreRelease(latest.version)) {
+        break;
       }
       return LatestVersionCache.set(
         dependency.name,
         latest as UpdatedDependency,
       );
     }
-    default:
-      // TODO: throw an error?
-      return;
   }
+  LatestVersionCache.set(dependency.name, null);
 }
 
 /**
