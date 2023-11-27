@@ -6,9 +6,7 @@ import { LatestSemVerStub } from "./testing.ts";
 describe("parse", () => {
   it("deno.land/std", () =>
     assertObjectMatch(
-      parse(
-        new URL("https://deno.land/std@0.1.0/version.ts"),
-      ),
+      parse("https://deno.land/std@0.1.0/version.ts")[0],
       {
         name: "deno.land/std",
         version: "0.1.0",
@@ -18,9 +16,7 @@ describe("parse", () => {
 
   it("deno.land/std (no semver)", () =>
     assertObjectMatch(
-      parse(
-        new URL("https://deno.land/std/version.ts"),
-      ),
+      parse("https://deno.land/std/version.ts")[0],
       {
         name: "deno.land/std/version.ts",
       },
@@ -28,9 +24,7 @@ describe("parse", () => {
 
   it("deno.land/x/ (with a leading 'v')", () =>
     assertObjectMatch(
-      parse(
-        new URL("https://deno.land/x/hono@v0.1.0"),
-      ),
+      parse("https://deno.land/x/hono@v0.1.0")[0],
       {
         name: "deno.land/x/hono",
         version: "v0.1.0",
@@ -40,9 +34,7 @@ describe("parse", () => {
 
   it("npm:", () =>
     assertObjectMatch(
-      parse(
-        new URL("npm:node-emoji@1.0.0"),
-      ),
+      parse("npm:node-emoji@1.0.0")[0],
       {
         name: "node-emoji",
         version: "1.0.0",
@@ -52,15 +44,37 @@ describe("parse", () => {
 
   it("cdn.jsdelivr.net/gh", () =>
     assertObjectMatch(
-      parse(
-        new URL("https://cdn.jsdelivr.net/gh/hasundue/molt@e4509a9/mod.ts"),
-      ),
+      parse("https://cdn.jsdelivr.net/gh/hasundue/molt@e4509a9/mod.ts")[0],
       {
         name: "cdn.jsdelivr.net/gh/hasundue/molt",
         version: "e4509a9",
         path: "/mod.ts",
       },
     ));
+
+  it("raw.githubusercontent.com", () => {
+    const candidates = parse(
+      "https://raw.githubusercontent.com/hasundue/molt/e4509a9/mod.ts",
+    );
+    assertEquals(candidates.length, 5);
+    assertEquals(
+      candidates[0],
+      {
+        protocol: "https:",
+        name: "raw.githubusercontent.com/hasundue/molt/e4509a9/mod.ts",
+        path: "",
+      },
+    );
+    assertEquals(
+      candidates[1],
+      {
+        protocol: "https:",
+        name: "raw.githubusercontent.com/hasundue/molt",
+        version: "e4509a9",
+        path: "/mod.ts",
+      },
+    );
+  });
 });
 
 Deno.test("isPreRelease", () => {
@@ -92,7 +106,7 @@ describe("resolveLatestVersion", () => {
 
   it("https://deno.land/std/version.ts", async () => {
     const updated = await resolveLatestVersion(
-      parse(new URL("https://deno.land/std/version.ts")),
+      parse("https://deno.land/std/version.ts")[0],
     );
     assertExists(updated);
     assertObjectMatch(updated, {
@@ -104,7 +118,7 @@ describe("resolveLatestVersion", () => {
 
   it("https://deno.land/std@0.200.0/version.ts", async () => {
     const updated = await resolveLatestVersion(
-      parse(new URL("https://deno.land/std@0.200.0/version.ts")),
+      parse("https://deno.land/std@0.200.0/version.ts")[0],
     )!;
     assertExists(updated);
     assertObjectMatch(updated, {
@@ -116,7 +130,7 @@ describe("resolveLatestVersion", () => {
 
   it("https://deno.land/std@0.200.0/assert/mod.ts", async () => {
     const updated = await resolveLatestVersion(
-      parse(new URL("https://deno.land/std@0.200.0/assert/mod.ts")),
+      parse("https://deno.land/std@0.200.0/assert/mod.ts")[0],
     );
     assertExists(updated);
     assertObjectMatch(updated, {
@@ -141,9 +155,7 @@ describe("resolveLatestVersion - pre-release", () => {
   it("deno.land", async () =>
     assertEquals(
       await resolveLatestVersion(
-        parse(
-          new URL("https://deno.land/x/deno_graph@0.50.0/mod.ts"),
-        ),
+        parse("https://deno.land/x/deno_graph@0.50.0/mod.ts")[0],
       ),
       undefined,
     ));
@@ -151,9 +163,7 @@ describe("resolveLatestVersion - pre-release", () => {
   it("npm", async () =>
     assertEquals(
       await resolveLatestVersion(
-        parse(
-          new URL("npm:node-emoji@1.0.0"),
-        ),
+        parse("npm:node-emoji@1.0.0")[0],
       ),
       undefined,
     ));

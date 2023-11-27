@@ -12,7 +12,7 @@ import { ImportMap, tryReadFromJson } from "./import_map.ts";
 import {
   type Dependency,
   parse,
-  resolveLatestVersion,
+  resolveLatestVersionFrom,
   type UpdatedDependency,
 } from "./dependency.ts";
 
@@ -107,17 +107,16 @@ export interface CollectOptions {
 }
 
 /**
- * Collect dependencies from the given module(s).
+ * Collect updates to dependencies from the given module(s).
  * @param from - The path(s) to the module(s) to collect dependencies from.
  * @param options - Options to customize the behavior.
- * @returns The list of dependencies.
+ * @returns The list of updates to dependencies.
  */
 export async function collect(
   from: string | URL | (string | URL)[],
   options: CollectOptions = {},
 ): Promise<DependencyUpdate[]> {
-  const froms = [from].flat();
-  const urls = froms.map((path) => toUrl(path));
+  const urls = [from].flat().map((path) => toUrl(path));
 
   const importMapPath = options.importMap ??
     (options.findImportMap
@@ -188,6 +187,7 @@ async function create(
     importMap?: ImportMap;
   },
 ): Promise<DependencyUpdate | undefined> {
+  /** The fully-resolve URL of the dependency */
   const specifier = dependencyJson.code?.specifier ??
     dependencyJson.type?.specifier;
   if (!specifier) {
@@ -203,14 +203,14 @@ async function create(
     referrer,
   );
   const dependency = parse(new URL(mapped?.value ?? specifier));
-  if (options?.ignore?.(dependency)) {
+  if (options?.ignore?.(dependency[0])) {
     return;
   }
-  if (options?.only && !options.only(dependency)) {
+  if (options?.only && !options.only(dependency[0])) {
     return;
   }
-  const latest = await resolveLatestVersion(dependency);
-  if (!latest || latest.version === dependency.version) {
+  const latest = await resolveLatestVersionFrom(dependency);
+  if (!latest || latest.version === dependency[0].version) {
     return;
   }
   const span = dependencyJson.code?.span ?? dependencyJson.type?.span;
@@ -222,7 +222,7 @@ async function create(
     );
   }
   return {
-    from: dependency,
+    from: dependency[0],
     to: latest,
     code: {
       // We prefer to put the original specifier here.

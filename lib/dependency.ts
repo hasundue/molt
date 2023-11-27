@@ -2,6 +2,7 @@ import { assertExists } from "./std/assert.ts";
 import * as SemVer from "./std/semver.ts";
 import { Mutex } from "./x/async.ts";
 import { ensure, is } from "./x/unknownutil.ts";
+import { entropy } from "./entropy.ts";
 
 /**
  * Properties of a dependency parsed from an import specifier.
@@ -66,16 +67,24 @@ export interface UpdatedDependency extends Dependency {
 }
 
 /**
- * Parse properties of a dependency from the given URL.
+ * Parse properties of a dependency from the given URL and returns candidates
+ * for the correct dependency.
+ *
  * @example
  * ```ts
- * const { name, version, path } = Dependency.parse(
+ * const { name, version, path } = parse(
  *   new URL("https://deno.land/std@0.200.0/fs/mod.ts")
  * );
  * // -> { name: "deno.land/std", version: "0.200.0", path: "/fs/mod.ts" }
  * ```
+ * ```ts
+ * const { name, version, path } = parse(
+ *   new URL("https://deno.land/std/fs/mod.ts")
+ * );
+ * // -> { name: "deno.land/std/fs/mod.ts", version: undefined, path: "" }
+ * ```
  */
-export function parse(url: string | URL): Dependency {
+export function parse(url: string | URL): Dependency[] {
   url = new URL(url);
   const protocol = url.protocol;
   const body = url.hostname + url.pathname;
@@ -85,14 +94,26 @@ export function parse(url: string | URL): Dependency {
     /^(?<name>.+)@(?<version>[^/]+)(?<path>\/.*)?$/,
   );
 
+  // If the URL has an explicit version specifier, only return one candidate.
   if (matched) {
     assertExists(matched.groups);
     const { name, version } = matched.groups;
     const path = matched.groups.path ?? "";
-    return { protocol, name, version, path };
+    return [{ protocol, name, version, path }];
   }
 
-  return { protocol, name: body, path: "" };
+  // If not, return three candidates.
+  const segments = url.pathname.split("/").slice(1)
+    .sort((a, b) => entropy(b) - entropy(a));
+  function candidate(version: string) {
+    const [name, path] = body.split(`/${version}`);
+    return { protocol, name, version, path };
+  }
+  return [
+    // A dependency that is unversioned,
+    { protocol, name: body, path: "" },
+    ...segments.map(candidate),
+  ];
 }
 
 /**
@@ -127,6 +148,18 @@ export function toUrl(dependency: Dependency): string {
   const version = dependency.version ? "@" + dependency.version : "";
   const path = dependency.path;
   return `${header}${dependency.name}${version}${path}`;
+}
+
+export async function resolveLatestVersionFrom(
+  candidates: Dependency[],
+): Promise<UpdatedDependency | undefined> {
+  for (const candidate of candidates) {
+    const latest = await resolveLatestVersion(candidate);
+    if (latest) {
+      candidates.with(0, candidate).splice(1);
+      return latest;
+    }
+  }
 }
 
 /**
@@ -194,61 +227,58 @@ async function _resolveLatestVersion(
     // The dependency is already found to be up to date or unable to resolve.
     return;
   }
-  switch (dependency.protocol) {
-    case "npm:": {
-      const response = await fetch(
-        `https://registry.npmjs.org/${dependency.name}`,
-      );
-      if (!response.ok) {
-        throw new Error(
-          `Failed to fetch npm registry: ${response.statusText}`,
-        );
-      }
-      const pkg = ensure(
-        await response.json(),
-        is.ObjectOf({
-          "dist-tags": is.ObjectOf({
-            latest: is.String,
-          }),
-        }),
-        { message: `Invalid response from NPM registry: ${response.url}` },
-      );
-      const latest = pkg["dist-tags"].latest;
-      if (latest === dependency.version || isPreRelease(latest)) {
-        LatestVersionCache.set(dependency.name, null);
-        return;
-      }
-      return LatestVersionCache.set(
-        dependency.name,
-        { ...dependency, version: latest },
-      );
-    }
-    case "http:":
-    case "https:": {
-      const response = await fetch(
-        addSeparator(dependency.protocol) + dependency.name + dependency.path,
-        { method: "HEAD" },
-      );
-      await response.arrayBuffer();
-      if (!response.redirected) {
-        // The host did not redirect
-        LatestVersionCache.set(dependency.name, null);
-        return;
-      }
-      const latest = parse(new URL(response.url));
-      if (latest.version === undefined || isPreRelease(latest.version)) {
-        LatestVersionCache.set(dependency.name, null);
-        return;
-      }
-      return LatestVersionCache.set(
-        dependency.name,
-        latest as UpdatedDependency,
-      );
-    }
-    default:
-      // TODO: throw an error?
-      return;
+  const latest = dependency.protocol === "npm:"
+    ? await resolveNpmModule(dependency)
+    : await resolveHttpModule(dependency);
+  if (!latest) {
+    LatestVersionCache.set(dependency.name, null);
+    return;
   }
+  return LatestVersionCache.set(dependency.name, latest);
+}
+
+async function resolveNpmModule(
+  dependency: Dependency,
+): Promise<UpdatedDependency | undefined> {
+  const response = await fetch(
+    `https://registry.npmjs.org/${dependency.name}`,
+  );
+  if (!response.ok) {
+    return;
+  }
+  const pkg = ensure(
+    await response.json(),
+    is.ObjectOf({
+      "dist-tags": is.ObjectOf({
+        latest: is.String,
+      }),
+    }),
+    { message: `Invalid response from NPM registry: ${response.url}` },
+  );
+  const latest = pkg["dist-tags"].latest;
+  if (latest === dependency.version || isPreRelease(latest)) {
+    return;
+  }
+  return { ...dependency, version: latest };
+}
+
+async function resolveHttpModule(
+  dependency: Dependency,
+): Promise<UpdatedDependency | undefined> {
+  const { protocol, name, path } = dependency;
+  const response = await fetch(addSeparator(protocol) + name + path, {
+    method: "HEAD",
+  });
+  await response.arrayBuffer();
+  if (!response.redirected) {
+    // The host did not redirect
+    return;
+  }
+  const latest = parse(response.url)[0];
+  if (!latest.version || isPreRelease(latest.version)) {
+    return;
+  }
+  return latest as UpdatedDependency;
 }
 
 /**
