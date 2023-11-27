@@ -2,9 +2,10 @@
   "tasks": {
     "cache": "deno cache ./lib/*/*.ts --lock",
     "lock": "deno task -q cache --lock-write && git add deno.lock",
-    "check": "deno check ./*.ts ./lib/**/*.ts ./test/specs/*.ts",
+    "check": "deno test -A --no-run",
     "test": "deno test -A --no-check",
     "test:update": "deno task -q test -- --update",
+    "test:integration": "deno test -A ./test/integration/*.ts",
     "dev": "deno fmt && deno lint && deno task lock && deno task -q check && deno task -q test ./lib/*_test.ts ./test/specs/*_test.ts",
     "run": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
     "update": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno ./cli.ts ./lib/*/*.ts --ignore import_map",
