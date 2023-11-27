@@ -1,0 +1,7 @@
+export const snapshot = {};
+
+snapshot[`deno.land/std 1`] = `true`;
+
+snapshot[`deno.land/std 2`] = `true`;
+
+snapshot[`deno.land/std 3`] = `true`;
