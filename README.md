@@ -7,13 +7,12 @@
 > Molt is still being developed actively. The API is not stable yet and may
 > change frequently.
 
-Molt is a [Deno] module to bump versions in import specifiers, like
-[udd][deno-udd], but with a few different goals:
+Molt is a [Deno] module to bump versions in import specifiers, like [udd], but
+with some unique concepts:
 
-**Consistent** - Molt uses [deno_graph] for dependency resolution, and utilizes
-fetch redirects for unversioned dependencies to get latest versions. This should
-make it support as many module registries as Deno runtime does, with a minimum
-maintenance cost.
+**The Deno way** - Molt finds dependencies with [deno_graph], and checks their
+latest versions by letting registries redirect unversioned import specifiers.
+This enables us to support variety of registries with a minimum effort.
 
 **Module-first** - The core logic is provided as versatile functions in a Deno
 module, which enables you to write the best scripts for your use cases.
@@ -179,5 +178,5 @@ and of full respect to the authors.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
-[deno-udd]: https://github.com/hayd/deno-udd
+[deno]: https://github.com/hayd/deno-udd
 [issues]: https://github.com/hasundue/molt/issues
