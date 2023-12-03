@@ -36,12 +36,6 @@ snapshot[`cdn.skypack.dev 2`] = `true`;
 
 snapshot[`cdn.skypack.dev 3`] = `false`;
 
-snapshot[`denopkg.com 1`] = `true`;
-
-snapshot[`denopkg.com 2`] = `true`;
-
-snapshot[`denopkg.com 3`] = `true`;
-
 snapshot[`ga.jspm.io 1`] = `true`;
 
 snapshot[`ga.jspm.io 2`] = `true`;

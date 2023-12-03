@@ -32,10 +32,6 @@ const SPECS = [
     "https://cdn.skypack.dev/preact@10.5.5",
   ],
   [
-    "denopkg.com",
-    "https://denopkg.com/hasundue/molt@e4509a9/lib/path.ts",
-  ],
-  [
     "ga.jspm.io",
     "https://ga.jspm.io/npm:lit-html@2.7.0/development/is-server.js",
   ],
