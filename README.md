@@ -210,5 +210,5 @@ and of full respect to the authors.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
-[deno]: https://github.com/hayd/deno-udd
+[udd]: https://github.com/hayd/deno-udd
 [issues]: https://github.com/hasundue/molt/issues
