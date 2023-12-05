@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/hasundue/molt/compare/v0.14.1...0.14.2) (2023-12-05)
+
+
+### Bug Fixes
+
+* **build:** fix tag format
+
 ## [0.14.1](https://github.com/hasundue/molt/compare/0.14.0...v0.14.1) (2023-12-05)
 
 
