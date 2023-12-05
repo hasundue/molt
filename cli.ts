@@ -26,16 +26,12 @@ const main = new Command()
   .example("Target all .ts files", "molt ./**/*.ts")
   .option("--import-map <file:string>", "Specify import map file")
   .example("Specify an import map", "molt mod.ts --import-map deno.json")
-  .option("--ignore=<deps:string[]>", "Ignore dependencies", {
-    conflicts: ["only"],
-  })
+  .option("--ignore=<deps:string[]>", "Ignore dependencies")
   .example(
     "Ignore specified dependencies",
     "molt deps.ts --ignore=deno_graph,node_emoji",
   )
-  .option("--only=<deps:string[]>", "Check specified dependencies", {
-    conflicts: ["ignore"],
-  })
+  .option("--only=<deps:string[]>", "Check specified dependencies")
   .example("Check deno_std only", "molt deps.ts --only deno.land/std")
   .option("-w, --write", "Write changes to local files", {
     conflicts: ["commit"],

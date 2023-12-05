@@ -13,8 +13,8 @@ Options:
   -h, --help               - Show this help.                                              
   -v, --version            - Print version info.                                          
   --import-map   <file>    - Specify import map file                                      
-  --ignore       <deps>    - Ignore dependencies                     (Conflicts: --only)  
-  --only         <deps>    - Check specified dependencies            (Conflicts: --ignore)
+  --ignore       <deps>    - Ignore dependencies                                          
+  --only         <deps>    - Check specified dependencies                                 
   -w, --write              - Write changes to local files            (Conflicts: --commit)
   -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
   --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
@@ -54,8 +54,8 @@ Options:
   -h, --help               - Show this help.                                              
   -v, --version            - Print version info.                                          
   --import-map   <file>    - Specify import map file                                      
-  --ignore       <deps>    - Ignore dependencies                     (Conflicts: --only)  
-  --only         <deps>    - Check specified dependencies            (Conflicts: --ignore)
+  --ignore       <deps>    - Ignore dependencies                                          
+  --only         <deps>    - Check specified dependencies                                 
   -w, --write              - Write changes to local files            (Conflicts: --commit)
   -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
   --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
@@ -200,6 +200,17 @@ snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 1`]
 `;
 
 snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only deno.land --ignore deno_graph 1`] = `
+"📦 deno.land/std 0.200.0 => 123.456.789
+  test/data/multiple_imports.ts 0.200.0
+"
+`;
+
+snapshot[`molt test/data/multiple_imports.ts --only deno.land --ignore deno_graph 2`] = `
 "Checking for updates
 "
 `;
