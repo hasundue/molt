@@ -11,7 +11,7 @@ Molt is a [Deno] module to bump versions in import specifiers, like [udd], but
 with some unique concepts:
 
 **The Deno way** - Molt finds dependencies and checks their latest versions in
-the same way as Deno runtime and Deno's official registries do.
+the same way as the Deno runtime does.
 
 **Module-first** - The core logic is provided as a Deno module, which enables
 you to write the best scripts for your use cases.
