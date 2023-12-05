@@ -34,25 +34,21 @@ provided.
 ```ts
 import { collect, writeAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await collect("./mod.ts", { importMap: "./deno.json" });
-
-await writeAll(updates, {
-  onWrite: (file) => console.log(`💾 ${file.specifier}`),
-});
+const updates = await collect("./mod.ts");
+await writeAll(updates);
 ```
 
-##### Update all dependencies in a module and commit the changes to local git repository
+##### Update all dependencies in a module and commit the changes to git
 
 ```ts
 import { collect, commitAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await collect("./mod.ts", { findImportMap: true });
+const updates = await collect("./mod.ts");
 
 await commitAll(updates, {
   groupBy: (dependency) => dependency.name,
   composeCommitMessage: ({ group, version }) =>
     `build(deps): bump ${group} to ${version!.to}`,
-  postCommit: (commit) => console.log(commit.message),
 });
 ```
 
@@ -78,7 +74,7 @@ Alternatively, you may prefer to run the remote script directly through
 {
   "tasks": {
     "update": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land https://deno.land/x/molt@{VERSION}/cli.ts ./**/*.ts",
-    "update:commit": "deno task -q update --commit --pre-commit=fmt,lint,test"
+    "update:commit": "deno task -q update --commit --pre-commit=fmt"
   }
 }
 ```
@@ -95,16 +91,27 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                            
-  -v, --version            - Print version info.                                        
-  --import-map   <file>    - Specify import map file                                    
-  -w, --write              - Write changes to local files                               
-  -c, --commit             - Commit changes to local git repository                     
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)
-  --summary      <file>    - Write a summary of changes to file                         
-  --report       <file>    - Write a report of changes to file
+  -h, --help               - Show this help.                                              
+  -v, --version            - Print version info.                                          
+  --import-map   <file>    - Specify import map file                                      
+  --ignore       <deps>    - Ignore dependencies                                          
+  --only         <deps>    - Check specified dependencies                                 
+  -w, --write              - Write changes to local files            (Conflicts: --commit)
+  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
+  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
+  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
+  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
+  --summary      <file>    - Write a summary of changes to file                           
+  --report       <file>    - Write a report of changes to file                            
+
+Examples:
+
+  Check updates in a module:     molt deps.ts                               
+  Include multiple modules:      molt mod.ts lib.ts                         
+  Target all .ts files:          molt ./**/*.ts                             
+  Specify an import map:         molt mod.ts --import-map deno.json         
+  Ignore specific dependencies:  molt deps.ts --ignore=deno_graph,node_emoji
+  Only check deno_std:           molt deps.ts --only deno.land/std
 ```
 
 > [!Note]\
@@ -118,8 +125,6 @@ Options:
 
 ```sh
 > molt mod.ts 
-💡 Found updates:
-
 📦 deno.land/std 0.200.0 => 123.456.789
   lib.ts 0.200.0
   mod.ts 0.200.0
@@ -135,9 +140,7 @@ Options:
 
 ```sh
 > molt mod.ts --write
-💡 Found updates:
     ...
-
 💾 lib.ts
 💾 mod.ts
 ```
@@ -146,19 +149,50 @@ Options:
 
 ```sh
 > molt mod.ts --commit --pre-commit=test --prefix :package: --summary title.txt --report report.md
-💡 Found updates:
     ...
-
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
 📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
 📝 :package: bump node-emoji from 2.0.0 to 123.456.789
+
+📄 title.txt
+📄 report.md
 ```
+
+## Compatibility with registries
+
+We check compatibility with various registries in
+[an integration test](./test/integration/registries.ts).
+
+### Deno's official registries
+
+Molt offers first-class support for the following registries, which means that
+we may implement registry-specific routines for them:
+
+- [x] [deno.land/std](https://deno.land/std)
+- [x] [deno.land/x](https://deno.land/x)
+- [x] [npm](https://www.npmjs.com) (via `npm:` specifier)
+
+### Third-party registries
+
+Molt also works with some third-party registries, but we don't add
+registry-specific routines for them:
+
+- [ ] [cdn.jsdelivr.net](https://cdn.jsdelivr.net)
+- [ ] [cdn.skypack.dev](https://cdn.skypack.dev)
+- [ ] [esm.run](https://esm.run)
+- [x] [esm.sh](https://esm.sh)
+- [ ] [denopkg.com](https://denopkg.com)
+- [ ] [ga.jspm.io](https://ga.jspm.io)
+- [ ] [pax.deno.dev](https://pax.deno.dev)
+- [ ] [raw.githubusercontent.com](https://github.com)
+- [x] [unpkg.com](https://unpkg.com)
+- [ ] [x.nest.land](https://x.nest.land)
 
 ## Limitations
 
-The following limitations are (currently) imposed by the design of Molt:
+The following limitations are imposed by the design of Molt:
 
-- Dependencies are always updated to the latest version. No version constraints
+- Dependencies are always updated to the latest versions. No version constraints
   are supported.
 - Dependencies in import specifiers are only targeted.
 
@@ -170,7 +204,7 @@ Molt is inspired by prior works such as
 
 - [deno-udd](https://github.com/hayd/deno-udd)
 - [dmm](https://github.com/drashland/dmm)
-- [update](https://github.com/deaddeno/update)
+- [updater](https://github.com/deaddeno/updater)
 
 and of full respect to the authors.
 
