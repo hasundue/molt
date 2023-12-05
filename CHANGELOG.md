@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.14.2](https://github.com/hasundue/molt/compare/v0.14.1...0.14.2) (2023-12-05)
+
+
+### Bug Fixes
+
+* **ci/release:** migrate to release-drafter ([27808af](https://github.com/hasundue/molt/commit/27808af024fef2088b3b0630bbe4ca0d0432166b))
+
+
+### Reverts
+
+* "fix(ci/release): migrate to release-drafter" ([48ac80e](https://github.com/hasundue/molt/commit/48ac80eada0d95344a5aec916d483be2f1a2477b))
+
 ## [0.14.1](https://github.com/hasundue/molt/compare/0.14.0...v0.14.1) (2023-12-05)
 
 
