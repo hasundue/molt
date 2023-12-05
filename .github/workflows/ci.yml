@@ -16,8 +16,10 @@ jobs:
     secrets: inherit
 
   release:
-    name: Create PR for release
+    name: Release
     needs: test
-    uses: hasundue/actions/.github/workflows/release.yml@main
-    with:
-      package-name: 'molt'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: release-drafter/release-drafter@v5
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
