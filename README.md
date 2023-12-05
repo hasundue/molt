@@ -172,19 +172,25 @@ we may implement registry-specific routines for them:
 
 ### Third-party registries
 
-Molt also works with some third-party registries, but we don't add
-registry-specific routines for them:
+Molt also works with the following third-party registries:
 
-- [ ] [cdn.jsdelivr.net](https://cdn.jsdelivr.net)
-- [ ] [cdn.skypack.dev](https://cdn.skypack.dev)
-- [ ] [esm.run](https://esm.run)
 - [x] [esm.sh](https://esm.sh)
-- [ ] [denopkg.com](https://denopkg.com)
-- [ ] [ga.jspm.io](https://ga.jspm.io)
-- [ ] [pax.deno.dev](https://pax.deno.dev)
-- [ ] [raw.githubusercontent.com](https://github.com)
 - [x] [unpkg.com](https://unpkg.com)
-- [ ] [x.nest.land](https://x.nest.land)
+
+The following registries are not compatible with Molt:
+
+- [cdn.jsdelivr.net](https://cdn.jsdelivr.net)
+- [cdn.skypack.dev](https://cdn.skypack.dev)
+- [esm.run](https://esm.run)
+- [denopkg.com](https://denopkg.com)
+- [ga.jspm.io](https://ga.jspm.io)
+- [pax.deno.dev](https://pax.deno.dev)
+- [raw.githubusercontent.com](https://github.com)
+- [x.nest.land](https://x.nest.land)
+
+## How it works
+
+TBW
 
 ## Limitations
 
