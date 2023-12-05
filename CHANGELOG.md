@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/hasundue/molt/compare/0.14.0...v0.14.1) (2023-12-05)
+
+
+### Bug Fixes
+
+* **cli:** no conflict in `--ignore` and `--only` ([97db9cf](https://github.com/hasundue/molt/commit/97db9cfc701f3153e8a00ab767bd1404ea4a34f9))
+
 ## [0.14.0](https://github.com/hasundue/molt/compare/0.13.0...0.14.0) (2023-11-26)
 
 
