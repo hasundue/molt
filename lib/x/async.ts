@@ -1,1 +1,1 @@
-export { Mutex } from "https://deno.land/x/async@v2.0.2/mutex.ts";
+export { Mutex } from "https://deno.land/x/async@v2.1.0/mutex.ts";
