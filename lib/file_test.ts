@@ -47,7 +47,7 @@ async function assertFileSystemSnapshot(
 ) {
   await assertSnapshot(
     t,
-    Array.from(fs.entries()).map(([, content]) => formatEOL(content, EOL.LF)),
+    Array.from(fs.entries()).map(([, content]) => formatEOL(content, EOL)),
   );
 }
 

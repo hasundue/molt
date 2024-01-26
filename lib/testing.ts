@@ -65,7 +65,7 @@ export const WriteTextFileStub = {
       Deno,
       "writeTextFile",
       (path, data) => {
-        fs.set(path.toString(), formatEOL(data.toString(), EOL.LF));
+        fs.set(path.toString(), formatEOL(data.toString(), EOL));
         return Promise.resolve();
       },
     );
