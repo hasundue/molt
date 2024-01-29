@@ -486,6 +486,8 @@
     "https://deno.land/x/emit@0.34.0/mod.ts": "b3d26b75a059ab4098ee191562bf21e634c5abf936b06d0c8d656a4e08f1e291",
     "https://deno.land/x/import_map@v0.15.0/lib/import_map.generated.js": "617626ef749703190de2f781e1e4019d858c9c6ba61a7cae39a14499a5a20628",
     "https://deno.land/x/import_map@v0.15.0/mod.ts": "dbd28bcdb5fba6eb6b7d0d2c300a5b537a13624bcb463311d44fc970d9f0ddad",
+    "https://deno.land/x/import_map@v0.18.3/import_map.generated.js": "48f4ff137e65f32a16b35112b15e4afbddb99bff0cb25737e476e4f5ce12ea98",
+    "https://deno.land/x/import_map@v0.18.3/mod.ts": "dd4c4e20639dcfd720a6d41f47bea250db86137901a08988102094678c6b7859",
     "https://deno.land/x/outdent@v0.8.0/src/index.ts": "6dc3df4108d5d6fedcdb974844d321037ca81eaaa16be6073235ff3268841a22",
     "https://deno.land/x/unknownutil@v3.11.0/inspect.ts": "33e61bdfed94cd586d66600813b528fa93046a2802d8144277b92f0fa5e5f10e",
     "https://deno.land/x/unknownutil@v3.11.0/is.ts": "01244c8e3d907c4761c40b580ff5f5a2f5b051c2ef5ae6ff8b76602ed681fd74",
