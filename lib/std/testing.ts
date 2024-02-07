@@ -5,7 +5,7 @@ export {
   beforeEach,
   describe,
   it,
-} from "https://deno.land/std@0.213.0/testing/bdd.ts";
+} from "https://deno.land/std@0.214.0/testing/bdd.ts";
 export {
   assertSpyCall,
   assertSpyCallArg,
@@ -17,7 +17,7 @@ export {
   type SpyCall,
   type Stub,
   stub,
-} from "https://deno.land/std@0.213.0/testing/mock.ts";
+} from "https://deno.land/std@0.214.0/testing/mock.ts";
 export {
   createAssertSnapshot,
-} from "https://deno.land/std@0.213.0/testing/snapshot.ts";
+} from "https://deno.land/std@0.214.0/testing/snapshot.ts";
