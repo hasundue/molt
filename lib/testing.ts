@@ -1,5 +1,5 @@
 import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
-import { EOL, formatEOL } from "./std/fs.ts";
+import { formatEOL, LF } from "./std/fs.ts";
 import { fromFileUrl } from "./std/path.ts";
 
 export const assertSnapshot = createAssertSnapshot({
@@ -65,7 +65,7 @@ export const WriteTextFileStub = {
       Deno,
       "writeTextFile",
       (path, data) => {
-        fs.set(path.toString(), formatEOL(data.toString(), EOL));
+        fs.set(path.toString(), formatEOL(data.toString(), LF));
         return Promise.resolve();
       },
     );

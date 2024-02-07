@@ -1,5 +1,5 @@
 import { basename, dirname } from "./std/path.ts";
-import { EOL, formatEOL } from "./std/fs.ts";
+import { formatEOL, LF } from "./std/fs.ts";
 import {
   FileSystemFake,
   ReadTextFileStub,
@@ -47,7 +47,7 @@ async function assertFileSystemSnapshot(
 ) {
   await assertSnapshot(
     t,
-    Array.from(fs.entries()).map(([, content]) => formatEOL(content, EOL)),
+    Array.from(fs.entries()).map(([, content]) => formatEOL(content, LF)),
   );
 }
 
