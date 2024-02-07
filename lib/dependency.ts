@@ -254,5 +254,6 @@ async function _resolveLatestVersion(
  */
 export function isPreRelease(version: string): boolean {
   const parsed = SemVer.tryParse(version);
-  return parsed !== undefined && parsed.prerelease.length > 0;
+  return parsed !== undefined && parsed.prerelease !== undefined &&
+    parsed.prerelease.length > 0;
 }
