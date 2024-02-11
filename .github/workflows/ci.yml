@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 permissions:
-  contents: write
-  pull-requests: write
+  contents: read
 
 jobs:
   test:
