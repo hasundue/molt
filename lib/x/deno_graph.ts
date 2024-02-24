@@ -4,4 +4,4 @@ export {
   init,
   load,
   type ModuleJson,
-} from "https://deno.land/x/deno_graph@0.69.3/mod.ts";
+} from "https://deno.land/x/deno_graph@0.69.4/mod.ts";
