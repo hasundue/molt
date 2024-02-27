@@ -61,6 +61,16 @@ describe("parse", () => {
         path: "/mod.ts",
       },
     ));
+
+  it("jsr:", () =>
+    assertObjectMatch(
+      parse(new URL("jsr:@luca/flag@^1.0.0/flag.ts")),
+      {
+        name: "@luca/flag",
+        version: "^1.0.0",
+        path: "/flag.ts",
+      },
+    ));
 });
 
 Deno.test("isPreRelease", () => {
@@ -124,6 +134,33 @@ describe("resolveLatestVersion", () => {
       version: LATEST,
       path: "/assert/mod.ts",
     });
+  });
+
+  it("jsr:@alice/foo@1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("jsr:@scope/foo@1.0.0")),
+    );
+    assertExists(updated);
+    assertObjectMatch(updated, {
+      name: "@scope/foo",
+      version: LATEST,
+    });
+  });
+
+  it("jsr:@bob/foo@~1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("jsr:@bob/foo@~1.0.0")),
+    );
+    // Do not update a version constraint.
+    assertEquals(updated, undefined);
+  });
+
+  it("jsr:@bob/bar@^1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("jsr:@luca/flag@^1.0.0")),
+    );
+    // Do not update a version constraint.
+    assertEquals(updated, undefined);
   });
 });
 
