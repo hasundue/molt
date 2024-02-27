@@ -104,6 +104,20 @@ export const LatestSemVerStub = {
             JSON.stringify({ "dist-tags": { latest } }),
             { status: 200 },
           );
+        case "jsr.io":
+          return new Response(
+            JSON.stringify({
+              versions: {
+                "1.0.0": {},
+                "1.0.1": {},
+                "1.0.2": { yanked: true },
+                "1.1.0": {},
+                "1.2.0": { yanked: true },
+                [latest]: {},
+              },
+            }),
+            { status: 200 },
+          );
         case "deno.land": {
           if (request.method !== "HEAD") {
             return init.original(request);

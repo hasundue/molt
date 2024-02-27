@@ -1,3 +1,4 @@
+import { filterEntries } from "./std/collections.ts";
 import { assertExists } from "./std/assert.ts";
 import * as SemVer from "./std/semver.ts";
 import { Mutex } from "./x/async.ts";
@@ -194,6 +195,15 @@ async function _resolveLatestVersion(
     // The dependency is already found to be up to date or unable to resolve.
     return;
   }
+  const constraint = dependency.version
+    ? SemVer.tryParseRange(dependency.version)
+    : undefined;
+
+  // Do not update inequality ranges.
+  if (constraint && constraint.flat().length > 1) {
+    return;
+  }
+
   switch (dependency.protocol) {
     case "npm:": {
       const response = await fetch(
@@ -204,14 +214,37 @@ async function _resolveLatestVersion(
       }
       const pkg = ensure(
         await response.json(),
-        is.ObjectOf({
-          "dist-tags": is.ObjectOf({
-            latest: is.String,
-          }),
-        }),
+        isNpmPackageMeta,
         { message: `Invalid response from NPM registry: ${response.url}` },
       );
       const latest = pkg["dist-tags"].latest;
+      if (latest === dependency.version || isPreRelease(latest)) {
+        break;
+      }
+      return LatestVersionCache.set(
+        dependency.name,
+        { ...dependency, version: latest },
+      );
+    }
+    // Ref: https://jsr.io/docs/api#jsr-registry-api
+    case "jsr:": {
+      const response = await fetch(
+        `https://jsr.io/${dependency.name}/meta.json`,
+      );
+      if (!response.ok) {
+        break;
+      }
+      const meta = ensure(
+        await response.json(),
+        isJsrPackageMeta,
+        { message: `Invalid response from JSR registry: ${response.url}` },
+      );
+      const candidates = filterEntries(
+        meta.versions,
+        ([version, { yanked }]) => !yanked && !isPreRelease(version),
+      );
+      const semvers = Object.keys(candidates).map(SemVer.parse);
+      const latest = SemVer.format(semvers.sort(SemVer.compare).reverse()[0]);
       if (latest === dependency.version || isPreRelease(latest)) {
         break;
       }
@@ -242,6 +275,21 @@ async function _resolveLatestVersion(
   }
   LatestVersionCache.set(dependency.name, null);
 }
+
+const isNpmPackageMeta = is.ObjectOf({
+  "dist-tags": is.ObjectOf({
+    latest: is.String,
+  }),
+});
+
+const isJsrPackageMeta = is.ObjectOf({
+  versions: is.RecordOf(
+    is.ObjectOf({
+      yanked: is.OptionalOf(is.Boolean),
+    }),
+    is.String,
+  ),
+});
 
 /**
  * Check if the given version string represents a pre-release.
