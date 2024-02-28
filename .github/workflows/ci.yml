@@ -16,3 +16,8 @@ jobs:
     name: Test
     uses: hasundue/actions/.github/workflows/test-deno.yml@main
     secrets: inherit
+
+  integration:
+    name: Integration
+    uses: hasundue/actions/.github/workflows/integration-deno.yml@main
+    secrets: inherit
