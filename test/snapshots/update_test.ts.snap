@@ -598,3 +598,33 @@ snapshot[`collect - unversioned.ts 1`] = `
   },
 }
 `;
+
+snapshot[`collect - jsr.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 48,
+        line: 0,
+      },
+      start: {
+        character: 23,
+        line: 0,
+      },
+    },
+    specifier: "jsr:@std/assert@0.210.0",
+  },
+  from: {
+    name: "@std/assert",
+    path: "",
+    protocol: "jsr:",
+    version: "0.210.0",
+  },
+  to: {
+    name: "@std/assert",
+    path: "",
+    protocol: "jsr:",
+    version: "123.456.789",
+  },
+}
+`;

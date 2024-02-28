@@ -799,3 +799,49 @@ snapshot[`write - unversioned.ts 1`] = `
 ',
 ]
 `;
+
+snapshot[`associateByFile - jsr.ts 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 48,
+              line: 0,
+            },
+            start: {
+              character: 23,
+              line: 0,
+            },
+          },
+          specifier: "jsr:@std/assert@0.210.0",
+        },
+        from: {
+          name: "@std/assert",
+          path: "",
+          protocol: "jsr:",
+          version: "0.210.0",
+        },
+        map: undefined,
+        to: {
+          name: "@std/assert",
+          path: "",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "module",
+  },
+]
+`;
+
+snapshot[`write - jsr.ts 1`] = `
+[
+  'import { assert } from "jsr:@std/assert@123.456.789";
+import { parse } from "jsr:@std/semver@^0.210.0";
+',
+]
+`;
