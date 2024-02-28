@@ -18,6 +18,12 @@ snapshot[`npm: 2`] = `true`;
 
 snapshot[`npm: 3`] = `true`;
 
+snapshot[`jsr: 1`] = `true`;
+
+snapshot[`jsr: 2`] = `true`;
+
+snapshot[`jsr: 3`] = `true`;
+
 snapshot[`cdn.jsdelivr.net/npm 1`] = `true`;
 
 snapshot[`cdn.jsdelivr.net/npm 2`] = `true`;

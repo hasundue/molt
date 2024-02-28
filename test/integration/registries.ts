@@ -20,6 +20,10 @@ const SPECS = [
     "npm:preact@10.5.5",
   ],
   [
+    "jsr:",
+    "jsr:@std/semver@0.210.0",
+  ],
+  [
     "cdn.jsdelivr.net/npm",
     "https://cdn.jsdelivr.net/npm/preact@10.5.5",
   ],
