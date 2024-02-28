@@ -136,6 +136,41 @@ describe("resolveLatestVersion", () => {
     });
   });
 
+  it("npm:@alice/foo@1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("npm:@alice/foo@1.0.0")),
+    );
+    assertExists(updated);
+    assertObjectMatch(updated, {
+      name: "@alice/foo",
+      version: LATEST,
+    });
+  });
+
+  it("npm:bob/foo@~1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("npm:bob/foo@~1.0.0")),
+    );
+    // Do not update a version constraint.
+    assertEquals(updated, undefined);
+  });
+
+  it("npm:bob/bar@^1.0.0", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("npm:bob/bar@^1.0.0")),
+    );
+    // Do not update a version constraint.
+    assertEquals(updated, undefined);
+  });
+
+  it("npm:node-emoji@2", async () => {
+    const updated = await resolveLatestVersion(
+      parse(new URL("npm:node-emoji@2")),
+    );
+    // Do not update a version constraint.
+    assertEquals(updated, undefined);
+  });
+
   it("jsr:@alice/foo@1.0.0", async () => {
     const updated = await resolveLatestVersion(
       parse(new URL("jsr:@scope/foo@1.0.0")),
