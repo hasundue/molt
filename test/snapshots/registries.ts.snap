@@ -48,12 +48,6 @@ snapshot[`ga.jspm.io 2`] = `true`;
 
 snapshot[`ga.jspm.io 3`] = `false`;
 
-snapshot[`esm.run 1`] = `true`;
-
-snapshot[`esm.run 2`] = `true`;
-
-snapshot[`esm.run 3`] = `false`;
-
 snapshot[`esm.sh 1`] = `true`;
 
 snapshot[`esm.sh 2`] = `true`;
