@@ -168,7 +168,12 @@ we may implement registry-specific routines for them:
 
 - [x] [deno.land/std](https://deno.land/std)
 - [x] [deno.land/x](https://deno.land/x)
+- [x] [jsr](https://jsr.io) (via `jsr:` specifier)
 - [x] [npm](https://www.npmjs.com) (via `npm:` specifier)
+
+> [!NOTE]\
+> Version constraints like `~1.2.3` and `^1.2.3` in `npm:` and `jrs:` specifiers
+> are not updated.
 
 ### Third-party registries
 
@@ -196,8 +201,8 @@ TBW
 
 The following limitations are imposed by the design of Molt:
 
-- Dependencies are always updated to the latest versions. No version constraints
-  are supported.
+- Dependencies are always updated to the latest versions. Version constraints
+  are not handled.
 - Dependencies in import specifiers are only targeted.
 
 See [issues] for other known limitations.
