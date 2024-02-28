@@ -39,10 +39,12 @@ const SPECS = [
     "ga.jspm.io",
     "https://ga.jspm.io/npm:lit-html@2.7.0/development/is-server.js",
   ],
+  /**
   [
     "esm.run",
     "https://esm.run/preact@10.5.5",
   ],
+  */
   [
     "esm.sh",
     "https://esm.sh/preact@10.5.5",
