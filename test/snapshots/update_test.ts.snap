@@ -270,6 +270,36 @@ snapshot[`collect - import_map 3`] = `
 }
 `;
 
+snapshot[`collect - npm.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 40,
+        line: 0,
+      },
+      start: {
+        character: 18,
+        line: 0,
+      },
+    },
+    specifier: "npm:node-emoji@2.0.0",
+  },
+  from: {
+    name: "node-emoji",
+    path: "",
+    protocol: "npm:",
+    version: "2.0.0",
+  },
+  to: {
+    name: "node-emoji",
+    path: "",
+    protocol: "npm:",
+    version: "123.456.789",
+  },
+}
+`;
+
 snapshot[`collect - import_and_export.ts 1`] = `
 {
   code: {
