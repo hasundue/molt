@@ -106,6 +106,17 @@ snapshot[`molt test/data/import.ts 2`] = `
 "
 `;
 
+snapshot[`molt test/data/jsr.ts 1`] = `
+"📦 @std/assert 0.210.0 => 123.456.789
+  test/data/jsr.ts 0.210.0
+"
+`;
+
+snapshot[`molt test/data/jsr.ts 2`] = `
+"Checking for updates
+"
+`;
+
 snapshot[`molt test/data/import_map/mod.ts 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
   test/data/import_map/deno.json 0.200.0

@@ -43,6 +43,8 @@ test("molt --version");
 test(`molt not_exist.ts`, 1);
 test(`molt ${dir}/import.ts`);
 
+test(`molt ${dir}/jsr.ts`);
+
 test(`molt ${dir}/import_map/mod.ts`);
 test(`molt ${dir}/import_map/mod.ts --import-map ${dir}/import_map/deno.json`);
 test(`molt ${dir}/import_map/deno.json`, 1);
