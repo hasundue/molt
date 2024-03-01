@@ -8,7 +8,11 @@ import {
   type ModuleJson,
 } from "./x/deno_graph.ts";
 import { findFileUp, toPath, toUrl } from "./path.ts";
-import { ImportMap, tryReadFromJson } from "./import_map.ts";
+import {
+  ImportMap,
+  ImportMapResolveResult,
+  tryReadFromJson,
+} from "./import_map.ts";
 import {
   type Dependency,
   parse,
@@ -43,11 +47,7 @@ export interface DependencyUpdate {
     /** The full path to the import map used to resolve the dependency.
      * @example "/path/to/import_map.json" */
     source: string;
-    /** The string in the dependency specifier being replaced */
-    key?: string;
-    /** The fully resolved specifier (URL) of the dependency. */
-    resolved: string;
-  };
+  } & ImportMapResolveResult;
 }
 
 class DenoGraph {
@@ -233,8 +233,7 @@ async function create(
     map: mapped
       ? {
         source: options!.importMap!.path,
-        key: mapped.key,
-        resolved: mapped.resolved,
+        ...mapped,
       }
       : undefined,
   };
