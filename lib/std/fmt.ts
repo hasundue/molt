@@ -1,1 +1,1 @@
-export { stripAnsiCode } from "https://deno.land/std@0.217.0/fmt/colors.ts";
+export { stripAnsiCode } from "https://deno.land/std@0.218.2/fmt/colors.ts";
