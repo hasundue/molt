@@ -1,4 +1,3 @@
-import { assertExists } from "./std/assert.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
 import { toUrl } from "./dependency.ts";
@@ -127,11 +126,7 @@ async function writeToImportMap(
   const content = await Deno.readTextFile(update.path);
   const json = parseJsonc(content) as unknown as ImportMapJson;
   for (const dependency of update.dependencies) {
-    assertExists(dependency.map);
-    json.imports[dependency.map.key!] = dependency.map.resolved.replace(
-      toUrl(dependency.from),
-      toUrl(dependency.to),
-    );
+    json.imports[dependency.map!.key!] = toUrl(dependency.to);
   }
   await Deno.writeTextFile(update.path, JSON.stringify(json, null, 2));
 }

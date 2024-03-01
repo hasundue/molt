@@ -352,7 +352,7 @@ snapshot[`write - import_map/mod.ts 1`] = `
 [
   '{
   "imports": {
-    "std/": "https://deno.land/std@123.456.789/assert.ts",
+    "std/": "https://deno.land/std@123.456.789/",
     "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
     "node-emoji": "npm:node-emoji@123.456.789",
     "/": "./"
