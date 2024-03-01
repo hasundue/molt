@@ -3,7 +3,7 @@
     "cache": "deno cache ./lib/*/*.ts --lock",
     "lock": "deno task -q cache --lock-write && git add deno.lock",
     "check": "deno check ./*.ts ./lib/*.ts ./test/integration/*.ts",
-    "test": "NO_COLOR=1 deno test -A --no-check ./lib/*.ts",
+    "test": "NO_COLOR=1 deno test -A --no-check ./lib",
     "all": "deno fmt && deno lint && deno task -q check && deno task lock && deno task -q test",
     "integration": "NO_COLOR=1 deno test --no-lock -A ./test/integration/*.ts",
     "run": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
