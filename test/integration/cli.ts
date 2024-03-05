@@ -18,7 +18,7 @@ molt("jsr.ts");
 // import maps
 molt("mod.ts", { cwd: "import_map" });
 molt("mod.ts --import-map deno.json", { cwd: "import_map" });
-molt("deno.json", { cwd: "import_map", code: 1 });
+molt("deno.json", { cwd: "import_map" });
 
 // --ignore and --only
 molt("multiple_imports.ts --ignore node-emoji");

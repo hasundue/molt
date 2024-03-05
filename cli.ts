@@ -1,6 +1,6 @@
 import { distinct, filterKeys, mapEntries } from "./lib/std/collections.ts";
 import { parse as parseJsonc } from "./lib/std/jsonc.ts";
-import { extname, relative } from "./lib/std/path.ts";
+import { relative } from "./lib/std/path.ts";
 import { colors, Command } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
@@ -19,9 +19,10 @@ const { gray, yellow, bold, cyan } = colors;
 
 const main = new Command()
   .name("molt")
-  .description("Check updates to dependencies in Deno modules")
+  .description("Check updates to dependencies in Deno modules and configuration files")
   .versionOption("-v, --version", "Print version info.", versionCommand)
-  .example("Check updates in a module", "molt deps.ts")
+  .example("Check import maps in a config", "molt deno.json")
+  .example("Check imports in a module", "molt deps.ts")
   .example("Include multiple modules", "molt mod.ts lib.ts")
   .example("Target all .ts files", "molt ./**/*.ts")
   .option("--import-map <file:string>", "Specify import map file")
@@ -58,7 +59,7 @@ const main = new Command()
         Deno.exit(1);
       }
     }
-    ensureJsFiles(entrypoints);
+    ensureFiles(entrypoints);
     const updates = await collectUpdates(entrypoints, options);
     printUpdates(updates);
     if (options.write) {
@@ -270,17 +271,14 @@ async function runTask([name, args]: [string, string[]]) {
   }
 }
 
-function ensureJsFiles(paths: string[]) {
+function ensureFiles(paths: string[]) {
   for (const path of paths) {
-    if (!["", ".js", ".ts", ".jsx", ".tsx"].includes(extname(path))) {
-      throw new Error(`❌ file must be javascript or typescript: "${path}"`);
-    }
     try {
       if (!Deno.statSync(path).isFile) {
-        throw new Error(`❌ not a file: "${path}"`);
+        throw new Error(`Not a valid file: "${path}"`);
       }
     } catch {
-      throw new Error(`❌ path does not exist: "${path}"`);
+      throw new Error(`Path does not exist: "${path}"`);
     }
   }
 }
