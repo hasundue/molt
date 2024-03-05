@@ -1,8 +1,7 @@
-import { parse as parseJsonc } from "./std/jsonc.ts";
 import { detectEOL } from "./std/fs.ts";
 import { toUrl } from "./dependency.ts";
 import { type DependencyUpdate } from "./update.ts";
-import { ImportMapJson } from "./import_map.ts";
+import { readImportMapJson } from "./import_map.ts";
 
 /**
  * Write the given array of DependencyUpdate to files.
@@ -27,16 +26,21 @@ export function writeAll(
   return write(associateByFile(updates), options);
 }
 
+type FileKind = "module" | "import_map";
+
 /**
  * A collection of updates to dependencies associated with a file.
  */
-export interface FileUpdate {
-  /** The full path to the file being updated. */
+export interface FileUpdate<
+  Kind extends FileKind = FileKind,
+> {
+  /** The full path to the file being updated.
+   * @example "/path/to/mod.ts" */
   path: string;
   /** The type of the file being updated. */
-  kind: "module" | "import_map";
+  kind: Kind;
   /** The updates to dependencies associated with the file. */
-  dependencies: DependencyUpdate[];
+  dependencies: DependencyUpdate<Kind extends "import_map" ? true : false>[];
 }
 
 /**
@@ -83,16 +87,16 @@ function _write(
 ) {
   switch (update.kind) {
     case "module":
-      return writeToModule(update);
+      return writeToModule(update as FileUpdate<"module">);
     case "import_map":
-      return writeToImportMap(update);
+      return writeToImportMap(update as FileUpdate<"import_map">);
   }
 }
 
 async function writeToModule(
-  update: FileUpdate,
+  update: FileUpdate<"module">,
 ) {
-  const lineToDependencyMap = new Map<number, DependencyUpdate>(
+  const lineToDependencyMap = new Map(
     update.dependencies.map((
       dependency,
     ) => [dependency.code.span.start.line, dependency]),
@@ -121,12 +125,11 @@ async function writeToModule(
 
 async function writeToImportMap(
   /** The dependency update to apply. */
-  update: FileUpdate,
+  update: FileUpdate<"import_map">,
 ) {
-  const content = await Deno.readTextFile(update.path);
-  const json = parseJsonc(content) as unknown as ImportMapJson;
+  const json = await readImportMapJson(update.path);
   for (const dependency of update.dependencies) {
-    json.imports[dependency.map!.key!] = toUrl(dependency.to);
+    json.imports[dependency.map.key] = toUrl(dependency.to);
   }
   await Deno.writeTextFile(update.path, JSON.stringify(json, null, 2));
 }

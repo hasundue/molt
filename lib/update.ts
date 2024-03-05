@@ -11,21 +11,25 @@ import { findFileUp, toPath, toUrl } from "./path.ts";
 import {
   ImportMap,
   ImportMapResolveResult,
+  readImportMapJson,
   tryReadFromJson,
 } from "./import_map.ts";
 import {
   type Dependency,
   parse,
   resolveLatestVersion,
+  toUrl as dependencyToUrl,
   type UpdatedDependency,
 } from "./dependency.ts";
 
 type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
+type If<T extends boolean, A, B> = T extends true ? A : B;
+
 /**
  * Representation of an update to a dependency.
  */
-export interface DependencyUpdate {
+export interface DependencyUpdate<IsMapped extends boolean = boolean> {
   /** Properties of the dependency being updated. */
   from: Dependency;
   /** Properties of the updated dependency. */
@@ -37,17 +41,21 @@ export interface DependencyUpdate {
   code: {
     /** The original specifier of the dependency appeared in the code. */
     specifier: string;
-    span: NonNullable<DependencyJson["code"]>["span"];
+    span: If<IsMapped, undefined, NonNullable<DependencyJson["code"]>["span"]>;
   };
   /** The full path to the module that imports the dependency.
    * @example "/path/to/mod.ts" */
   referrer: string;
   /** Information about the import map used to resolve the dependency. */
-  map?: {
-    /** The full path to the import map used to resolve the dependency.
-     * @example "/path/to/import_map.json" */
-    source: string;
-  } & ImportMapResolveResult;
+  map: If<
+    IsMapped,
+    {
+      /** The full path to the import map used to resolve the dependency.
+       * @example "/path/to/import_map.json" */
+      source: string;
+    } & ImportMapResolveResult<true>,
+    undefined
+  >;
 }
 
 class DenoGraph {
@@ -112,10 +120,23 @@ export interface CollectOptions {
 }
 
 /**
- * Collect dependencies from the given module(s).
- * @param from - The path(s) to the module(s) to collect dependencies from.
+ * Collect dependencies from the given module(s) or Deno configuration file(s).
+ * Local submodules are also checked recursively.
+ *
+ * @param from - The path(s) to the file(s) to collect dependencies from.
  * @param options - Options to customize the behavior.
  * @returns The list of dependencies.
+ *
+ * @example
+ * ```ts
+ * collect("mod.ts")
+ * // -> Collect dependencies from mod.ts and its local submodules.
+ * ```
+ * @example
+ * ```ts
+ * collect("deno.json")
+ * // -> Collect dependencies from the import map specified in deno.json
+ * ```
  */
 export async function collect(
   from: string | URL | (string | URL)[],
@@ -138,18 +159,26 @@ export async function collect(
   });
 
   const updates: DependencyUpdate[] = [];
-  await Promise.all(
-    graph.modules.flatMap((m) =>
-      m.dependencies?.map(async (dependency) => {
-        const update = await create(
-          dependency,
-          m.specifier,
-          { ...options, importMap },
-        );
-        return update ? updates.push(update) : undefined;
-      })
-    ),
-  );
+  await Promise.all([
+    ...graph.modules
+      .filter((m) => m.kind === "esm")
+      .flatMap((m) =>
+        m.dependencies?.map(async (dependency) => {
+          const update = await _createDependencyUpdate(
+            dependency,
+            m.specifier,
+            { ...options, importMap },
+          );
+          return update ? updates.push(update) : undefined;
+        })
+      ),
+    ...graph.modules
+      .filter((m) => m.kind === "asserted" && m.mediaType === "Json")
+      .map(async (m) => {
+        const results = await _collectFromImportMap(m.specifier, options);
+        updates.push(...results);
+      }),
+  ]);
   return updates.sort((a, b) => a.to.name.localeCompare(b.to.name));
 }
 
@@ -185,7 +214,7 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
  * @param options - Options to customize the behavior.
  * @returns The created DependencyUpdate.
  */
-async function create(
+async function _createDependencyUpdate(
   dependencyJson: DependencyJson,
   referrer: string,
   options?: Pick<CollectOptions, "ignore" | "only"> & {
@@ -205,7 +234,7 @@ async function create(
   const mapped = options?.importMap?.resolve(
     dependencyJson.specifier,
     referrer,
-  );
+  ) as ImportMapResolveResult<true> | undefined;
   const dependency = parse(new URL(mapped?.value ?? specifier));
   if (options?.ignore?.(dependency)) {
     return;
@@ -241,6 +270,50 @@ async function create(
       }
       : undefined,
   };
+}
+
+async function _collectFromImportMap(
+  specifier: ModuleJson["specifier"],
+  options: Pick<CollectOptions, "ignore" | "only">,
+): Promise<DependencyUpdate[]> {
+  const json = await readImportMapJson(new URL(specifier));
+  const updates: DependencyUpdate[] = [];
+  await Promise.all(
+    Object.entries(json.imports).map(
+      async ([key, value]): Promise<DependencyUpdate | undefined> => {
+        if (!URL.canParse(value)) {
+          return;
+        }
+        const dependency = parse(new URL(value));
+        if (options.ignore?.(dependency)) {
+          return;
+        }
+        if (options.only && !options.only(dependency)) {
+          return;
+        }
+        const latest = await resolveLatestVersion(dependency);
+        if (!latest || latest.version === dependency.version) {
+          return;
+        }
+        updates.push({
+          from: dependency,
+          to: latest,
+          code: {
+            specifier: value,
+            span: undefined,
+          },
+          referrer: toPath(specifier),
+          map: {
+            source: toPath(specifier),
+            resolved: value,
+            key,
+            value: dependencyToUrl(latest),
+          },
+        });
+      },
+    ),
+  );
+  return updates;
 }
 
 export type VersionChange = {

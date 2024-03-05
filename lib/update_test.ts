@@ -4,6 +4,7 @@ import { filterKeys } from "./std/collections.ts";
 import { basename } from "./std/path.ts";
 import { assertSnapshot } from "./testing.ts";
 import { LatestSemVerStub } from "./testing.ts";
+import { readImportMapJson } from "./import_map.ts";
 import { collect, DependencyUpdate, getVersionChange } from "./update.ts";
 
 function test(
@@ -38,6 +39,15 @@ async function assertUpdateSnapshot(
   );
 }
 
+async function hasImportMap(url: URL) {
+  try {
+    await readImportMapJson(url);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 const LATEST = "123.456.789";
 LatestSemVerStub.create(LATEST);
 
@@ -54,7 +64,15 @@ for await (
         new URL("../test/data/" + testCase.name, import.meta.url),
       )
     ) {
-      if (entry.isFile && ["mod.ts", "deno.json"].includes(entry.name)) {
+      if (
+        entry.isFile && entry.name === "mod.ts" ||
+        entry.name.endsWith(".json") && await hasImportMap(
+            new URL(
+              `../test/data/${testCase.name}/${entry.name}`,
+              import.meta.url,
+            ),
+          )
+      ) {
         test(
           `../test/data/${testCase.name}/${entry.name}`,
           testCase.name,

@@ -69,6 +69,8 @@ describe("resolve()", () => {
       {
         resolved:
           new URL("../test/data/import_map/lib.ts", import.meta.url).href,
+        key: undefined,
+        value: undefined,
       },
     );
   });
