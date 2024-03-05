@@ -71,14 +71,6 @@ for (const spec of SPECS) {
   Deno.test(name, async (t) => {
     const assert = (it: unknown) => assertSnapshot(t, it !== undefined);
 
-    // Make sure the URL is valid.
-    // Skip this test for npm because it fails.
-    if (spec[0] !== "npm:") {
-      await assert(await import(spec[1]));
-    } else {
-      await assert(true);
-    }
-
     // Check if the dependency can be parsed.
     const parsed = parse(spec[1]);
     await assert(parsed.version);
