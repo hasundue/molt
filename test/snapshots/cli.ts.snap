@@ -6,7 +6,7 @@ Usage: molt <modules...>
 
 Description:
 
-  Check updates to dependencies in Deno modules
+  Check updates to dependencies in Deno modules and configuration files
 
 Options:
 
@@ -25,7 +25,8 @@ Options:
 
 Examples:
 
-  Check updates in a module:     molt deps.ts                               
+  Check import maps in a config: molt deno.json                             
+  Check imports in a module:     molt deps.ts                               
   Include multiple modules:      molt mod.ts lib.ts                         
   Target all .ts files:          molt ./**/*.ts                             
   Specify an import map:         molt mod.ts --import-map deno.json         
@@ -47,7 +48,7 @@ Usage: molt <modules...>
 
 Description:
 
-  Check updates to dependencies in Deno modules
+  Check updates to dependencies in Deno modules and configuration files
 
 Options:
 
@@ -66,7 +67,8 @@ Options:
 
 Examples:
 
-  Check updates in a module:     molt deps.ts                               
+  Check import maps in a config: molt deno.json                             
+  Check imports in a module:     molt deps.ts                               
   Include multiple modules:      molt mod.ts lib.ts                         
   Target all .ts files:          molt ./**/*.ts                             
   Specify an import map:         molt mod.ts --import-map deno.json         
@@ -91,7 +93,7 @@ snapshot[`cli - "molt --version" 2`] = `
 snapshot[`cli - "molt not_exist.ts" 1`] = `""`;
 
 snapshot[`cli - "molt not_exist.ts" 2`] = `
-'❌ path does not exist: "not_exist.ts"
+'Path does not exist: "not_exist.ts"
 '
 `;
 
@@ -151,11 +153,21 @@ snapshot[`cli - import_map - "molt mod.ts --import-map deno.json" 2`] = `
 "
 `;
 
-snapshot[`cli - import_map - "molt deno.json" 1`] = `""`;
+snapshot[`cli - import_map - "molt deno.json" 1`] = `
+"📦 deno.land/std 0.200.0 => 123.456.789
+  deno.json 0.200.0
+
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+  deno.json 0.50.0
+
+📦 node-emoji 1.0.0 => 123.456.789
+  deno.json 1.0.0
+"
+`;
 
 snapshot[`cli - import_map - "molt deno.json" 2`] = `
-'❌ file must be javascript or typescript: "deno.json"
-'
+"Checking for updates
+"
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --ignore node-emoji" 1`] = `

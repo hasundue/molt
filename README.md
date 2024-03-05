@@ -85,7 +85,7 @@ Usage: molt <modules...>
 
 Description:
 
-  Check updates to dependencies in Deno modules
+  Check updates to dependencies in Deno modules and configuration files
 
 Options:
 
@@ -104,25 +104,25 @@ Options:
 
 Examples:
 
-  Check updates in a module:     molt deps.ts                               
+  Check import maps in a config: molt deno.json                             
+  Check imports in a module:     molt deps.ts                               
   Include multiple modules:      molt mod.ts lib.ts                         
   Target all .ts files:          molt ./**/*.ts                             
   Specify an import map:         molt mod.ts --import-map deno.json         
-  Ignore specific dependencies:  molt deps.ts --ignore=deno_graph,node_emoji
-  Only check deno_std:           molt deps.ts --only deno.land/std
-```
+  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
+  Check deno_std only:           molt deps.ts --only deno.land/std          
 
 > [!Note]\
-> Molt CLI automatically uses import maps defined in `deno.json` or `deno.jsonc`
-> if available.\
-> You can't, however, use import maps as entrypoints.
+> Molt CLI automatically finds `deno.json` or `deno.jsonc` in the current
+> working directory or its parent directories and uses import maps defined in
+> the file if available.\
 
 #### Examples
 
 ##### Check for updates
 
 ```sh
-> molt mod.ts 
+> molt deno.json
 📦 deno.land/std 0.200.0 => 123.456.789
   lib.ts 0.200.0
   mod.ts 0.200.0
@@ -137,7 +137,7 @@ Examples:
 ##### Write changes to files
 
 ```sh
-> molt mod.ts --write
+> molt deno.json --write
     ...
 💾 lib.ts
 💾 mod.ts
@@ -146,7 +146,7 @@ Examples:
 ##### Commit changes to git
 
 ```sh
-> molt mod.ts --commit --pre-commit=test --prefix :package: --summary title.txt --report report.md
+> molt deno.json --commit --pre-commit=test --prefix :package: --summary title.txt --report report.md
     ...
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
 📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
