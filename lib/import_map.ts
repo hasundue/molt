@@ -2,18 +2,18 @@ import { assertEquals } from "./std/assert.ts";
 import { maxBy } from "./std/collections.ts";
 import { parse as parseJsonc } from "./std/jsonc.ts";
 import { type ImportMapJson, parseFromJson } from "./x/import_map.ts";
-import { is } from "./x/unknownutil.ts";
+import { ensure, is } from "./x/unknownutil.ts";
 import { toPath } from "./path.ts";
 
 export type { ImportMapJson };
 
-export interface ImportMapResolveResult {
+export interface ImportMapResolveResult<HasKey extends boolean = boolean> {
   /** The fully-resolved URL string of the import specifier. */
   resolved: string;
   /** The key of the import map that matched with the import specifier. */
-  key?: string;
+  key: HasKey extends true ? string : undefined;
   /** The mapped value by the import map corresponding to the key. */
-  value?: string;
+  value: HasKey extends true ? string : undefined;
 }
 
 export interface ImportMap {
@@ -44,6 +44,20 @@ const isImportMapJson = is.ObjectOf({
 const isImportMapReferrer = is.ObjectOf({
   importMap: is.String,
 });
+
+/**
+ * Read and parse a JSON including import maps from the given file path or URL.
+ */
+export async function readImportMapJson(
+  url: string | URL,
+): Promise<ImportMapJson> {
+  const data = await Deno.readTextFile(url);
+  try {
+    return ensure(parseJsonc(data), isImportMapJson);
+  } catch {
+    throw new SyntaxError(`${url} does not have a valid import map`);
+  }
+}
 
 /**
  * Read an import map from the given file path or URL.
@@ -91,7 +105,8 @@ export async function readFromJson(
       }
       return {
         resolved,
-        ...replacement,
+        key: replacement?.key,
+        value: replacement?.value,
       };
     },
     resolveInner: inner.resolve.bind(inner),
