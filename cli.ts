@@ -19,7 +19,9 @@ const { gray, yellow, bold, cyan } = colors;
 
 const main = new Command()
   .name("molt")
-  .description("Check updates to dependencies in Deno modules and configuration files")
+  .description(
+    "Check updates to dependencies in Deno modules and configuration files",
+  )
   .versionOption("-v, --version", "Print version info.", versionCommand)
   .example("Check import maps in a config", "molt deno.json")
   .example("Check imports in a module", "molt deps.ts")
@@ -52,16 +54,16 @@ const main = new Command()
   .option("--summary <file:string>", "Write a summary of changes to file")
   .option("--report <file:string>", "Write a report of changes to file")
   .arguments("<modules...:string>")
-  .action(async function (options, ...entrypoints) {
+  .action(async function (options, ...files) {
     if (options.importMap) {
       if (await $.path(options.importMap).exists() === false) {
         console.error(`Import map ${options.importMap} does not exist.`);
         Deno.exit(1);
       }
     }
-    ensureFiles(entrypoints);
-    const updates = await collectUpdates(entrypoints, options);
-    printUpdates(updates);
+    ensureFiles(files);
+    const updates = await collectUpdates(files, options);
+    printUpdates(files, updates);
     if (options.write) {
       return writeUpdates(updates, options);
     }
@@ -149,7 +151,10 @@ async function getTasks() {
 
 const toRelativePath = (path: string) => relative(Deno.cwd(), path);
 
-function printUpdates(updates: DependencyUpdate[]) {
+function printUpdates(
+  files: string[],
+  updates: DependencyUpdate[],
+) {
   const dependencies = new Map<string, DependencyUpdate[]>();
   for (const u of updates) {
     const list = dependencies.get(u.to.name) ?? [];
@@ -157,19 +162,22 @@ function printUpdates(updates: DependencyUpdate[]) {
     dependencies.set(u.to.name, list);
   }
   let count = 0;
+  const nWrites = distinct(updates.map((u) => u.referrer)).length;
   for (const [name, list] of dependencies.entries()) {
     const froms = distinct(list.map((u) => u.from.version)).join(", ");
     console.log(
       `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].to.version)}`,
     );
-    distinct(
-      list.map((u) => {
-        const source = toRelativePath(u.map?.source ?? u.referrer);
-        return `  ${source} ` + gray(u.from.version ?? "");
-      }),
-    ).forEach((line) => console.log(line));
-    if (++count < dependencies.size) {
-      console.log();
+    if (files.length > 1 || nWrites > 1) {
+      distinct(
+        list.map((u) => {
+          const source = toRelativePath(u.map?.source ?? u.referrer);
+          return `  ${source} ` + gray(u.from.version ?? "");
+        }),
+      ).forEach((line) => console.log(line));
+      if (++count < dependencies.size) {
+        console.log();
+      }
     }
   }
 }
