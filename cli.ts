@@ -102,7 +102,6 @@ async function collectUpdates(
     const updates = await Promise.all(
       entrypoints.map(async (entrypoint) =>
         await collect(entrypoint, {
-          findImportMap: options.importMap === undefined,
           ignore: options.ignore
             ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
             : undefined,

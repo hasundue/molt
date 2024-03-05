@@ -58,7 +58,7 @@ WriteTextFileStub.create(fs);
 async function test(path: string, name = toName(path)) {
   const updates = await DependencyUpdate.collect(
     new URL(path, import.meta.url),
-    { findImportMap: true },
+    { cwd: new URL(dirname(path), import.meta.url) },
   );
   const results = associateByFile(updates);
 
