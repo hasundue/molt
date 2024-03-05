@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`molt 1`] = `
+snapshot[`cli - "molt" 1`] = `
 "
 Usage: molt <modules...>
 
@@ -35,13 +35,13 @@ Examples:
 "
 `;
 
-snapshot[`molt 2`] = `
+snapshot[`cli - "molt" 2`] = `
 "  error: Missing argument(s): modules
 
 "
 `;
 
-snapshot[`molt --help 1`] = `
+snapshot[`cli - "molt --help" 1`] = `
 "
 Usage: molt <modules...>
 
@@ -76,211 +76,204 @@ Examples:
 "
 `;
 
-snapshot[`molt --help 2`] = `""`;
+snapshot[`cli - "molt --help" 2`] = `""`;
 
-snapshot[`molt --version 1`] = `
+snapshot[`cli - "molt --version" 1`] = `
 "123.456.789
 "
 `;
 
-snapshot[`molt --version 2`] = `
+snapshot[`cli - "molt --version" 2`] = `
 "Fetching version info
 "
 `;
 
-snapshot[`molt not_exist.ts 1`] = `""`;
+snapshot[`cli - "molt not_exist.ts" 1`] = `""`;
 
-snapshot[`molt not_exist.ts 2`] = `
+snapshot[`cli - "molt not_exist.ts" 2`] = `
 '❌ path does not exist: "not_exist.ts"
 '
 `;
 
-snapshot[`molt test/data/import.ts 1`] = `
+snapshot[`cli - "molt import.ts" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/import.ts 0.200.0
+  import.ts 0.200.0
 "
 `;
 
-snapshot[`molt test/data/import.ts 2`] = `
+snapshot[`cli - "molt import.ts" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/jsr.ts 1`] = `
+snapshot[`cli - "molt jsr.ts" 1`] = `
 "📦 @std/assert 0.210.0 => 123.456.789
-  test/data/jsr.ts 0.210.0
+  jsr.ts 0.210.0
 "
 `;
 
-snapshot[`molt test/data/jsr.ts 2`] = `
+snapshot[`cli - "molt jsr.ts" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/import_map/mod.ts 1`] = `
+snapshot[`cli - import_map - "molt mod.ts" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/import_map/deno.json 0.200.0
+  deno.json 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/import_map/deno.json 0.50.0
+  deno.json 0.50.0
 
 📦 node-emoji 1.0.0 => 123.456.789
-  test/data/import_map/deno.json 1.0.0
+  deno.json 1.0.0
 "
 `;
 
-snapshot[`molt test/data/import_map/mod.ts 2`] = `
+snapshot[`cli - import_map - "molt mod.ts" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/import_map/mod.ts --import-map test/data/import_map/deno.json 1`] = `
+snapshot[`cli - import_map - "molt mod.ts --import-map deno.json" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/import_map/deno.json 0.200.0
+  deno.json 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/import_map/deno.json 0.50.0
+  deno.json 0.50.0
 
 📦 node-emoji 1.0.0 => 123.456.789
-  test/data/import_map/deno.json 1.0.0
+  deno.json 1.0.0
 "
 `;
 
-snapshot[`molt test/data/import_map/mod.ts --import-map test/data/import_map/deno.json 2`] = `
+snapshot[`cli - import_map - "molt mod.ts --import-map deno.json" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/import_map/deno.json 1`] = `""`;
+snapshot[`cli - import_map - "molt deno.json" 1`] = `""`;
 
-snapshot[`molt test/data/import_map/deno.json 2`] = `
-'❌ file must be javascript or typescript: "test/data/import_map/deno.json"
+snapshot[`cli - import_map - "molt deno.json" 2`] = `
+'❌ file must be javascript or typescript: "deno.json"
 '
 `;
 
-snapshot[`molt test/data/import_map/mod.ts --import-map not_exist.json 1`] = `""`;
-
-snapshot[`molt test/data/import_map/mod.ts --import-map not_exist.json 2`] = `
-"Import map not_exist.json does not exist.
-"
-`;
-
-snapshot[`molt test/data/multiple_imports.ts --ignore node-emoji 1`] = `
+snapshot[`cli - "molt multiple_imports.ts --ignore node-emoji" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_imports.ts 0.200.0
+  multiple_imports.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_imports.ts 0.50.0
+  multiple_imports.ts 0.50.0
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --ignore node-emoji 2`] = `
+snapshot[`cli - "molt multiple_imports.ts --ignore node-emoji" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --ignore=deno_graph,node-emoji 1`] = `
+snapshot[`cli - "molt multiple_imports.ts --ignore=deno_graph,node-emoji" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_imports.ts 0.200.0
+  multiple_imports.ts 0.200.0
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --ignore=deno_graph,node-emoji 2`] = `
+snapshot[`cli - "molt multiple_imports.ts --ignore=deno_graph,node-emoji" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only deno.land/std 1`] = `
+snapshot[`cli - "molt multiple_imports.ts --only deno.land/std" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_imports.ts 0.200.0
+  multiple_imports.ts 0.200.0
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only deno.land/std 2`] = `
+snapshot[`cli - "molt multiple_imports.ts --only deno.land/std" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 1`] = `
+snapshot[`cli - "molt multiple_imports.ts --only=deno.land/std,deno_graph" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_imports.ts 0.200.0
+  multiple_imports.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_imports.ts 0.50.0
+  multiple_imports.ts 0.50.0
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only=deno.land/std,deno_graph 2`] = `
+snapshot[`cli - "molt multiple_imports.ts --only=deno.land/std,deno_graph" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only deno.land --ignore deno_graph 1`] = `
+snapshot[`cli - "molt multiple_imports.ts --only deno.land --ignore deno_graph" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_imports.ts 0.200.0
+  multiple_imports.ts 0.200.0
 "
 `;
 
-snapshot[`molt test/data/multiple_imports.ts --only deno.land --ignore deno_graph 2`] = `
+snapshot[`cli - "molt multiple_imports.ts --only deno.land --ignore deno_graph" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --write 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --write" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
-💾 test/data/multiple_modules/lib.ts
-💾 test/data/multiple_modules/mod.ts
+💾 lib.ts
+💾 mod.ts
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --write 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --write" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --write --summary title.txt --report body.md 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --write --summary title.txt --report body.md" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
-💾 test/data/multiple_modules/lib.ts
-💾 test/data/multiple_modules/mod.ts
+💾 lib.ts
+💾 mod.ts
 
 📄 title.txt
 📄 body.md
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --write --summary title.txt --report body.md 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --write --summary title.txt --report body.md" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
 📝 bump deno.land/std from 0.200.0 to 123.456.789
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -288,21 +281,21 @@ snapshot[`molt test/data/multiple_modules/mod.ts --commit 1`] = `
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --prefix :package: 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --prefix :package:" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
 📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -310,21 +303,21 @@ snapshot[`molt test/data/multiple_modules/mod.ts --commit --prefix :package: 1`]
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --prefix :package: 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --prefix :package:" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --pre-commit=fmt --post-commit=lint 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --pre-commit=fmt --post-commit=lint" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
 💾 bump deno.land/std from 0.200.0 to 123.456.789
 🔨 Running task fmt...
@@ -343,21 +336,21 @@ snapshot[`molt test/data/multiple_modules/mod.ts --commit --pre-commit=fmt --pos
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --pre-commit=fmt --post-commit=lint 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --pre-commit=fmt --post-commit=lint" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --report body.md 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --report body.md" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
 📝 bump deno.land/std from 0.200.0 to 123.456.789
 📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
@@ -368,21 +361,21 @@ snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --report body.md 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --report body.md" 2`] = `
 "Checking for updates
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --pre-commit=fmt 1`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --pre-commit=fmt" 1`] = `
 "📦 deno.land/std 0.200.0 => 123.456.789
-  test/data/multiple_modules/lib.ts 0.200.0
-  test/data/multiple_modules/mod.ts 0.200.0
+  lib.ts 0.200.0
+  mod.ts 0.200.0
 
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 0.50.0
+  mod.ts 0.50.0
 
 📦 node-emoji 2.0.0 => 123.456.789
-  test/data/multiple_modules/mod.ts 2.0.0
+  mod.ts 2.0.0
 
 💾 bump deno.land/std from 0.200.0 to 123.456.789
 🔨 Running task fmt...
@@ -400,7 +393,7 @@ snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --
 "
 `;
 
-snapshot[`molt test/data/multiple_modules/mod.ts --commit --summary title.txt --pre-commit=fmt 2`] = `
+snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --pre-commit=fmt" 2`] = `
 "Checking for updates
 "
 `;
