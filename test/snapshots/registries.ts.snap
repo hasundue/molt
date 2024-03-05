@@ -48,6 +48,12 @@ snapshot[`registry - ga.jspm.io 2`] = `true`;
 
 snapshot[`registry - ga.jspm.io 3`] = `false`;
 
+snapshot[`registry - esm.run 1`] = `true`;
+
+snapshot[`registry - esm.run 2`] = `true`;
+
+snapshot[`registry - esm.run 3`] = `false`;
+
 snapshot[`registry - esm.sh 1`] = `true`;
 
 snapshot[`registry - esm.sh 2`] = `true`;

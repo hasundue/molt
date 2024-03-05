@@ -17,37 +17,35 @@ const SPECS = [
   ],
   [
     "npm:",
-    "npm:preact@10.5.5",
+    "npm:preact@10.19.0",
   ],
   [
     "jsr:",
-    "jsr:@std/semver@0.210.0",
+    "jsr:@std/jsonc@0.210.0",
   ],
   [
     "cdn.jsdelivr.net/npm",
-    "https://cdn.jsdelivr.net/npm/preact@10.5.5",
+    "https://cdn.jsdelivr.net/npm/preact@10.19.0",
   ],
   [
     "cdn.jsdelivr.net/gh",
-    "https://cdn.jsdelivr.net/gh/hasundue/molt@e4509a9/lib/path.ts",
+    "https://cdn.jsdelivr.net/gh/hasundue/molt@8a4a9a7/lib/path.ts",
   ],
   [
     "cdn.skypack.dev",
-    "https://cdn.skypack.dev/preact@10.5.5",
+    "https://cdn.skypack.dev/preact@10.19.0",
   ],
   [
     "ga.jspm.io",
     "https://ga.jspm.io/npm:lit-html@2.7.0/development/is-server.js",
   ],
-  /**
   [
     "esm.run",
-    "https://esm.run/preact@10.5.5",
+    "https://esm.run/preact@10.19.0",
   ],
-  */
   [
     "esm.sh",
-    "https://esm.sh/preact@10.5.5",
+    "https://esm.sh/preact@10.19.0",
   ],
   [
     "x.nest.land",
@@ -55,15 +53,15 @@ const SPECS = [
   ],
   [
     "pax.deno.dev",
-    "https://pax.deno.dev/hasundue/molt@e4509a9/lib/path.ts",
+    "https://pax.deno.dev/hasundue/molt@8a4a9a7/lib/path.ts",
   ],
   [
     "raw.githubusercontent.com",
-    "https://raw.githubusercontent.com/hasundue/molt/e4509a9/lib/path.ts",
+    "https://raw.githubusercontent.com/hasundue/molt/8a4a9a7/lib/path.ts",
   ],
   [
     "unpkg.com",
-    "https://unpkg.com/preact@10.5.5",
+    "https://unpkg.com/preact@10.19.0",
   ],
 ] satisfies RegistryTestSpec[];
 
