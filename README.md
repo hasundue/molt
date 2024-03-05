@@ -79,7 +79,7 @@ Alternatively, you may prefer to run the remote script directly through
 
 #### Usage
 
-````
+```
 > molt --help
 Usage: molt <modules...>
 
@@ -110,12 +110,13 @@ Examples:
   Target all .ts files:          molt ./**/*.ts                             
   Specify an import map:         molt mod.ts --import-map deno.json         
   Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
-  Check deno_std only:           molt deps.ts --only deno.land/std          
+  Check deno_std only:           molt deps.ts --only deno.land/std
+```
 
 > [!Note]\
 > Molt CLI automatically finds `deno.json` or `deno.jsonc` in the current
 > working directory or its parent directories and uses import maps defined in
-> the file if available.\
+> the file if available.
 
 #### Examples
 
@@ -127,7 +128,7 @@ Examples:
 📦 deno.land/std 0.200.0 => 123.456.789
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
 📦 node-emoji 1.0.0 => 123.456.789
-````
+```
 
 ##### Write changes to files
 
