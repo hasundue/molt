@@ -1,5 +1,5 @@
 import { distinct } from "./std/collections.ts";
-import { dirname, fromFileUrl } from "./std/path.ts";
+import { fromFileUrl } from "./std/path.ts";
 import {
   createGraph,
   type CreateGraphOptions,
@@ -64,8 +64,17 @@ class DenoGraph {
 
 export interface CollectOptions {
   /**
+   * The working directory to resolve relative paths.
+   * If not specified, the current working directory is used.
+   * At present, this option is only used to find the import map.
+   *
+   * @example "/path/to/project"
+   */
+  cwd?: string | URL;
+  /**
    * The path to the import map used to resolve dependencies.
-   * If not specified, deno.json or deno.jsonc in the root directory of the module is used.
+   * If not specified, molt will automatically find deno.json or deno.jsonc
+   * in the current working directory or parent directories.
    *
    * @example
    * ```ts
@@ -76,10 +85,6 @@ export interface CollectOptions {
    * ```
    */
   importMap?: string | URL;
-  /**
-   * If true, the import map is searched for in the parent directories of the first module specified.
-   */
-  findImportMap?: boolean;
   /**
    * A function to filter out dependencies.
    *
@@ -120,9 +125,7 @@ export async function collect(
   const urls = froms.map((path) => toUrl(path));
 
   const importMapPath = options.importMap ??
-    (options.findImportMap
-      ? await findFileUp(dirname(urls[0]), "deno.json", "deno.jsonc")
-      : undefined);
+    await findFileUp(options.cwd ?? Deno.cwd(), "deno.json", "deno.jsonc");
 
   const importMap = importMapPath
     ? await tryReadFromJson(toUrl(importMapPath))
@@ -157,6 +160,7 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
   switch (url.protocol) {
     case "node:":
     case "npm:":
+    case "jsr:":
       return {
         kind: "external",
         specifier,

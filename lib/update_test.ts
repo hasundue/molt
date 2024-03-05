@@ -1,3 +1,4 @@
+import { dirname } from "./std/path.ts";
 import { assertEquals, assertThrows } from "./std/assert.ts";
 import { filterKeys } from "./std/collections.ts";
 import { basename } from "./std/path.ts";
@@ -5,15 +6,23 @@ import { assertSnapshot } from "./testing.ts";
 import { LatestSemVerStub } from "./testing.ts";
 import { collect, DependencyUpdate, getVersionChange } from "./update.ts";
 
-const test = (path: string, name = basename(path)) =>
-  Deno.test("collect - " + name, async (t) => {
-    const updates = await collect(new URL(path, import.meta.url), {
-      findImportMap: true,
-    });
-    for (const update of updates) {
-      await assertUpdateSnapshot(t, update);
-    }
-  });
+function test(
+  path: string,
+  name = basename(path),
+  variation?: string,
+) {
+  Deno.test(
+    "collect - " + (variation ? `${name} - ${variation}` : name),
+    async (t) => {
+      const updates = await collect(new URL(path, import.meta.url), {
+        cwd: new URL(dirname(path), import.meta.url),
+      });
+      for (const update of updates) {
+        await assertUpdateSnapshot(t, update);
+      }
+    },
+  );
+}
 
 async function assertUpdateSnapshot(
   t: Deno.TestContext,
@@ -45,8 +54,12 @@ for await (
         new URL("../test/data/" + testCase.name, import.meta.url),
       )
     ) {
-      if (entry.isFile && entry.name === "mod.ts") {
-        test(`../test/data/${testCase.name}/mod.ts`, testCase.name);
+      if (entry.isFile && ["mod.ts", "deno.json"].includes(entry.name)) {
+        test(
+          `../test/data/${testCase.name}/${entry.name}`,
+          testCase.name,
+          entry.name,
+        );
       }
     }
   }
