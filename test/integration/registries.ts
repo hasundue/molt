@@ -68,14 +68,14 @@ const SPECS = [
 ] satisfies RegistryTestSpec[];
 
 for (const spec of SPECS) {
-  const name = spec[0];
+  const name = "registry - " + spec[0];
 
   Deno.test(name, async (t) => {
     const assert = (it: unknown) => assertSnapshot(t, it !== undefined);
 
     // Make sure the URL is valid.
     // Skip this test for npm because it fails.
-    if (name !== "npm:") {
+    if (spec[0] !== "npm:") {
       await assert(await import(spec[1]));
     } else {
       await assert(true);
