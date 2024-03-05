@@ -79,7 +79,7 @@ Alternatively, you may prefer to run the remote script directly through
 
 #### Usage
 
-```
+````
 > molt --help
 Usage: molt <modules...>
 
@@ -123,37 +123,29 @@ Examples:
 
 ```sh
 > molt deno.json
+📦 @luca/flag 1.0.0 => 123.456.789
 📦 deno.land/std 0.200.0 => 123.456.789
-  lib.ts 0.200.0
-  mod.ts 0.200.0
-
 📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-  mod.ts 0.50.0
-
-📦 node-emoji 2.0.0 => 123.456.789
-  mod.ts 2.0.0
-```
+📦 node-emoji 1.0.0 => 123.456.789
+````
 
 ##### Write changes to files
 
 ```sh
 > molt deno.json --write
     ...
-💾 lib.ts
-💾 mod.ts
+💾 deno.json
 ```
 
 ##### Commit changes to git
 
 ```sh
-> molt deno.json --commit --pre-commit=test --prefix :package: --summary title.txt --report report.md
+> molt deno.json --commit --prefix :package:
     ...
+📝 :package: bump @luca/flag from 1.0.0 to 123.456.789
 📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
 📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
 📝 :package: bump node-emoji from 2.0.0 to 123.456.789
-
-📄 title.txt
-📄 report.md
 ```
 
 ## Compatibility with registries
