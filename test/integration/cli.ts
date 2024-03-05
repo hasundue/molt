@@ -15,10 +15,9 @@ molt("import.ts");
 // special registries
 molt("jsr.ts");
 
-// import maps
+// with import maps
 molt("mod.ts", { cwd: "import_map" });
 molt("mod.ts --import-map deno.json", { cwd: "import_map" });
-molt("deno.json", { cwd: "import_map" });
 
 // --ignore and --only
 molt("multiple_imports.ts --ignore node-emoji");
@@ -49,6 +48,11 @@ molt(
   "mod.ts --commit --summary title.txt --pre-commit=fmt",
   { cwd: "multiple_modules" },
 );
+
+// deno.json
+molt("deno.json", { cwd: "import_map" });
+molt("deno.json --write", { cwd: "import_map" });
+molt("deno.json --commit --prefix :package:", { cwd: "import_map" });
 
 //-----------------------
 // Test implementation

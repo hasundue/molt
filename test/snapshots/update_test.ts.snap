@@ -35,6 +35,36 @@ snapshot[`collect - multiple_imports.ts 1`] = `
   code: {
     span: {
       end: {
+        character: 52,
+        line: 3,
+      },
+      start: {
+        character: 30,
+        line: 3,
+      },
+    },
+    specifier: "jsr:@luca/flag@1.0.0",
+  },
+  from: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "1.0.0",
+  },
+  to: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - multiple_imports.ts 2`] = `
+{
+  code: {
+    span: {
+      end: {
         character: 71,
         line: 0,
       },
@@ -60,7 +90,7 @@ snapshot[`collect - multiple_imports.ts 1`] = `
 }
 `;
 
-snapshot[`collect - multiple_imports.ts 2`] = `
+snapshot[`collect - multiple_imports.ts 3`] = `
 {
   code: {
     span: {
@@ -90,7 +120,7 @@ snapshot[`collect - multiple_imports.ts 2`] = `
 }
 `;
 
-snapshot[`collect - multiple_imports.ts 3`] = `
+snapshot[`collect - multiple_imports.ts 4`] = `
 {
   code: {
     span: {
@@ -205,6 +235,27 @@ snapshot[`collect - import_map - deno.json 1`] = `
 {
   code: {
     span: undefined,
+    specifier: "jsr:@luca/flag@1.0.0",
+  },
+  from: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "1.0.0",
+  },
+  to: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - import_map - deno.json 2`] = `
+{
+  code: {
+    span: undefined,
     specifier: "https://deno.land/std@0.200.0/",
   },
   from: {
@@ -222,7 +273,7 @@ snapshot[`collect - import_map - deno.json 1`] = `
 }
 `;
 
-snapshot[`collect - import_map - deno.json 2`] = `
+snapshot[`collect - import_map - deno.json 3`] = `
 {
   code: {
     span: undefined,
@@ -243,7 +294,7 @@ snapshot[`collect - import_map - deno.json 2`] = `
 }
 `;
 
-snapshot[`collect - import_map - deno.json 3`] = `
+snapshot[`collect - import_map - deno.json 4`] = `
 {
   code: {
     span: undefined,
@@ -265,6 +316,36 @@ snapshot[`collect - import_map - deno.json 3`] = `
 `;
 
 snapshot[`collect - import_map - mod.ts 1`] = `
+{
+  code: {
+    span: {
+      end: {
+        character: 36,
+        line: 3,
+      },
+      start: {
+        character: 30,
+        line: 3,
+      },
+    },
+    specifier: "flag",
+  },
+  from: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "1.0.0",
+  },
+  to: {
+    name: "@luca/flag",
+    path: "",
+    protocol: "jsr:",
+    version: "123.456.789",
+  },
+}
+`;
+
+snapshot[`collect - import_map - mod.ts 2`] = `
 {
   code: {
     span: {
@@ -294,7 +375,7 @@ snapshot[`collect - import_map - mod.ts 1`] = `
 }
 `;
 
-snapshot[`collect - import_map - mod.ts 2`] = `
+snapshot[`collect - import_map - mod.ts 3`] = `
 {
   code: {
     span: {
@@ -324,7 +405,7 @@ snapshot[`collect - import_map - mod.ts 2`] = `
 }
 `;
 
-snapshot[`collect - import_map - mod.ts 3`] = `
+snapshot[`collect - import_map - mod.ts 4`] = `
 {
   code: {
     span: {
