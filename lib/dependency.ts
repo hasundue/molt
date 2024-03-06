@@ -148,62 +148,64 @@ export function toUrl(dependency: Dependency): string {
  */
 export async function resolveLatestVersion(
   dependency: Dependency,
+  options?: { cache?: boolean },
 ): Promise<UpdatedDependency | undefined> {
-  await LatestVersionCache.lock(dependency.name);
+  using cache = new LatestVersionCache(dependency.name);
+  if (options?.cache) {
+    const cached = cache.get(dependency.name);
+    if (cached) {
+      return { ...cached, path: dependency.path };
+    }
+    if (cached === null) {
+      // The dependency is already found to be up to date or unable to resolve.
+      return;
+    }
+  }
+  const constraint = dependency.version
+    ? SemVer.tryParseRange(dependency.version)
+    : undefined;
+  // Do not update inequality ranges.
+  if (constraint && constraint.flat().length > 1) {
+    return;
+  }
   const result = await _resolveLatestVersion(dependency);
-  LatestVersionCache.unlock(dependency.name);
+  if (options?.cache) {
+    cache.set(dependency.name, result ?? null);
+  }
   return result;
 }
 
-class LatestVersionCache {
+class LatestVersionCache implements Disposable {
   static #mutex = new Map<string, Mutex>();
   static #cache = new Map<string, UpdatedDependency | null>();
 
-  static lock(name: string): Promise<void> {
-    const mutex = this.#mutex.get(name) ??
-      this.#mutex.set(name, new Mutex()).get(name)!;
-    return mutex.acquire();
+  constructor(readonly name: string) {
+    const mutex = LatestVersionCache.#mutex.get(name) ??
+      LatestVersionCache.#mutex.set(name, new Mutex()).get(name)!;
+    mutex.acquire();
   }
 
-  static unlock(name: string): void {
-    const mutex = this.#mutex.get(name);
-    assertExists(mutex);
-    mutex.release();
+  get(name: string): UpdatedDependency | null | undefined {
+    return LatestVersionCache.#cache.get(name);
   }
 
-  static get(name: string): UpdatedDependency | null | undefined {
-    return this.#cache.get(name);
-  }
-
-  static set<T extends UpdatedDependency | null>(
+  set<T extends UpdatedDependency | null>(
     name: string,
     dependency: T,
-  ): T {
-    this.#cache.set(name, dependency);
-    return dependency;
+  ): void {
+    LatestVersionCache.#cache.set(name, dependency);
+  }
+
+  [Symbol.dispose]() {
+    const mutex = LatestVersionCache.#mutex.get(this.name);
+    assertExists(mutex);
+    mutex.release();
   }
 }
 
 async function _resolveLatestVersion(
   dependency: Dependency,
 ): Promise<UpdatedDependency | undefined> {
-  const cached = LatestVersionCache.get(dependency.name);
-  if (cached) {
-    return { ...cached, path: dependency.path };
-  }
-  if (cached === null) {
-    // The dependency is already found to be up to date or unable to resolve.
-    return;
-  }
-  const constraint = dependency.version
-    ? SemVer.tryParseRange(dependency.version)
-    : undefined;
-
-  // Do not update inequality ranges.
-  if (constraint && constraint.flat().length > 1) {
-    return;
-  }
-
   switch (dependency.protocol) {
     case "npm:": {
       const response = await fetch(
@@ -221,10 +223,7 @@ async function _resolveLatestVersion(
       if (latest === dependency.version || isPreRelease(latest)) {
         break;
       }
-      return LatestVersionCache.set(
-        dependency.name,
-        { ...dependency, version: latest },
-      );
+      return { ...dependency, version: latest };
     }
     // Ref: https://jsr.io/docs/api#jsr-registry-api
     case "jsr:": {
@@ -248,10 +247,7 @@ async function _resolveLatestVersion(
       if (latest === dependency.version || isPreRelease(latest)) {
         break;
       }
-      return LatestVersionCache.set(
-        dependency.name,
-        { ...dependency, version: latest },
-      );
+      return { ...dependency, version: latest };
     }
     case "http:":
     case "https:": {
@@ -263,17 +259,19 @@ async function _resolveLatestVersion(
       if (!response.redirected) {
         break;
       }
-      const latest = parse(response.url);
-      if (!latest.version || isPreRelease(latest.version)) {
+      const redirected = parse(response.url);
+      if (!redirected.version || isPreRelease(redirected.version)) {
         break;
       }
-      return LatestVersionCache.set(
-        dependency.name,
-        latest as UpdatedDependency,
-      );
+      const latest = redirected as UpdatedDependency;
+      return {
+        ...latest,
+        // Preserve the original path if it is the root, which is unlikely to be
+        // included in the redirected URL.
+        // path: dependency.path === "/" ? "/" : latest.path,
+      };
     }
   }
-  LatestVersionCache.set(dependency.name, null);
 }
 
 const isNpmPackageMeta = is.ObjectOf({

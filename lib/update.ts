@@ -72,6 +72,11 @@ class DenoGraph {
 
 export interface CollectOptions {
   /**
+   * Whether to use the cache to resolve dependencies.
+   * @default true
+   */
+  cache?: boolean;
+  /**
    * The working directory to resolve relative paths.
    * If not specified, the current working directory is used.
    * At present, this option is only used to find the import map.
@@ -167,7 +172,7 @@ export async function collect(
         const update = await _createDependencyUpdate(
           dependency,
           mod.specifier,
-          { ...options, importMap },
+          { cache: true, ...options, importMap },
         );
         if (update) updates.push(update);
       })
@@ -218,7 +223,7 @@ const load: NonNullable<CreateGraphOptions["load"]> = async (
 async function _createDependencyUpdate(
   dependencyJson: DependencyJson,
   referrer: string,
-  options?: Pick<CollectOptions, "ignore" | "only"> & {
+  options?: Pick<CollectOptions, "cache" | "ignore" | "only"> & {
     importMap?: ImportMap;
   },
 ): Promise<DependencyUpdate | undefined> {
@@ -243,7 +248,9 @@ async function _createDependencyUpdate(
   if (options?.only && !options.only(dependency)) {
     return;
   }
-  const latest = await resolveLatestVersion(dependency);
+  const latest = await resolveLatestVersion(dependency, {
+    cache: options?.cache,
+  });
   if (!latest || latest.version === dependency.version) {
     return;
   }
@@ -275,7 +282,7 @@ async function _createDependencyUpdate(
 
 async function _collectFromImportMap(
   specifier: ModuleJson["specifier"],
-  options: Pick<CollectOptions, "ignore" | "only">,
+  options: Pick<CollectOptions, "cache" | "ignore" | "only">,
 ): Promise<DependencyUpdate[]> {
   const json = await readImportMapJson(new URL(specifier));
   const updates: DependencyUpdate[] = [];
@@ -292,7 +299,9 @@ async function _collectFromImportMap(
         if (options.only && !options.only(dependency)) {
           return;
         }
-        const latest = await resolveLatestVersion(dependency);
+        const latest = await resolveLatestVersion(dependency, {
+          cache: options.cache,
+        });
         if (!latest || latest.version === dependency.version) {
           return;
         }

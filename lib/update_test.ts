@@ -13,6 +13,7 @@ async function test(
 ) {
   try {
     const updates = await collect(new URL(path, import.meta.url), {
+      cache: false,
       cwd: new URL(dirname(path), import.meta.url),
     });
     Deno.test(
