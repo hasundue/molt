@@ -1,45 +1,51 @@
+import { assertEquals } from "./std/assert.ts";
+import { deepMerge, omit, partition } from "./std/collections.ts";
 import { detectEOL, EOL } from "./std/fs.ts";
-import { toUrl } from "./dependency.ts";
-import { type DependencyUpdate } from "./update.ts";
+import { stringify } from "./dependency.ts";
+import { createLockPart, LockPart, parseLockFileJson } from "./lockfile.ts";
+import {
+  CollectResult,
+  DependencyUpdate,
+  SourceType,
+  sourceTypeOf,
+} from "./update.ts";
 
 /**
- * Write the given array of DependencyUpdate to files.
- *
+ * A collection of updates to dependencies associated with a file.
+ */
+export interface FileUpdate<T extends SourceType = SourceType> {
+  /** The full path to the file being updated.
+   * @example "/path/to/mod.ts" */
+  path: string;
+  /** The type of the file being updated. */
+  kind: T;
+  /** The updates to dependencies associated with the file. */
+  dependencies: DependencyUpdate<T>[];
+  /** Partial locks used to update a lockfile. */
+  locks: LockPart[];
+}
+
+export interface WriteOptions {
+  onWrite?: (file: FileUpdate) => void | Promise<void>;
+}
+
+/**
+ * Write the given `CollectResult` to file system.
  * @returns A promise that resolves when all updates are written.
- *
  * @example
  * ```ts
- * await writeAll(updates, {
+ * await write(updates, {
  *   onWrite: (file) => {
  *     console.log(`Updated ${file.specifier}`);
  *   },
  * });
  * ```
  */
-export function writeAll(
-  updates: DependencyUpdate[],
-  options?: {
-    onWrite?: (file: FileUpdate) => void | Promise<void>;
-  },
+export function write(
+  result: CollectResult,
+  options: WriteOptions = {},
 ) {
-  return write(associateByFile(updates), options);
-}
-
-type FileKind = "module" | "import_map";
-
-/**
- * A collection of updates to dependencies associated with a file.
- */
-export interface FileUpdate<
-  Kind extends FileKind = FileKind,
-> {
-  /** The full path to the file being updated.
-   * @example "/path/to/mod.ts" */
-  path: string;
-  /** The type of the file being updated. */
-  kind: Kind;
-  /** The updates to dependencies associated with the file. */
-  dependencies: DependencyUpdate<Kind extends "import_map" ? true : false>[];
+  return writeFileUpdate(associateByFile(result), options);
 }
 
 /**
@@ -47,48 +53,50 @@ export interface FileUpdate<
  * The collected updates are lexically sorted by the url of the file.
  */
 export function associateByFile(
-  dependencies: DependencyUpdate[],
+  collected: CollectResult,
 ): FileUpdate[] {
   /** A map from module URLs to dependency updates. */
   const fileToDepsMap = new Map<string, DependencyUpdate[]>();
-  for (const dep of dependencies) {
-    const referrer = dep.map?.source ?? dep.referrer;
+  for (const dependency of collected.updates) {
+    const referrer = dependency.map?.source ?? dependency.referrer;
     const deps = fileToDepsMap.get(referrer) ??
       fileToDepsMap.set(referrer, []).get(referrer)!;
-    deps.push(dep);
+    deps.push(dependency);
   }
   return Array.from(fileToDepsMap.entries()).map((
     [referrer, dependencies],
-  ) => ({
-    path: referrer,
-    kind: dependencies[0].map ? "import_map" : "module",
-    dependencies,
-  })).sort((a, b) => a.path.localeCompare(b.path)) as FileUpdate[];
+  ) => {
+    const kind = sourceTypeOf(dependencies[0]);
+    return {
+      path: referrer,
+      kind,
+      dependencies,
+      locks: collected.locks,
+    };
+  }).sort((a, b) => a.path.localeCompare(b.path)) as FileUpdate[];
 }
 
 /**
  * Write the given (array of) FileUpdate to file system.
  */
-export async function write(
+export async function writeFileUpdate(
   updates: FileUpdate | FileUpdate[],
-  options?: {
-    onWrite?: (result: FileUpdate) => void | Promise<void>;
-  },
+  options: WriteOptions = {},
 ) {
   for (const update of [updates].flat()) {
-    await _write(update);
-    await options?.onWrite?.(update);
+    await writeTo(update);
+    await options.onWrite?.(update);
   }
 }
 
-function _write(
-  update: FileUpdate,
-) {
+function writeTo(update: FileUpdate) {
   switch (update.kind) {
     case "module":
       return writeToModule(update as FileUpdate<"module">);
     case "import_map":
       return writeToImportMap(update as FileUpdate<"import_map">);
+    case "lockfile":
+      return writeToLockfile(update as FileUpdate<"lockfile">);
   }
 }
 
@@ -114,7 +122,7 @@ async function writeToModule(
               dependency.code.span.start.character + 1,
               dependency.code.span.end.character - 1,
             ),
-            toUrl(dependency.to),
+            stringify(dependency.to),
           )
           : line;
       })
@@ -123,12 +131,111 @@ async function writeToModule(
 }
 
 async function writeToImportMap(
-  /** The dependency update to apply. */
   update: FileUpdate<"import_map">,
 ) {
   let content = await Deno.readTextFile(update.path);
   for (const dependency of update.dependencies) {
-    content = content.replaceAll(toUrl(dependency.from), toUrl(dependency.to));
+    content = content.replaceAll(
+      stringify(dependency.from),
+      stringify(dependency.to),
+    );
   }
   await Deno.writeTextFile(update.path, content);
+}
+
+async function writeToLockfile(
+  update: FileUpdate<"lockfile">,
+) {
+  const original = await parseLockFileJson(update.path);
+
+  for await (const dependency of update.dependencies) {
+    const specifier = dependency.code.specifier;
+
+    // An updated partial lockfile for the dependency.
+    const { data: patch } = await createLockPart(
+      specifier,
+      null,
+      dependency.from?.protocol.startsWith("http")
+        ? specifier.replace(
+          stringify(dependency.from),
+          stringify(dependency.to),
+        )
+        : undefined,
+    );
+
+    // Specifiers that are only depended by the current dependency.
+    const omitter = createLockFileOmitKeys(specifier, update.locks);
+
+    if (original.packages && patch.packages) {
+      original.packages.specifiers = deepMerge(
+        original.packages.specifiers,
+        patch.packages.specifiers,
+      );
+      if (patch.packages.jsr) {
+        original.packages.jsr = deepMerge(
+          omit(original.packages.jsr ?? {}, omitter.jsr),
+          patch.packages.jsr,
+          { arrays: "replace" },
+        );
+      }
+      if (patch.packages.npm) {
+        original.packages.npm = deepMerge(
+          omit(original.packages.npm ?? {}, omitter.npm),
+          patch.packages.npm,
+        );
+      }
+    }
+    if (patch.remote) {
+      original.remote = deepMerge(
+        omit(original.remote ?? {}, omitter.remote),
+        patch.remote,
+      );
+    }
+  }
+  await Deno.writeTextFile(update.path, JSON.stringify(original, replacer, 2));
+}
+
+function replacer(
+  key: string,
+  value: unknown,
+) {
+  return ["specifiers", "jsr", "npm", "remote"].includes(key) && value
+    ? Object.fromEntries(Object.entries(value).sort())
+    : value;
+}
+
+interface LockFileOmitKeys {
+  jsr: string[];
+  npm: string[];
+  remote: string[];
+}
+
+/** Create a list of keys to omit from the original lockfile. */
+function createLockFileOmitKeys(
+  specifier: string,
+  locks: LockPart[],
+): LockFileOmitKeys {
+  const [relevant, others] = partition(
+    locks,
+    (it) => it.specifier === specifier,
+  );
+  assertEquals(relevant.length, 1);
+  const { data: patch } = relevant[0];
+  return {
+    jsr: Object.keys(patch.packages?.jsr ?? {}).filter((key) =>
+      !others.some((part) =>
+        Object.keys(part.data.packages?.jsr ?? {}).some((it) => it === key)
+      )
+    ),
+    npm: Object.keys(patch.packages?.npm ?? {}).filter((key) =>
+      !others.some((part) =>
+        Object.keys(part.data.packages?.npm ?? {}).some((it) => it === key)
+      )
+    ),
+    remote: Object.keys(patch.remote ?? {}).filter((key) =>
+      !others.some((part) =>
+        Object.keys(part.data.remote ?? {}).some((it) => it === key)
+      )
+    ),
+  };
 }

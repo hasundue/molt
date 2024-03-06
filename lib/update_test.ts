@@ -1,58 +1,73 @@
 import { dirname } from "./std/path.ts";
-import { assertEquals, assertInstanceOf, assertThrows } from "./std/assert.ts";
+import { assertEquals, assertInstanceOf } from "./std/assert.ts";
 import { filterKeys } from "./std/collections.ts";
 import { basename } from "./std/path.ts";
 import { assertSnapshot } from "./testing.ts";
-import { LatestSemVerStub } from "./testing.ts";
-import { collect, DependencyUpdate, getVersionChange } from "./update.ts";
+import { LatestVersionStub } from "./testing.ts";
+import { collect, DependencyUpdate } from "./update.ts";
 
-async function test(
+function test(
   path: string,
   name = basename(path),
   variation?: string,
 ) {
-  try {
-    const updates = await collect(new URL(path, import.meta.url), {
-      cache: false,
-      cwd: new URL(dirname(path), import.meta.url),
-    });
-    Deno.test(
-      "collect - " + (variation ? `${name} - ${variation}` : name),
-      async (t) => {
-        for (const update of updates) {
-          await assertUpdateSnapshot(t, update);
+  Deno.test(
+    "collect - " + (variation ? `${name} - ${variation}` : name),
+    async (t) => {
+      try {
+        const actual = await collect(new URL(path, import.meta.url), {
+          cwd: new URL(dirname(path), import.meta.url),
+          lock: path.includes("lockfile"),
+        });
+        const no_cache = await collect(new URL(path, import.meta.url), {
+          cache: false,
+          cwd: new URL(dirname(path), import.meta.url),
+          lock: path.includes("lockfile"),
+        });
+        assertEquals(actual, no_cache, "cache should not affect results");
+        await assertUpdateSnapshot(t, actual.updates);
+        if (actual.locks.length) {
+          await assertSnapshot(t, actual.locks);
         }
-      },
-    );
-  } catch (error) {
-    // import_map_reffered/deno.json just reffers to another import_map.json
-    assertInstanceOf(error, SyntaxError);
-  }
+      } catch (error) {
+        if (path.includes("import_map_referred/deno.json")) {
+          // deno.json just reffers to another import_map.json
+          assertInstanceOf(error, SyntaxError, error);
+        } else if (path.includes("lockfile_not_importable/deno.json")) {
+          // can't lock an import specifier that is not importable as is
+          assertInstanceOf(error, Deno.errors.NotSupported);
+        } else {
+          throw error;
+        }
+      }
+    },
+  );
 }
 
 async function assertUpdateSnapshot(
   t: Deno.TestContext,
-  update: DependencyUpdate,
+  actual: DependencyUpdate[],
 ) {
   await assertSnapshot(
     t,
-    filterKeys(
-      // deno-lint-ignore no-explicit-any
-      update as Readonly<Record<string, any>>,
-      (key) => ["from", "to", "code"].includes(key),
+    actual.map((update) =>
+      filterKeys(
+        // deno-lint-ignore no-explicit-any
+        update as Readonly<Record<string, any>>,
+        (key) => ["from", "to", "code"].includes(key),
+      )
     ),
   );
 }
 
-const LATEST = "123.456.789";
-LatestSemVerStub.create(LATEST);
+LatestVersionStub.create({ "deno.land/std": "0.218.0", _: "123.456.789" });
 
 // Test collect() for all cases in test/data
 for await (
   const testCase of Deno.readDir(new URL("../test/data", import.meta.url))
 ) {
   if (testCase.isFile && testCase.name.endsWith(".ts")) {
-    await test(`../test/data/${testCase.name}`);
+    test(`../test/data/${testCase.name}`);
   }
   if (testCase.isDirectory) {
     for await (
@@ -62,9 +77,9 @@ for await (
     ) {
       if (
         entry.isFile && entry.name === "mod.ts" ||
-        entry.name.endsWith(".json") || entry.name.endsWith("jsonc")
+        entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")
       ) {
-        await test(
+        test(
           `../test/data/${testCase.name}/${entry.name}`,
           testCase.name,
           entry.name,
@@ -73,146 +88,3 @@ for await (
     }
   }
 }
-
-Deno.test("getVersionChange - single version", () => {
-  assertEquals(
-    getVersionChange([
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.1.0",
-        },
-      },
-      // deno-lint-ignore no-explicit-any
-    ] as any),
-    {
-      from: "0.0.1",
-      to: "0.1.0",
-    },
-  );
-});
-
-Deno.test("getVersionChange - multiple versions with different names", () => {
-  assertEquals(
-    getVersionChange([
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.1.0",
-        },
-      },
-      {
-        from: {
-          name: "node-emoji",
-          version: "0.0.1",
-        },
-        to: {
-          name: "node-emoji",
-          version: "0.1.0",
-        },
-      },
-      // deno-lint-ignore no-explicit-any
-    ] as any),
-    undefined,
-  );
-});
-
-Deno.test("getVersionChange - multiple versions with different `from`s and a common `to`", () => {
-  assertEquals(
-    getVersionChange([
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.1.0",
-        },
-      },
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.2",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.1.0",
-        },
-      },
-      // deno-lint-ignore no-explicit-any
-    ] as any),
-    {
-      from: undefined,
-      to: "0.1.0",
-    },
-  );
-});
-
-Deno.test("getVersionChange - multiple versions with a common `from` and `to`", () => {
-  assertEquals(
-    getVersionChange([
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.2.0",
-        },
-      },
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.2.0",
-        },
-      },
-      // deno-lint-ignore no-explicit-any
-    ] as any),
-    {
-      from: "0.0.1",
-      to: "0.2.0",
-    },
-  );
-});
-
-Deno.test("getVersionChange - multiple versions with a common `from` and different `to`s", () => {
-  assertThrows(() =>
-    getVersionChange([
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.1.0",
-        },
-      },
-      {
-        from: {
-          name: "deno_graph",
-          version: "0.0.1",
-        },
-        to: {
-          name: "deno_graph",
-          version: "0.2.0",
-        },
-      },
-      // deno-lint-ignore no-explicit-any
-    ] as any)
-  );
-});

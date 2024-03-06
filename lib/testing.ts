@@ -1,6 +1,6 @@
 import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
 import { formatEOL, LF } from "./std/fs.ts";
-import { fromFileUrl } from "./std/path.ts";
+import { dirname, fromFileUrl } from "./std/path.ts";
 
 export const assertSnapshot = createAssertSnapshot({
   dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
@@ -48,7 +48,7 @@ export const ReadTextFileStub = {
       "readTextFile",
       async (path) => {
         return fs.get(path.toString()) ??
-          (options?.readThrough
+          (path.toString().startsWith("/tmp") || options?.readThrough
             ? await original(path)
             : _throw(new Deno.errors.NotFound(`File not found: ${path}`)));
       },
@@ -61,17 +61,30 @@ export const WriteTextFileStub = {
   create(
     fs: FileSystemFake,
   ) {
+    const original = Deno.writeTextFile;
+    const tmp = getTempDir();
     return stub(
       Deno,
       "writeTextFile",
       (path, data) => {
-        fs.set(path.toString(), formatEOL(data.toString(), LF));
-        return Promise.resolve();
+        if (path.toString().startsWith(tmp)) {
+          return original(path, data);
+        } else {
+          fs.set(path.toString(), formatEOL(data.toString(), LF));
+          return Promise.resolve();
+        }
       },
     );
   },
 };
 export type WriteTextFileStub = ReturnType<typeof WriteTextFileStub.create>;
+
+function getTempDir() {
+  const temp = Deno.makeTempFileSync();
+  const tempDir = dirname(temp);
+  Deno.removeSync(temp);
+  return tempDir;
+}
 
 export const FetchStub = {
   create(
@@ -91,13 +104,23 @@ export const FetchStub = {
 };
 export type FetchStub = ReturnType<typeof FetchStub.create>;
 
-export const LatestSemVerStub = {
-  create(latest: string): FetchStub {
+export const LatestVersionStub = {
+  create(
+    replacer: string | Record<string, string | undefined>,
+  ): FetchStub {
     return FetchStub.create((request, init) => {
       request = (request instanceof Request)
         ? request
         : new Request(request, init);
       const url = new URL(request.url);
+      const latest = typeof replacer === "string"
+        ? replacer
+        : Object.entries(replacer)
+          .find(([pattern]) => url.href.includes(pattern))?.[1] ??
+          replacer["_"];
+      if (!latest) {
+        return init.original(request, init);
+      }
       switch (url.hostname) {
         case "registry.npmjs.org":
           return new Response(
@@ -136,7 +159,7 @@ export const LatestSemVerStub = {
     });
   },
 };
-export type LatestSemVerStub = ReturnType<typeof LatestSemVerStub.create>;
+export type LatestVersionStub = ReturnType<typeof LatestVersionStub.create>;
 
 function parseDenoLandUrl(url: URL) {
   const std = url.pathname.startsWith("/std");
@@ -167,7 +190,7 @@ export function enableTestMode() {
   const fs = new FileSystemFake();
   ReadTextFileStub.create(fs, { readThrough: true });
   WriteTextFileStub.create(fs);
-  LatestSemVerStub.create("123.456.789");
+  LatestVersionStub.create("123.456.789");
   Deno.Command = CommandStub.create();
 }
 

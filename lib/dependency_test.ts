@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, it } from "./std/testing.ts";
 import { assertEquals, assertExists, assertObjectMatch } from "./std/assert.ts";
 import { isPreRelease, parse, resolveLatestVersion } from "./dependency.ts";
-import { LatestSemVerStub } from "./testing.ts";
+import { LatestVersionStub } from "./testing.ts";
 
 describe("parse", () => {
   it("deno.land/std", () =>
@@ -90,10 +90,10 @@ Deno.test("isPreRelease", () => {
 
 describe("resolveLatestVersion", () => {
   const LATEST = "123.456.789";
-  let stub: LatestSemVerStub;
+  let stub: LatestVersionStub;
 
   beforeAll(() => {
-    stub = LatestSemVerStub.create(LATEST);
+    stub = LatestVersionStub.create(LATEST);
   });
 
   afterAll(() => {
@@ -200,10 +200,10 @@ describe("resolveLatestVersion", () => {
 });
 
 describe("resolveLatestVersion - pre-release", () => {
-  let stub: LatestSemVerStub;
+  let stub: LatestVersionStub;
 
   beforeAll(() => {
-    stub = LatestSemVerStub.create("123.456.789-alpha.1");
+    stub = LatestVersionStub.create("123.456.789-alpha.1");
   });
 
   afterAll(() => {

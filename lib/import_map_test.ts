@@ -59,9 +59,9 @@ describe("resolve()", () => {
     assertEquals(
       importMap.resolve("node-emoji", referrer),
       {
-        resolved: "npm:node-emoji@1.0.0",
+        resolved: "npm:node-emoji@2.0.0",
         key: "node-emoji",
-        value: "npm:node-emoji@1.0.0",
+        value: "npm:node-emoji@2.0.0",
       },
     );
     assertEquals(

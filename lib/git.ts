@@ -1,10 +1,13 @@
+import { distinct, mapN } from "./std/collections.ts";
 import { relative } from "./std/path.ts";
 import {
-  type DependencyUpdate,
-  getVersionChange,
-  VersionChange,
-} from "./update.ts";
-import { associateByFile, type FileUpdate, write } from "./file.ts";
+  associateByFile,
+  type FileUpdate,
+  writeFileUpdate,
+  WriteOptions,
+} from "./file.ts";
+import { LockPart } from "./lockfile.ts";
+import { CollectResult, DependencyUpdate } from "./update.ts";
 
 export interface CommitProps {
   /** The name of the module group */
@@ -12,7 +15,18 @@ export interface CommitProps {
   version?: VersionChange;
 }
 
-export interface CommitOptions {
+export interface GitCommit extends CommitProps {
+  message: string;
+  updates: DependencyUpdate[];
+  locks: LockPart[];
+}
+
+export interface CommitSequence {
+  commits: GitCommit[];
+  options: CommitOptions;
+}
+
+export interface CommitOptions extends WriteOptions {
   groupBy?: (dependency: DependencyUpdate) => string;
   composeCommitMessage?: (props: CommitProps) => string;
   preCommit?: (commit: GitCommit) => void | Promise<void>;
@@ -37,33 +51,30 @@ const defaultCommitOptions = {
   gitCommitOptions: [],
 } satisfies CommitOptions;
 
-export interface GitCommit extends CommitProps {
-  message: string;
-  updates: DependencyUpdate[];
-}
-
-export interface CommitSequence {
-  commits: GitCommit[];
-  options: CommitOptions;
-}
-
-export function commitAll(
-  updates: DependencyUpdate[],
+/**
+ * Write the given `CollectResult` to file system.
+ * @returns A promise that resolves when all updates are committed.
+ */
+export function commit(
+  result: CollectResult,
   options?: CommitOptions,
 ) {
-  return exec(createCommitSequence(updates, {
+  return execute(createCommitSequence(result, {
     ...defaultCommitOptions,
     ...options,
   }));
 }
 
+/**
+ * Create a sequence of commits from the given `CollectResult`.
+ */
 export function createCommitSequence(
-  updates: DependencyUpdate[],
-  options?: Partial<CommitOptions>,
+  result: CollectResult,
+  options?: CommitOptions,
 ): CommitSequence {
   const _options = { ...defaultCommitOptions, ...options };
   const groups = new Map<string, DependencyUpdate[]>();
-  for (const u of updates) {
+  for (const u of result.updates) {
     const key = _options.groupBy(u);
     if (!groups.has(key)) {
       groups.set(key, []);
@@ -79,15 +90,19 @@ export function createCommitSequence(
       version,
       message: _options.composeCommitMessage({ group, version }),
       updates,
+      locks: result.locks,
     });
   }).sort((a, b) => a.group.localeCompare(b.group));
   return { commits, options: _options };
 }
 
-export function exec(commit: GitCommit, options?: CommitOptions): Promise<void>;
-export function exec(sequence: CommitSequence): Promise<void>;
+export function execute(
+  commit: GitCommit,
+  options?: CommitOptions,
+): Promise<void>;
+export function execute(sequence: CommitSequence): Promise<void>;
 
-export function exec(
+export function execute(
   commit: GitCommit | CommitSequence,
   options?: CommitOptions,
 ): Promise<void> {
@@ -109,8 +124,8 @@ async function execCommit(
   commit: GitCommit,
   options?: CommitOptions,
 ) {
-  const results = associateByFile(commit.updates);
-  await write(results);
+  const results = associateByFile(commit);
+  await writeFileUpdate(results);
   await options?.preCommit?.(commit);
   await addCommand(results, options?.gitAddOptions ?? []);
   await commitCommand(commit.message, options?.gitCommitOptions ?? []);
@@ -140,4 +155,30 @@ async function commitCommand(
   if (code !== 0) {
     throw new Error(new TextDecoder().decode(stderr));
   }
+}
+
+export type VersionChange = {
+  from?: string;
+  to: string;
+};
+
+export function getVersionChange(
+  dependencies: DependencyUpdate[],
+): VersionChange | undefined {
+  const modules = distinct(dependencies.map((d) => d.to.name));
+  if (modules.length > 1) {
+    // Cannot provide a well-defined version prop
+    return;
+  }
+  const tos = distinct(dependencies.map((d) => d.to.version));
+  if (tos.length > 1) {
+    throw new Error(
+      "Multiple target versions are specified for a single module",
+    );
+  }
+  const froms = distinct(mapN(dependencies, (d) => d.from?.version));
+  return {
+    from: froms.length === 1 ? froms[0] : undefined,
+    to: tos[0],
+  };
 }

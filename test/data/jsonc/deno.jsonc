@@ -2,7 +2,7 @@
   "imports": {
     "std/": "https://deno.land/std@0.200.0/",
     "deno_graph": "https://deno.land/x/deno_graph@0.50.0/mod.ts",
-    "node-emoji": "npm:node-emoji@1.0.0",
+    "node-emoji": "npm:node-emoji@2.0.0",
     "flag": "jsr:@luca/flag@1.0.0",
     // map root to the project root
     "/": "./"
