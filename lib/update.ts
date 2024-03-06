@@ -256,7 +256,7 @@ async function _createDependencyUpdate(
     );
   }
   return {
-    from: dependency,
+    from: normalizeWithUpdated(dependency, latest),
     to: latest,
     code: {
       // We prefer to put the original specifier here.
@@ -297,7 +297,7 @@ async function _collectFromImportMap(
           return;
         }
         updates.push({
-          from: dependency,
+          from: normalizeWithUpdated(dependency, latest),
           to: latest,
           code: {
             specifier: value,
@@ -315,6 +315,19 @@ async function _collectFromImportMap(
     ),
   );
   return updates;
+}
+
+function normalizeWithUpdated(
+  dependency: Dependency,
+  updated: UpdatedDependency,
+): Dependency {
+  if (dependency.version) {
+    return dependency;
+  }
+  return {
+    ...updated,
+    version: undefined,
+  };
 }
 
 export type VersionChange = {
