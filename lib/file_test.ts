@@ -5,6 +5,7 @@ import {
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
+import { assertInstanceOf } from "./std/assert.ts";
 import { assertSnapshot } from "./testing.ts";
 import * as DependencyUpdate from "./update.ts";
 import { associateByFile, type FileUpdate, write } from "./file.ts";
@@ -15,7 +16,9 @@ LatestSemVerStub.create(LATEST);
 
 function toName(path: string) {
   const base = basename(path);
-  return base === "mod.ts" ? `${basename(dirname(path))}/mod.ts` : base;
+  return base === "mod.ts" || base.endsWith(".json") || base.endsWith(".jsonc")
+    ? basename(dirname(path)) + "/" + base
+    : base;
 }
 
 async function assertFileUpdateSnapshot(
@@ -56,21 +59,26 @@ ReadTextFileStub.create(fs, { readThrough: true });
 WriteTextFileStub.create(fs);
 
 async function test(path: string, name = toName(path)) {
-  const updates = await DependencyUpdate.collect(
-    new URL(path, import.meta.url),
-    { cwd: new URL(dirname(path), import.meta.url) },
-  );
-  const results = associateByFile(updates);
+  try {
+    const updates = await DependencyUpdate.collect(
+      new URL(path, import.meta.url),
+      { cwd: new URL(dirname(path), import.meta.url) },
+    );
+    const results = associateByFile(updates);
 
-  Deno.test("associateByFile - " + name, async (t) => {
-    await assertFileUpdateSnapshot(t, results);
-  });
+    Deno.test("associateByFile - " + name, async (t) => {
+      await assertFileUpdateSnapshot(t, results);
+    });
 
-  Deno.test("write - " + name, async (t) => {
-    fs.clear();
-    await write(results);
-    await assertFileSystemSnapshot(t, fs);
-  });
+    Deno.test("write - " + name, async (t) => {
+      fs.clear();
+      await write(results);
+      await assertFileSystemSnapshot(t, fs);
+    });
+  } catch (error) {
+    // import_map_reffered/deno.json just reffers to another import_map.json
+    assertInstanceOf(error, SyntaxError);
+  }
 }
 
 // Test the all cases in test/data
@@ -86,8 +94,11 @@ for await (
         new URL("../test/data/" + testCase.name, import.meta.url),
       )
     ) {
-      if (entry.isFile && entry.name === "mod.ts") {
-        await test(`../test/data/${testCase.name}/mod.ts`);
+      if (
+        entry.isFile && entry.name === "mod.ts" ||
+        entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")
+      ) {
+        await test(`../test/data/${testCase.name}/${entry.name}`);
       }
     }
   }

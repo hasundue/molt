@@ -54,6 +54,11 @@ molt("deno.json", { cwd: "import_map" });
 molt("deno.json --write", { cwd: "import_map" });
 molt("deno.json --commit --prefix :package:", { cwd: "import_map" });
 
+// deno.jsonc
+molt("deno.jsonc", { cwd: "jsonc" });
+molt("deno.jsonc --write", { cwd: "jsonc" });
+molt("deno.jsonc --commit --prefix :package:", { cwd: "jsonc" });
+
 //-----------------------
 // Test implementation
 //-----------------------

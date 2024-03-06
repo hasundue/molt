@@ -177,6 +177,49 @@ import { printProgress } from "jsr:@luca/flag@123.456.789";
 ]
 `;
 
+snapshot[`associateByFile - import_map_referred/import_map.json 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/x/dax@0.17.0/mod.ts",
+        },
+        from: {
+          name: "deno.land/x/dax",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "0.17.0",
+        },
+        map: {
+          key: "dax",
+          resolved: "https://deno.land/x/dax@0.17.0/mod.ts",
+        },
+        to: {
+          name: "deno.land/x/dax",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - import_map_referred/import_map.json 1`] = `
+[
+  '{
+  "imports": {
+    "dax": "https://deno.land/x/dax@123.456.789/mod.ts"
+  }
+}
+',
+]
+`;
+
 snapshot[`associateByFile - import_map_referred/mod.ts 1`] = `
 [
   {
@@ -271,6 +314,119 @@ snapshot[`write - updated_import_and_outdated_export.ts 1`] = `
 [
   'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
 export { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_equals.ts";
+',
+]
+`;
+
+snapshot[`associateByFile - import_map/deno.json 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@luca/flag@1.0.0",
+        },
+        from: {
+          name: "@luca/flag",
+          path: "",
+          protocol: "jsr:",
+          version: "1.0.0",
+        },
+        map: {
+          key: "flag",
+          resolved: "jsr:@luca/flag@1.0.0",
+        },
+        to: {
+          name: "@luca/flag",
+          path: "",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: {
+          key: "std/",
+          resolved: "https://deno.land/std@0.200.0/",
+        },
+        to: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        },
+        from: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "0.50.0",
+        },
+        map: {
+          key: "deno_graph",
+          resolved: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        },
+        to: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "npm:node-emoji@1.0.0",
+        },
+        from: {
+          name: "node-emoji",
+          path: "",
+          protocol: "npm:",
+          version: "1.0.0",
+        },
+        map: {
+          key: "node-emoji",
+          resolved: "npm:node-emoji@1.0.0",
+        },
+        to: {
+          name: "node-emoji",
+          path: "",
+          protocol: "npm:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - import_map/deno.json 1`] = `
+[
+  '{
+  "imports": {
+    "std/": "https://deno.land/std@123.456.789/",
+    "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
+    "node-emoji": "npm:node-emoji@123.456.789",
+    "flag": "jsr:@luca/flag@123.456.789",
+    "/": "./"
+  }
+}
 ',
 ]
 `;
@@ -545,6 +701,10 @@ export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 ]
 `;
 
+snapshot[`associateByFile - import_map_no_resolve/deno.json 1`] = `[]`;
+
+snapshot[`write - import_map_no_resolve/deno.json 1`] = `[]`;
+
 snapshot[`associateByFile - import_map_no_resolve/mod.ts 1`] = `
 [
   {
@@ -631,6 +791,120 @@ snapshot[`associateByFile - relative_import/mod.ts 1`] = `
 snapshot[`write - relative_import/mod.ts 1`] = `
 [
   'export { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+',
+]
+`;
+
+snapshot[`associateByFile - jsonc/deno.jsonc 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@luca/flag@1.0.0",
+        },
+        from: {
+          name: "@luca/flag",
+          path: "",
+          protocol: "jsr:",
+          version: "1.0.0",
+        },
+        map: {
+          key: "flag",
+          resolved: "jsr:@luca/flag@1.0.0",
+        },
+        to: {
+          name: "@luca/flag",
+          path: "",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: {
+          key: "std/",
+          resolved: "https://deno.land/std@0.200.0/",
+        },
+        to: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        },
+        from: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "0.50.0",
+        },
+        map: {
+          key: "deno_graph",
+          resolved: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+        },
+        to: {
+          name: "deno.land/x/deno_graph",
+          path: "/mod.ts",
+          protocol: "https:",
+          version: "123.456.789",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "npm:node-emoji@1.0.0",
+        },
+        from: {
+          name: "node-emoji",
+          path: "",
+          protocol: "npm:",
+          version: "1.0.0",
+        },
+        map: {
+          key: "node-emoji",
+          resolved: "npm:node-emoji@1.0.0",
+        },
+        to: {
+          name: "node-emoji",
+          path: "",
+          protocol: "npm:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - jsonc/deno.jsonc 1`] = `
+[
+  '{
+  "imports": {
+    "std/": "https://deno.land/std@123.456.789/",
+    "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
+    "node-emoji": "npm:node-emoji@123.456.789",
+    "flag": "jsr:@luca/flag@123.456.789",
+    // map root to the project root
+    "/": "./"
+  }
+}
 ',
 ]
 `;
