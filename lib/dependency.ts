@@ -268,7 +268,7 @@ async function _resolveLatestVersion(
         ...latest,
         // Preserve the original path if it is the root, which is unlikely to be
         // included in the redirected URL.
-        // path: dependency.path === "/" ? "/" : latest.path,
+        path: dependency.path === "/" ? "/" : latest.path,
       };
     }
   }
