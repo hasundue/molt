@@ -224,7 +224,8 @@ snapshot[`write - import_map_referred/mod.ts 1`] = `
   "imports": {
     "dax": "https://deno.land/x/dax@123.456.789/mod.ts"
   }
-}',
+}
+',
 ]
 `;
 
@@ -418,7 +419,8 @@ snapshot[`write - import_map/mod.ts 1`] = `
     "flag": "jsr:@luca/flag@123.456.789",
     "/": "./"
   }
-}',
+}
+',
 ]
 `;
 

@@ -53,10 +53,19 @@ export async function readImportMapJson(
 ): Promise<ImportMapJson> {
   const data = await Deno.readTextFile(url);
   try {
-    return ensure(parseJsonc(data), isImportMapJson);
+    return parseImportMapJson(data);
   } catch {
     throw new SyntaxError(`${url} does not have a valid import map`);
   }
+}
+
+/**
+ * Parse a JSON including import maps from the given string.
+ */
+export function parseImportMapJson(
+  data: string,
+): ImportMapJson {
+  return ensure(parseJsonc(data), isImportMapJson);
 }
 
 /**
