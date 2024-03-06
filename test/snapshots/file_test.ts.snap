@@ -1159,9 +1159,10 @@ snapshot[`associateByFile - unversioned.ts 1`] = `
           specifier: "https://deno.land/std/assert/assert.ts",
         },
         from: {
-          name: "deno.land/std/assert/assert.ts",
-          path: "",
+          name: "deno.land/std",
+          path: "/assert/assert.ts",
           protocol: "https:",
+          version: undefined,
         },
         map: undefined,
         to: {
