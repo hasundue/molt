@@ -154,7 +154,9 @@ function parseDenoLandUrl(url: URL) {
   return {
     name: std ? "deno.land/std" : `deno.land/x/${name}`,
     version,
-    path,
+    // Remove a trailing slash if it exists to imitate the behavior of typical
+    // Web servers.
+    path: path.replace(/\/$/, ""),
   };
 }
 
