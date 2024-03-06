@@ -1,7 +1,6 @@
-import { detectEOL, EOL, formatEOL } from "./std/fs.ts";
+import { detectEOL, EOL } from "./std/fs.ts";
 import { toUrl } from "./dependency.ts";
 import { type DependencyUpdate } from "./update.ts";
-import { parseImportMapJson } from "./import_map.ts";
 
 /**
  * Write the given array of DependencyUpdate to files.
@@ -127,14 +126,9 @@ async function writeToImportMap(
   /** The dependency update to apply. */
   update: FileUpdate<"import_map">,
 ) {
-  const content = await Deno.readTextFile(update.path);
-  const json = parseImportMapJson(content);
+  let content = await Deno.readTextFile(update.path);
   for (const dependency of update.dependencies) {
-    json.imports[dependency.map.key] = toUrl(dependency.to);
+    content = content.replaceAll(toUrl(dependency.from), toUrl(dependency.to));
   }
-  const eol = detectEOL(content) ?? EOL;
-  await Deno.writeTextFile(
-    update.path,
-    formatEOL(JSON.stringify(json, null, 2), eol) + eol,
-  );
+  await Deno.writeTextFile(update.path, content);
 }

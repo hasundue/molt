@@ -1,4 +1,4 @@
-import { distinct } from "./std/collections.ts";
+import { distinct, partition } from "./std/collections.ts";
 import { fromFileUrl } from "./std/path.ts";
 import {
   createGraph,
@@ -152,8 +152,10 @@ export async function collect(
     ? await tryReadFromJson(toUrl(importMapPath))
     : undefined;
 
+  const [jsons, esms] = partition(urls, isJsonPath);
+
   await DenoGraph.ensureInit();
-  const graph = await createGraph(urls, {
+  const graph = await createGraph(esms, {
     load,
     resolve: importMap?.resolveInner,
   });
@@ -172,15 +174,16 @@ export async function collect(
           return update ? updates.push(update) : undefined;
         })
       ),
-    ...graph.modules
-      .filter((m) => m.kind === "asserted" && m.mediaType === "Json")
-      .map(async (m) => {
-        const results = await _collectFromImportMap(m.specifier, options);
-        updates.push(...results);
-      }),
+    ...jsons.map(async (url) => {
+      const results = await _collectFromImportMap(url, options);
+      updates.push(...results);
+    }),
   ]);
   return updates.sort((a, b) => a.to.name.localeCompare(b.to.name));
 }
+
+const isJsonPath = (path: string) =>
+  path.endsWith(".json") || path.endsWith(".jsonc");
 
 const load: NonNullable<CreateGraphOptions["load"]> = async (
   specifier,

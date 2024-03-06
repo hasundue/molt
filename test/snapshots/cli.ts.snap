@@ -421,3 +421,49 @@ snapshot[`cli - import_map - "molt deno.json --commit --prefix :package:" 2`] = 
 "Checking for updates
 "
 `;
+
+snapshot[`cli - jsonc - "molt deno.jsonc" 1`] = `
+"📦 @luca/flag 1.0.0 => 123.456.789
+📦 deno.land/std 0.200.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 node-emoji 1.0.0 => 123.456.789
+"
+`;
+
+snapshot[`cli - jsonc - "molt deno.jsonc" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - jsonc - "molt deno.jsonc --write" 1`] = `
+"📦 @luca/flag 1.0.0 => 123.456.789
+📦 deno.land/std 0.200.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 node-emoji 1.0.0 => 123.456.789
+
+💾 deno.jsonc
+"
+`;
+
+snapshot[`cli - jsonc - "molt deno.jsonc --write" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - jsonc - "molt deno.jsonc --commit --prefix :package:" 1`] = `
+"📦 @luca/flag 1.0.0 => 123.456.789
+📦 deno.land/std 0.200.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 node-emoji 1.0.0 => 123.456.789
+
+📝 :package: bump @luca/flag from 1.0.0 to 123.456.789
+📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
+📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 :package: bump node-emoji from 1.0.0 to 123.456.789
+"
+`;
+
+snapshot[`cli - jsonc - "molt deno.jsonc --commit --prefix :package:" 2`] = `
+"Checking for updates
+"
+`;
