@@ -162,18 +162,16 @@ export async function collect(
 
   const updates: DependencyUpdate[] = [];
   await Promise.all([
-    ...graph.modules
-      .filter((m) => m.kind === "esm")
-      .flatMap((m) =>
-        m.dependencies?.map(async (dependency) => {
-          const update = await _createDependencyUpdate(
-            dependency,
-            m.specifier,
-            { ...options, importMap },
-          );
-          return update ? updates.push(update) : undefined;
-        })
-      ),
+    ...graph.modules.flatMap((mod) =>
+      mod.dependencies?.map(async (dependency) => {
+        const update = await _createDependencyUpdate(
+          dependency,
+          mod.specifier,
+          { ...options, importMap },
+        );
+        if (update) updates.push(update);
+      })
+    ),
     ...jsons.map(async (url) => {
       const results = await _collectFromImportMap(url, options);
       updates.push(...results);
