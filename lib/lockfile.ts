@@ -25,7 +25,7 @@ const isLockFileJson = is.ObjectOf({
   })),
   remote: is.OptionalOf(is.RecordOf(is.String, is.String)),
   workspace: is.OptionalOf(is.ObjectOf({
-    dependencies: is.ArrayOf(is.String),
+    dependencies: is.OptionalOf(is.ArrayOf(is.String)),
   })),
 });
 
