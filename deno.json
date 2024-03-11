@@ -7,8 +7,8 @@
     "pre-commit": "deno fmt && deno lint && deno task -q check && deno task lock && deno task -q test",
     "integration": "deno task -q test --no-lock ./test/integration/*.ts",
     "run": "deno run --allow-env --allow-read --allow-net --allow-write=. --allow-run=git,deno cli.ts",
-    "update": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno ./cli.ts ./lib/*/*.ts",
-    "update:commit": "deno task -q update --commit --pre-commit=fmt,lock --prefix 'build(deps):'"
+    "update": "deno run --allow-env --allow-read --allow-write --allow-net=deno.land,registry.npmjs.org --allow-run=git,deno ./cli.ts ./lib/*/*.ts --unstable-lock",
+    "update:commit": "deno task -q update --commit --prefix 'build(deps):' --prefix-lock 'build(lock)'"
   },
   "fmt": {
     "exclude": [
