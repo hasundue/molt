@@ -25,16 +25,6 @@ Options:
   --report         <file>    - Write a report of changes to file                                                       
   --unstable-lock  [file]    - Enable unstable updating of a lock file                                                 
 
-Examples:
-
-  Check import maps in a config: molt deno.json                             
-  Check imports in a module:     molt deps.ts                               
-  Include multiple modules:      molt mod.ts lib.ts                         
-  Target all .ts files:          molt ./**/*.ts                             
-  Specify an import map:         molt mod.ts --import-map deno.json         
-  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
-  Check deno_std only:           molt deps.ts --only deno.land/std          
-
 "
 `;
 
@@ -68,16 +58,6 @@ Options:
   --summary        <file>    - Write a summary of changes to file                                                      
   --report         <file>    - Write a report of changes to file                                                       
   --unstable-lock  [file]    - Enable unstable updating of a lock file                                                 
-
-Examples:
-
-  Check import maps in a config: molt deno.json                             
-  Check imports in a module:     molt deps.ts                               
-  Include multiple modules:      molt mod.ts lib.ts                         
-  Target all .ts files:          molt ./**/*.ts                             
-  Specify an import map:         molt mod.ts --import-map deno.json         
-  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
-  Check deno_std only:           molt deps.ts --only deno.land/std          
 
 "
 `;
