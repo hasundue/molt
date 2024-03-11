@@ -53,11 +53,16 @@ const main = new Command()
   .option("--prefix <prefix:string>", "Prefix for commit messages", {
     depends: ["commit"],
   })
+  .option(
+    "--prefix-lock <prefix:string>",
+    "Prefix for commit messages of updating a lock file",
+    { depends: ["commit", "unstable-lock"] },
+  )
   .option("--summary <file:string>", "Write a summary of changes to file")
   .option("--report <file:string>", "Write a report of changes to file")
   .option(
     "--unstable-lock [file:string]",
-    "Enable unstable updating of lockfiles",
+    "Enable unstable updating of a lock file",
   )
   .arguments("<modules...:string>")
   .action(async function (options, ...files) {
@@ -224,6 +229,7 @@ async function commitResult(
     preCommit?: TaskRecord;
     postCommit?: TaskRecord;
     prefix?: string;
+    prefixLock?: string;
     summary?: string;
     report?: string;
   },
@@ -237,8 +243,12 @@ async function commitResult(
   let count = 0;
   const commits = createCommitSequence(result, {
     groupBy: (dependency) => dependency.to.name,
-    composeCommitMessage: ({ group, version }) =>
-      formatPrefix(options.prefix) + `bump ${group}` +
+    composeCommitMessage: ({ group, types, version }) =>
+      formatPrefix(
+        types.length === 1 && types.includes("lockfile")
+          ? options.prefixLock
+          : options.prefix,
+      ) + `bump ${group}` +
       (version?.from ? ` from ${version?.from}` : "") +
       (version?.to ? ` to ${version?.to}` : ""),
     preCommit: preCommitTasks.length > 0
