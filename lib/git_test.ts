@@ -1,44 +1,192 @@
-import { assertArrayIncludes } from "./std/assert.ts";
-import { assertSpyCall } from "./std/testing.ts";
+import {
+  assertArrayIncludes,
+  assertEquals,
+  assertThrows,
+} from "./std/assert.ts";
+import { assertSpyCall, describe, it } from "./std/testing.ts";
 import { basename, relative } from "./std/path.ts";
 import {
   CommandStub,
   FileSystemFake,
-  LatestSemVerStub,
+  LatestVersionStub,
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
 import { collect } from "./update.ts";
-import { commitAll } from "./git.ts";
+import { commit, getVersionChange } from "./git.ts";
 
-const normalizePath = (path: string) =>
-  Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
+//--------------------------------------------------------------------
+//
+// Unit tests
+//
+//--------------------------------------------------------------------
 
-const LATEST = "123.456.789";
+describe("getVersionChange", () => {
+  it("single version", () => {
+    assertEquals(
+      getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        // deno-lint-ignore no-explicit-any
+      ] as any),
+      {
+        from: "0.0.1",
+        to: "0.1.0",
+      },
+    );
+  });
+  it("multiple versions with different names", () => {
+    assertEquals(
+      getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        {
+          from: {
+            name: "node-emoji",
+            version: "0.0.1",
+          },
+          to: {
+            name: "node-emoji",
+            version: "0.1.0",
+          },
+        },
+        // deno-lint-ignore no-explicit-any
+      ] as any),
+      undefined,
+    );
+  });
+  it("multiple versions with different `from`s and a common `to`", () => {
+    assertEquals(
+      getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.2",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        // deno-lint-ignore no-explicit-any
+      ] as any),
+      {
+        from: undefined,
+        to: "0.1.0",
+      },
+    );
+  });
+  it("multiple versions with a common `from` and `to`", () => {
+    assertEquals(
+      getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
+        },
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
+        },
+        // deno-lint-ignore no-explicit-any
+      ] as any),
+      {
+        from: "0.0.1",
+        to: "0.2.0",
+      },
+    );
+  });
+  it("multiple versions with a common `from` and different `to`s", () => {
+    assertThrows(() =>
+      getVersionChange([
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.1.0",
+          },
+        },
+        {
+          from: {
+            name: "deno_graph",
+            version: "0.0.1",
+          },
+          to: {
+            name: "deno_graph",
+            version: "0.2.0",
+          },
+        },
+        // deno-lint-ignore no-explicit-any
+      ] as any)
+    );
+  });
+});
 
-const EXPECTED = [
-  `import { assert } from "https://deno.land/std@${LATEST}/assert/assert.ts";
+//--------------------------------------------------------------------
+//
+// Integration tests
+//
+//--------------------------------------------------------------------
+
+Deno.test("commit", async (t) => {
+  const DIR = "test/data/multiple_modules";
+
+  const LATEST = "123.456.789";
+  LatestVersionStub.create(LATEST);
+
+  const EXPECTED = [
+    `import { assert } from "https://deno.land/std@${LATEST}/assert/assert.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@${LATEST}/mod.ts";
 import emoji from "npm:node-emoji@${LATEST}";
 import { noop } from "./lib.ts";
 `,
-  `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
+    `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
 export const noop = () => {};
 `,
-];
-
-const assertFileSystem = (
-  fs: FileSystemFake,
-) => assertArrayIncludes(Array.from(fs.values()), EXPECTED);
-
-const DIR = "test/data/multiple_modules";
-
-Deno.test("commitAll", async (t) => {
-  LatestSemVerStub.create(LATEST);
-
-  const updates = await collect(
-    new URL(`../${DIR}/mod.ts`, import.meta.url),
-  );
+  ];
+  const assertFileSystem = (
+    fs: FileSystemFake,
+  ) => assertArrayIncludes(Array.from(fs.values()), EXPECTED);
 
   const cs = CommandStub.create();
   Deno.Command = cs;
@@ -47,8 +195,10 @@ Deno.test("commitAll", async (t) => {
   ReadTextFileStub.create(fs, { readThrough: true });
   WriteTextFileStub.create(fs);
 
-  let calls = 0;
+  const normalizePath = (path: string) =>
+    Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
 
+  let calls = 0;
   const assertGitAdd = (
     ...paths: string[]
   ) =>
@@ -58,7 +208,6 @@ Deno.test("commitAll", async (t) => {
         { args: ["add", ...paths.map(normalizePath)] },
       ],
     });
-
   const assertGitCommit = (
     message: string,
   ) =>
@@ -69,8 +218,12 @@ Deno.test("commitAll", async (t) => {
       ],
     });
 
+  const result = await collect(
+    new URL(`../${DIR}/mod.ts`, import.meta.url),
+  );
+
   await t.step("no grouping", async () => {
-    await commitAll(updates);
+    await commit(result);
     assertGitAdd(`${DIR}/lib.ts`, `${DIR}/mod.ts`);
     assertGitCommit("build(deps): update dependencies");
     assertFileSystem(fs);
@@ -79,7 +232,7 @@ Deno.test("commitAll", async (t) => {
   fs.clear();
 
   await t.step("group by dependency name", async () => {
-    await commitAll(updates, {
+    await commit(result, {
       groupBy: (update) => update.to.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
@@ -95,7 +248,7 @@ Deno.test("commitAll", async (t) => {
   fs.clear();
 
   await t.step("group by module (file) name", async () => {
-    await commitAll(updates, {
+    await commit(result, {
       groupBy: (update) => basename(update.referrer),
       composeCommitMessage: ({ group }) => {
         const path = relative(Deno.cwd(), group);

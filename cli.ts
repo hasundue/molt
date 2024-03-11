@@ -5,14 +5,16 @@ import { colors, Command } from "./lib/x/cliffy.ts";
 import { $ } from "./lib/x/dax.ts";
 import { ensure, is } from "./lib/x/unknownutil.ts";
 import { findFileUp } from "./lib/path.ts";
-import { parse, resolveLatestVersion } from "./lib/dependency.ts";
 import {
   collect,
-  type CommitSequence,
+  CollectResult,
+  CommitSequence,
   createCommitSequence,
-  type DependencyUpdate,
-  exec,
-  writeAll,
+  DependencyUpdate,
+  execute,
+  parse,
+  resolveLatestVersion,
+  write,
 } from "./mod.ts";
 
 const { gray, yellow, bold, cyan } = colors;
@@ -62,14 +64,14 @@ const main = new Command()
       }
     }
     ensureFiles(files);
-    const updates = await collectUpdates(files, options);
-    printUpdates(files, updates);
+    const result = await collectUpdates(files, options);
+    printResult(files, result);
     if (options.write) {
-      return writeUpdates(updates, options);
+      return writeResult(result, options);
     }
     if (options.commit) {
       const tasks = await getTasks();
-      return commitUpdates(updates, {
+      return commitResult(result, {
         ...options,
         preCommit: filterKeys(
           tasks,
@@ -100,27 +102,23 @@ async function collectUpdates(
     importMap?: string;
     only?: string[];
   },
-): Promise<DependencyUpdate[]> {
-  return await $.progress("Checking for updates").with(async () => {
-    const updates = await Promise.all(
-      entrypoints.map(async (entrypoint) =>
-        await collect(entrypoint, {
-          ignore: options.ignore
-            ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
-            : undefined,
-          importMap: options.importMap,
-          only: options.only
-            ? (dep) => options.only!.some((it) => dep.name.includes(it))
-            : undefined,
-        })
-      ),
-    ).then((results) => results.flat());
-    if (!updates.length) {
-      console.log("🍵 No updates found");
-      Deno.exit(0);
-    }
-    return updates;
-  });
+): Promise<CollectResult> {
+  const result = await $.progress("Checking for updates").with(() =>
+    collect(entrypoints, {
+      importMap: options.importMap,
+      ignore: options.ignore
+        ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
+        : undefined,
+      only: options.only
+        ? (dep) => options.only!.some((it) => dep.name.includes(it))
+        : undefined,
+    })
+  );
+  if (!result.updates.length) {
+    console.log("🍵 No updates found");
+    Deno.exit(0);
+  }
+  return result;
 }
 
 type TaskRecord = Record<string, string[]>;
@@ -151,20 +149,20 @@ async function getTasks() {
 
 const toRelativePath = (path: string) => relative(Deno.cwd(), path);
 
-function printUpdates(
+function printResult(
   files: string[],
-  updates: DependencyUpdate[],
+  result: CollectResult,
 ) {
   const dependencies = new Map<string, DependencyUpdate[]>();
-  for (const u of updates) {
+  for (const u of result.updates) {
     const list = dependencies.get(u.to.name) ?? [];
     list.push(u);
     dependencies.set(u.to.name, list);
   }
   let count = 0;
-  const nWrites = distinct(updates.map((u) => u.referrer)).length;
+  const nWrites = distinct(result.updates.map((u) => u.referrer)).length;
   for (const [name, list] of dependencies.entries()) {
-    const froms = distinct(list.map((u) => u.from.version)).join(", ");
+    const froms = distinct(list.map((u) => u.from?.version)).join(", ");
     console.log(
       `📦 ${bold(name)} ${yellow(froms)} => ${yellow(list[0].to.version)}`,
     );
@@ -172,7 +170,7 @@ function printUpdates(
       distinct(
         list.map((u) => {
           const source = toRelativePath(u.map?.source ?? u.referrer);
-          return `  ${source} ` + gray(u.from.version ?? "");
+          return `  ${source} ` + gray(u.from?.version ?? "");
         }),
       ).forEach((line) => console.log(line));
       if (++count < dependencies.size) {
@@ -182,15 +180,15 @@ function printUpdates(
   }
 }
 
-async function writeUpdates(
-  updates: DependencyUpdate[],
+async function writeResult(
+  result: CollectResult,
   options?: {
     summary?: string;
     report?: string;
   },
 ) {
   console.log();
-  await writeAll(updates, {
+  await write(result, {
     onWrite: (file) => console.log(`💾 ${toRelativePath(file.path)}`),
   });
   if (options?.summary || options?.report) {
@@ -202,15 +200,17 @@ async function writeUpdates(
   }
   if (options?.report) {
     const content = distinct(
-      updates.map((u) => `- ${u.to.name} ${u.from.version} => ${u.to.version}`),
+      result.updates.map((u) =>
+        `- ${u.to.name} ${u.from?.version} => ${u.to.version}`
+      ),
     ).join("\n");
     await Deno.writeTextFile(options.report, content);
     console.log(`📄 ${options.report}`);
   }
 }
 
-async function commitUpdates(
-  updates: DependencyUpdate[],
+async function commitResult(
+  result: CollectResult,
   options: {
     preCommit?: TaskRecord;
     postCommit?: TaskRecord;
@@ -226,8 +226,7 @@ async function commitUpdates(
   const hasTask = preCommitTasks.length > 0 || postCommitTasks.length > 0;
 
   let count = 0;
-
-  const commits = createCommitSequence(updates, {
+  const commits = createCommitSequence(result, {
     groupBy: (dependency) => dependency.to.name,
     composeCommitMessage: ({ group, version }) =>
       formatPrefix(options.prefix) + `bump ${group}` +
@@ -251,8 +250,7 @@ async function commitUpdates(
       }
     },
   });
-
-  await exec(commits);
+  await execute(commits);
 
   if (options?.summary || options?.report) {
     console.log();

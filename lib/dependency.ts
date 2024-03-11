@@ -123,11 +123,20 @@ function addSeparator(protocol: string): string {
  * // -> "https://deno.land/std@1.0.0/fs/mod.ts"
  * ```
  */
-export function toUrl(dependency: Dependency): string {
+export function stringify(dependency: Dependency, includePath = true): string {
   const header = addSeparator(dependency.protocol);
   const version = dependency.version ? "@" + dependency.version : "";
   const path = dependency.path;
-  return `${header}${dependency.name}${version}${path}`;
+  return `${header}${dependency.name}${version}` + (includePath ? path : "");
+}
+
+export function hasVersionRange(
+  dependency: Dependency,
+): boolean {
+  const constraint = dependency.version
+    ? SemVer.tryParseRange(dependency.version)
+    : undefined;
+  return !!constraint && constraint.flat().length > 1;
 }
 
 /**
@@ -140,7 +149,7 @@ export function toUrl(dependency: Dependency): string {
  *
  * @example
  * ```ts
- * await Dependency.resolveLatestVersion(
+ * await resolveLatestVersion(
  *   Dependency.parse(new URL("https://deno.land/std@0.200.0/fs/mod.ts"))
  * );
  * // -> { name: "deno.land/std", version: "0.207.0", path: "/fs/mod.ts" }
@@ -150,16 +159,16 @@ export async function resolveLatestVersion(
   dependency: Dependency,
   options?: { cache?: boolean },
 ): Promise<UpdatedDependency | undefined> {
-  using cache = new LatestVersionCache(dependency.name);
-  if (options?.cache) {
-    const cached = cache.get(dependency.name);
-    if (cached) {
-      return { ...cached, path: dependency.path };
-    }
-    if (cached === null) {
-      // The dependency is already found to be up to date or unable to resolve.
-      return;
-    }
+  using cache = options?.cache
+    ? new LatestVersionCache(dependency.name)
+    : undefined;
+  const cached = cache?.get(dependency.name);
+  if (cached) {
+    return { ...cached, path: dependency.path };
+  }
+  if (cached === null) {
+    // The dependency is already found to be up to date or unable to resolve.
+    return;
   }
   const constraint = dependency.version
     ? SemVer.tryParseRange(dependency.version)
@@ -169,9 +178,7 @@ export async function resolveLatestVersion(
     return;
   }
   const result = await _resolveLatestVersion(dependency);
-  if (options?.cache) {
-    cache.set(dependency.name, result ?? null);
-  }
+  cache?.set(dependency.name, result ?? null);
   return result;
 }
 
@@ -220,7 +227,7 @@ async function _resolveLatestVersion(
         { message: `Invalid response from NPM registry: ${response.url}` },
       );
       const latest = pkg["dist-tags"].latest;
-      if (latest === dependency.version || isPreRelease(latest)) {
+      if (isPreRelease(latest)) {
         break;
       }
       return { ...dependency, version: latest };
@@ -244,7 +251,7 @@ async function _resolveLatestVersion(
       );
       const semvers = Object.keys(candidates).map(SemVer.parse);
       const latest = SemVer.format(semvers.sort(SemVer.compare).reverse()[0]);
-      if (latest === dependency.version || isPreRelease(latest)) {
+      if (isPreRelease(latest)) {
         break;
       }
       return { ...dependency, version: latest };

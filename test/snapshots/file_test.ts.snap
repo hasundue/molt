@@ -1,6 +1,6 @@
 export const snapshot = {};
 
-snapshot[`associateByFile - export.ts 1`] = `
+snapshot[`write - export.ts 1`] = `
 [
   {
     dependencies: [
@@ -29,7 +29,7 @@ snapshot[`associateByFile - export.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -38,14 +38,96 @@ snapshot[`associateByFile - export.ts 1`] = `
 ]
 `;
 
-snapshot[`write - export.ts 1`] = `
+snapshot[`write - export.ts 2`] = `
 [
-  'export { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'export { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - multiple_imports.ts 1`] = `
+snapshot[`write - lockfile_not_importable/mod.ts 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 23,
+              line: 0,
+            },
+            start: {
+              character: 7,
+              line: 0,
+            },
+          },
+          specifier: "std/version.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: {
+          key: "std/",
+          resolved: "https://deno.land/std@0.200.0/version.ts",
+        },
+        to: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/version.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: undefined,
+        to: {
+          name: "deno.land/std",
+          path: "/",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+    ],
+    kind: "lockfile",
+  },
+]
+`;
+
+snapshot[`write - lockfile_not_importable/mod.ts 2`] = `
+[
+  '{
+  "imports": {
+    "std/": "https://deno.land/std@0.218.0/"
+  }
+}
+',
+  '{
+  "version": "3",
+  "remote": {
+    "https://deno.land/std@0.218.0/version.ts": "cfb73e2f2b628978b2b70585b941c5ef5ccbf1dc06e76967206115c74ecfce49"
+  }
+}',
+]
+`;
+
+snapshot[`write - multiple_imports.ts 1`] = `
 [
   {
     dependencies: [
@@ -102,7 +184,7 @@ snapshot[`associateByFile - multiple_imports.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -167,9 +249,9 @@ snapshot[`associateByFile - multiple_imports.ts 1`] = `
 ]
 `;
 
-snapshot[`write - multiple_imports.ts 1`] = `
+snapshot[`write - multiple_imports.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 import emoji from "npm:node-emoji@123.456.789";
 import { printProgress } from "jsr:@luca/flag@123.456.789";
@@ -177,7 +259,7 @@ import { printProgress } from "jsr:@luca/flag@123.456.789";
 ]
 `;
 
-snapshot[`associateByFile - import_map_referred/import_map.json 1`] = `
+snapshot[`write - import_map_referred/import_map.json 1`] = `
 [
   {
     dependencies: [
@@ -209,7 +291,7 @@ snapshot[`associateByFile - import_map_referred/import_map.json 1`] = `
 ]
 `;
 
-snapshot[`write - import_map_referred/import_map.json 1`] = `
+snapshot[`write - import_map_referred/import_map.json 2`] = `
 [
   '{
   "imports": {
@@ -220,7 +302,7 @@ snapshot[`write - import_map_referred/import_map.json 1`] = `
 ]
 `;
 
-snapshot[`associateByFile - import_map_referred/mod.ts 1`] = `
+snapshot[`write - import_map_referred/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -261,7 +343,7 @@ snapshot[`associateByFile - import_map_referred/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`write - import_map_referred/mod.ts 1`] = `
+snapshot[`write - import_map_referred/mod.ts 2`] = `
 [
   '{
   "imports": {
@@ -272,7 +354,7 @@ snapshot[`write - import_map_referred/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`associateByFile - updated_import_and_outdated_export.ts 1`] = `
+snapshot[`write - updated_import_and_outdated_export.ts 1`] = `
 [
   {
     dependencies: [
@@ -301,7 +383,7 @@ snapshot[`associateByFile - updated_import_and_outdated_export.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert_equals.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -310,15 +392,15 @@ snapshot[`associateByFile - updated_import_and_outdated_export.ts 1`] = `
 ]
 `;
 
-snapshot[`write - updated_import_and_outdated_export.ts 1`] = `
+snapshot[`write - updated_import_and_outdated_export.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
-export { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_equals.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
+export { assertEquals } from "https://deno.land/std@0.218.0/assert/assert_equals.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - import_map/deno.json 1`] = `
+snapshot[`write - import_map/deno.json 1`] = `
 [
   {
     dependencies: [
@@ -363,7 +445,7 @@ snapshot[`associateByFile - import_map/deno.json 1`] = `
           name: "deno.land/std",
           path: "/",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -391,17 +473,17 @@ snapshot[`associateByFile - import_map/deno.json 1`] = `
       {
         code: {
           span: undefined,
-          specifier: "npm:node-emoji@1.0.0",
+          specifier: "npm:node-emoji@2.0.0",
         },
         from: {
           name: "node-emoji",
           path: "",
           protocol: "npm:",
-          version: "1.0.0",
+          version: "2.0.0",
         },
         map: {
           key: "node-emoji",
-          resolved: "npm:node-emoji@1.0.0",
+          resolved: "npm:node-emoji@2.0.0",
         },
         to: {
           name: "node-emoji",
@@ -416,11 +498,11 @@ snapshot[`associateByFile - import_map/deno.json 1`] = `
 ]
 `;
 
-snapshot[`write - import_map/deno.json 1`] = `
+snapshot[`write - import_map/deno.json 2`] = `
 [
   '{
   "imports": {
-    "std/": "https://deno.land/std@123.456.789/",
+    "std/": "https://deno.land/std@0.218.0/",
     "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
     "node-emoji": "npm:node-emoji@123.456.789",
     "flag": "jsr:@luca/flag@123.456.789",
@@ -431,7 +513,7 @@ snapshot[`write - import_map/deno.json 1`] = `
 ]
 `;
 
-snapshot[`associateByFile - import_map/mod.ts 1`] = `
+snapshot[`write - import_map/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -494,7 +576,7 @@ snapshot[`associateByFile - import_map/mod.ts 1`] = `
           name: "deno.land/std",
           path: "/",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -546,11 +628,11 @@ snapshot[`associateByFile - import_map/mod.ts 1`] = `
           name: "node-emoji",
           path: "",
           protocol: "npm:",
-          version: "1.0.0",
+          version: "2.0.0",
         },
         map: {
           key: "node-emoji",
-          resolved: "npm:node-emoji@1.0.0",
+          resolved: "npm:node-emoji@2.0.0",
         },
         to: {
           name: "node-emoji",
@@ -565,11 +647,11 @@ snapshot[`associateByFile - import_map/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`write - import_map/mod.ts 1`] = `
+snapshot[`write - import_map/mod.ts 2`] = `
 [
   '{
   "imports": {
-    "std/": "https://deno.land/std@123.456.789/",
+    "std/": "https://deno.land/std@0.218.0/",
     "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
     "node-emoji": "npm:node-emoji@123.456.789",
     "flag": "jsr:@luca/flag@123.456.789",
@@ -580,7 +662,7 @@ snapshot[`write - import_map/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`associateByFile - npm.ts 1`] = `
+snapshot[`write - npm.ts 1`] = `
 [
   {
     dependencies: [
@@ -618,7 +700,7 @@ snapshot[`associateByFile - npm.ts 1`] = `
 ]
 `;
 
-snapshot[`write - npm.ts 1`] = `
+snapshot[`write - npm.ts 2`] = `
 [
   'import emoji from "npm:node-emoji@123.456.789";
 import chalk from "npm:chalk@5";
@@ -627,7 +709,7 @@ import express from "npm:express@^4.17";
 ]
 `;
 
-snapshot[`associateByFile - import_and_export.ts 1`] = `
+snapshot[`write - import_and_export.ts 1`] = `
 [
   {
     dependencies: [
@@ -656,7 +738,7 @@ snapshot[`associateByFile - import_and_export.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -693,65 +775,20 @@ snapshot[`associateByFile - import_and_export.ts 1`] = `
 ]
 `;
 
-snapshot[`write - import_and_export.ts 1`] = `
+snapshot[`write - import_and_export.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - import_map_no_resolve/deno.json 1`] = `[]`;
-
 snapshot[`write - import_map_no_resolve/deno.json 1`] = `[]`;
 
-snapshot[`associateByFile - import_map_no_resolve/mod.ts 1`] = `
-[
-  {
-    dependencies: [
-      {
-        code: {
-          span: {
-            end: {
-              character: 71,
-              line: 0,
-            },
-            start: {
-              character: 23,
-              line: 0,
-            },
-          },
-          specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
-        },
-        from: {
-          name: "deno.land/std",
-          path: "/assert/assert.ts",
-          protocol: "https:",
-          version: "0.200.0",
-        },
-        map: undefined,
-        to: {
-          name: "deno.land/std",
-          path: "/assert/assert.ts",
-          protocol: "https:",
-          version: "123.456.789",
-        },
-      },
-    ],
-    kind: "module",
-  },
-]
-`;
+snapshot[`write - import_map_no_resolve/deno.json 2`] = `[]`;
 
 snapshot[`write - import_map_no_resolve/mod.ts 1`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
-',
-]
-`;
-
-snapshot[`associateByFile - relative_import/mod.ts 1`] = `
-[
   {
     dependencies: [
       {
@@ -779,23 +816,365 @@ snapshot[`associateByFile - relative_import/mod.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
     kind: "module",
   },
+]
+`;
+
+snapshot[`write - import_map_no_resolve/mod.ts 2`] = `
+[
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
+',
 ]
 `;
 
 snapshot[`write - relative_import/mod.ts 1`] = `
 [
-  'export { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 71,
+              line: 0,
+            },
+            start: {
+              character: 23,
+              line: 0,
+            },
+          },
+          specifier: "https://deno.land/std@0.200.0/assert/assert.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/assert/assert.ts",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: undefined,
+        to: {
+          name: "deno.land/std",
+          path: "/assert/assert.ts",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+    ],
+    kind: "module",
+  },
+]
+`;
+
+snapshot[`write - relative_import/mod.ts 2`] = `
+[
+  'export { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - jsonc/deno.jsonc 1`] = `
+snapshot[`write - lockfile/deno.json 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/bytes/copy.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: {
+          key: "std/bytes",
+          resolved: "https://deno.land/std@0.200.0/bytes/copy.ts",
+        },
+        to: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@core/match@0.1.x",
+        },
+        from: {
+          name: "@core/match",
+          path: "",
+          protocol: "jsr:",
+          version: "0.1.0",
+        },
+        map: undefined,
+        to: {
+          name: "@core/match",
+          path: "",
+          protocol: "jsr:",
+          version: "0.1.9",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/bytes/copy.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: undefined,
+        to: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "npm:hono@^3",
+        },
+        from: {
+          name: "hono",
+          path: "",
+          protocol: "npm:",
+          version: "3.0.0",
+        },
+        map: undefined,
+        to: {
+          name: "hono",
+          path: "",
+          protocol: "npm:",
+          version: "3.12.12",
+        },
+      },
+    ],
+    kind: "lockfile",
+  },
+]
+`;
+
+snapshot[`write - lockfile/deno.json 2`] = `
+[
+  '{
+  "imports": {
+    "std/bytes": "https://deno.land/std@0.218.0/bytes/copy.ts",
+    "hono": "npm:hono@^3",
+    "@core/match": "jsr:@core/match@0.1.x"
+  }
+}
+',
+  '{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.9",
+      "npm:hono@^3": "npm:hono@3.12.12",
+      "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
+    },
+    "jsr": {
+      "@core/match@0.1.9": {
+        "integrity": "ceff06cf40212bb720925972a4405bef373efe768690b344ac4fd7ca7189f746",
+        "dependencies": [
+          "npm:ts-toolbelt@9.6.0"
+        ]
+      }
+    },
+    "npm": {
+      "hono@3.12.12": {
+        "integrity": "sha512-5IAMJOXfpA5nT+K0MNjClchzz0IhBHs2Szl7WFAhrFOsbtQsYmNynFyJRg/a3IPsmCfxcrf8txUGiNShXpK5Rg==",
+        "dependencies": {}
+      },
+      "ts-toolbelt@9.6.0": {
+        "integrity": "sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==",
+        "dependencies": {}
+      }
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.218.0/bytes/copy.ts": "f29c03168853720dfe82eaa57793d0b9e3543ebfe5306684182f0f1e3bfd422a"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@core/match@0.1.x",
+      "npm:hono@^3"
+    ]
+  }
+}',
+]
+`;
+
+snapshot[`write - lockfile/mod.ts 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 32,
+              line: 0,
+            },
+            start: {
+              character: 21,
+              line: 0,
+            },
+          },
+          specifier: "std/bytes",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: {
+          key: "std/bytes",
+          resolved: "https://deno.land/std@0.200.0/bytes/copy.ts",
+        },
+        to: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@core/match@0.1.x",
+        },
+        from: {
+          name: "@core/match",
+          path: "",
+          protocol: "jsr:",
+          version: "0.1.0",
+        },
+        map: undefined,
+        to: {
+          name: "@core/match",
+          path: "",
+          protocol: "jsr:",
+          version: "0.1.9",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "https://deno.land/std@0.200.0/bytes/copy.ts",
+        },
+        from: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.200.0",
+        },
+        map: undefined,
+        to: {
+          name: "deno.land/std",
+          path: "/bytes/copy.ts",
+          protocol: "https:",
+          version: "0.218.0",
+        },
+      },
+      {
+        code: {
+          span: undefined,
+          specifier: "npm:hono@^3",
+        },
+        from: {
+          name: "hono",
+          path: "",
+          protocol: "npm:",
+          version: "3.0.0",
+        },
+        map: undefined,
+        to: {
+          name: "hono",
+          path: "",
+          protocol: "npm:",
+          version: "3.12.12",
+        },
+      },
+    ],
+    kind: "lockfile",
+  },
+]
+`;
+
+snapshot[`write - lockfile/mod.ts 2`] = `
+[
+  '{
+  "imports": {
+    "std/bytes": "https://deno.land/std@0.218.0/bytes/copy.ts",
+    "hono": "npm:hono@^3",
+    "@core/match": "jsr:@core/match@0.1.x"
+  }
+}
+',
+  '{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.9",
+      "npm:hono@^3": "npm:hono@3.12.12",
+      "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
+    },
+    "jsr": {
+      "@core/match@0.1.9": {
+        "integrity": "ceff06cf40212bb720925972a4405bef373efe768690b344ac4fd7ca7189f746",
+        "dependencies": [
+          "npm:ts-toolbelt@9.6.0"
+        ]
+      }
+    },
+    "npm": {
+      "hono@3.12.12": {
+        "integrity": "sha512-5IAMJOXfpA5nT+K0MNjClchzz0IhBHs2Szl7WFAhrFOsbtQsYmNynFyJRg/a3IPsmCfxcrf8txUGiNShXpK5Rg==",
+        "dependencies": {}
+      },
+      "ts-toolbelt@9.6.0": {
+        "integrity": "sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==",
+        "dependencies": {}
+      }
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.218.0/bytes/copy.ts": "f29c03168853720dfe82eaa57793d0b9e3543ebfe5306684182f0f1e3bfd422a"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@core/match@0.1.x",
+      "npm:hono@^3"
+    ]
+  }
+}',
+]
+`;
+
+snapshot[`write - jsonc/deno.jsonc 1`] = `
 [
   {
     dependencies: [
@@ -840,7 +1219,7 @@ snapshot[`associateByFile - jsonc/deno.jsonc 1`] = `
           name: "deno.land/std",
           path: "/",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -868,17 +1247,17 @@ snapshot[`associateByFile - jsonc/deno.jsonc 1`] = `
       {
         code: {
           span: undefined,
-          specifier: "npm:node-emoji@1.0.0",
+          specifier: "npm:node-emoji@2.0.0",
         },
         from: {
           name: "node-emoji",
           path: "",
           protocol: "npm:",
-          version: "1.0.0",
+          version: "2.0.0",
         },
         map: {
           key: "node-emoji",
-          resolved: "npm:node-emoji@1.0.0",
+          resolved: "npm:node-emoji@2.0.0",
         },
         to: {
           name: "node-emoji",
@@ -893,11 +1272,11 @@ snapshot[`associateByFile - jsonc/deno.jsonc 1`] = `
 ]
 `;
 
-snapshot[`write - jsonc/deno.jsonc 1`] = `
+snapshot[`write - jsonc/deno.jsonc 2`] = `
 [
   '{
   "imports": {
-    "std/": "https://deno.land/std@123.456.789/",
+    "std/": "https://deno.land/std@0.218.0/",
     "deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
     "node-emoji": "npm:node-emoji@123.456.789",
     "flag": "jsr:@luca/flag@123.456.789",
@@ -909,7 +1288,7 @@ snapshot[`write - jsonc/deno.jsonc 1`] = `
 ]
 `;
 
-snapshot[`associateByFile - updated_and_outdated.ts 1`] = `
+snapshot[`write - updated_and_outdated.ts 1`] = `
 [
   {
     dependencies: [
@@ -938,7 +1317,7 @@ snapshot[`associateByFile - updated_and_outdated.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert_equals.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -947,15 +1326,15 @@ snapshot[`associateByFile - updated_and_outdated.ts 1`] = `
 ]
 `;
 
-snapshot[`write - updated_and_outdated.ts 1`] = `
+snapshot[`write - updated_and_outdated.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
-import { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_equals.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
+import { assertEquals } from "https://deno.land/std@0.218.0/assert/assert_equals.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - multiple_modules/mod.ts 1`] = `
+snapshot[`write - multiple_modules/mod.ts 1`] = `
 [
   {
     dependencies: [
@@ -984,7 +1363,7 @@ snapshot[`associateByFile - multiple_modules/mod.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert_equals.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -1017,7 +1396,7 @@ snapshot[`associateByFile - multiple_modules/mod.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
       {
@@ -1082,12 +1461,12 @@ snapshot[`associateByFile - multiple_modules/mod.ts 1`] = `
 ]
 `;
 
-snapshot[`write - multiple_modules/mod.ts 1`] = `
+snapshot[`write - multiple_modules/mod.ts 2`] = `
 [
-  'import { assertEquals } from "https://deno.land/std@123.456.789/assert/assert_equals.ts";
+  'import { assertEquals } from "https://deno.land/std@0.218.0/assert/assert_equals.ts";
 export const noop = () => {};
 ',
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 import { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";
 import emoji from "npm:node-emoji@123.456.789";
 import { noop } from "./lib.ts";
@@ -1095,7 +1474,7 @@ import { noop } from "./lib.ts";
 ]
 `;
 
-snapshot[`associateByFile - import.ts 1`] = `
+snapshot[`write - import.ts 1`] = `
 [
   {
     dependencies: [
@@ -1124,7 +1503,7 @@ snapshot[`associateByFile - import.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -1133,14 +1512,14 @@ snapshot[`associateByFile - import.ts 1`] = `
 ]
 `;
 
-snapshot[`write - import.ts 1`] = `
+snapshot[`write - import.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - unversioned.ts 1`] = `
+snapshot[`write - unversioned.ts 1`] = `
 [
   {
     dependencies: [
@@ -1169,7 +1548,7 @@ snapshot[`associateByFile - unversioned.ts 1`] = `
           name: "deno.land/std",
           path: "/assert/assert.ts",
           protocol: "https:",
-          version: "123.456.789",
+          version: "0.218.0",
         },
       },
     ],
@@ -1178,14 +1557,14 @@ snapshot[`associateByFile - unversioned.ts 1`] = `
 ]
 `;
 
-snapshot[`write - unversioned.ts 1`] = `
+snapshot[`write - unversioned.ts 2`] = `
 [
-  'import { assert } from "https://deno.land/std@123.456.789/assert/assert.ts";
+  'import { assert } from "https://deno.land/std@0.218.0/assert/assert.ts";
 ',
 ]
 `;
 
-snapshot[`associateByFile - jsr.ts 1`] = `
+snapshot[`write - jsr.ts 1`] = `
 [
   {
     dependencies: [
@@ -1223,7 +1602,7 @@ snapshot[`associateByFile - jsr.ts 1`] = `
 ]
 `;
 
-snapshot[`write - jsr.ts 1`] = `
+snapshot[`write - jsr.ts 2`] = `
 [
   'import { assert } from "jsr:@std/assert@123.456.789";
 import { parse } from "jsr:@std/semver@^0.210.0";

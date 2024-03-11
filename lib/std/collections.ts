@@ -1,6 +1,11 @@
+export { deepMerge } from "https://deno.land/std@0.218.2/collections/deep_merge.ts";
 export { distinct } from "https://deno.land/std@0.218.2/collections/distinct.ts";
-export { maxBy } from "https://deno.land/std@0.218.2/collections/max_by.ts";
-export { filterKeys } from "https://deno.land/std@0.218.2/collections/filter_keys.ts";
+export { distinctBy } from "https://deno.land/std@0.218.2/collections/distinct_by.ts";
 export { filterEntries } from "https://deno.land/std@0.218.2/collections/filter_entries.ts";
+export { filterKeys } from "https://deno.land/std@0.218.2/collections/filter_keys.ts";
+export { mapValues } from "https://deno.land/std@0.218.2/collections/map_values.ts";
 export { mapEntries } from "https://deno.land/std@0.218.2/collections/map_entries.ts";
+export { mapNotNullish as mapN } from "https://deno.land/std@0.218.2/collections/map_not_nullish.ts";
+export { maxBy } from "https://deno.land/std@0.218.2/collections/max_by.ts";
+export { omit } from "https://deno.land/std@0.218.2/collections/omit.ts";
 export { partition } from "https://deno.land/std@0.218.2/collections/partition.ts";

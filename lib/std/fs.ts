@@ -1,4 +1,4 @@
-export { existsSync } from "https://deno.land/std@0.218.2/fs/exists.ts";
+export { exists, existsSync } from "https://deno.land/std@0.218.2/fs/exists.ts";
 export {
   detect as detectEOL,
   EOL,
