@@ -10,18 +10,19 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                              
-  -v, --version            - Print version info.                                          
-  --import-map   <file>    - Specify import map file                                      
-  --ignore       <deps>    - Ignore dependencies                                          
-  --only         <deps>    - Check specified dependencies                                 
-  -w, --write              - Write changes to local files            (Conflicts: --commit)
-  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
-  --summary      <file>    - Write a summary of changes to file                           
-  --report       <file>    - Write a report of changes to file                            
+  -h, --help                 - Show this help.                                              
+  -v, --version              - Print version info.                                          
+  --import-map     <file>    - Specify import map file                                      
+  --ignore         <deps>    - Ignore dependencies                                          
+  --only           <deps>    - Check specified dependencies                                 
+  -w, --write                - Write changes to local files            (Conflicts: --commit)
+  -c, --commit               - Commit changes to local git repository  (Conflicts: --write) 
+  --pre-commit     <tasks>   - Run tasks before each commit            (Depends: --commit)  
+  --post-commit    <tasks>   - Run tasks after each commit             (Depends: --commit)  
+  --prefix         <prefix>  - Prefix for commit messages              (Depends: --commit)  
+  --summary        <file>    - Write a summary of changes to file                           
+  --report         <file>    - Write a report of changes to file                            
+  --unstable-lock  [file]    - Enable unstable updating of lockfiles                        
 
 Examples:
 
@@ -52,18 +53,19 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                              
-  -v, --version            - Print version info.                                          
-  --import-map   <file>    - Specify import map file                                      
-  --ignore       <deps>    - Ignore dependencies                                          
-  --only         <deps>    - Check specified dependencies                                 
-  -w, --write              - Write changes to local files            (Conflicts: --commit)
-  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
-  --summary      <file>    - Write a summary of changes to file                           
-  --report       <file>    - Write a report of changes to file                            
+  -h, --help                 - Show this help.                                              
+  -v, --version              - Print version info.                                          
+  --import-map     <file>    - Specify import map file                                      
+  --ignore         <deps>    - Ignore dependencies                                          
+  --only           <deps>    - Check specified dependencies                                 
+  -w, --write                - Write changes to local files            (Conflicts: --commit)
+  -c, --commit               - Commit changes to local git repository  (Conflicts: --write) 
+  --pre-commit     <tasks>   - Run tasks before each commit            (Depends: --commit)  
+  --post-commit    <tasks>   - Run tasks after each commit             (Depends: --commit)  
+  --prefix         <prefix>  - Prefix for commit messages              (Depends: --commit)  
+  --summary        <file>    - Write a summary of changes to file                           
+  --report         <file>    - Write a report of changes to file                            
+  --unstable-lock  [file]    - Enable unstable updating of lockfiles                        
 
 Examples:
 
@@ -81,7 +83,7 @@ Examples:
 snapshot[`cli - "molt --help" 2`] = `""`;
 
 snapshot[`cli - "molt --version" 1`] = `
-"123.456.789
+"0.16.3
 "
 `;
 
@@ -98,7 +100,7 @@ snapshot[`cli - "molt not_exist.ts" 2`] = `
 `;
 
 snapshot[`cli - "molt import.ts" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
 "
 `;
 
@@ -108,7 +110,7 @@ snapshot[`cli - "molt import.ts" 2`] = `
 `;
 
 snapshot[`cli - "molt jsr.ts" 1`] = `
-"📦 @std/assert 0.210.0 => 123.456.789
+"📦 @std/assert 0.210.0 => 0.219.1
 "
 `;
 
@@ -118,10 +120,10 @@ snapshot[`cli - "molt jsr.ts" 2`] = `
 `;
 
 snapshot[`cli - import_map - "molt mod.ts" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 "
 `;
 
@@ -131,10 +133,10 @@ snapshot[`cli - import_map - "molt mod.ts" 2`] = `
 `;
 
 snapshot[`cli - import_map - "molt mod.ts --import-map deno.json" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 "
 `;
 
@@ -144,9 +146,9 @@ snapshot[`cli - import_map - "molt mod.ts --import-map deno.json" 2`] = `
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --ignore node-emoji" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
 "
 `;
 
@@ -156,8 +158,8 @@ snapshot[`cli - "molt multiple_imports.ts --ignore node-emoji" 2`] = `
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --ignore=deno_graph,node-emoji" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
 "
 `;
 
@@ -167,7 +169,7 @@ snapshot[`cli - "molt multiple_imports.ts --ignore=deno_graph,node-emoji" 2`] = 
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --only deno.land/std" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
 "
 `;
 
@@ -177,8 +179,8 @@ snapshot[`cli - "molt multiple_imports.ts --only deno.land/std" 2`] = `
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --only=deno.land/std,deno_graph" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
 "
 `;
 
@@ -188,7 +190,7 @@ snapshot[`cli - "molt multiple_imports.ts --only=deno.land/std,deno_graph" 2`] =
 `;
 
 snapshot[`cli - "molt multiple_imports.ts --only deno.land --ignore deno_graph" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
 "
 `;
 
@@ -198,14 +200,14 @@ snapshot[`cli - "molt multiple_imports.ts --only deno.land --ignore deno_graph" 
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --write" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
 💾 lib.ts
@@ -219,14 +221,14 @@ snapshot[`cli - multiple_modules - "molt mod.ts --write" 2`] = `
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --write --summary title.txt --report body.md" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
 💾 lib.ts
@@ -243,19 +245,19 @@ snapshot[`cli - multiple_modules - "molt mod.ts --write --summary title.txt --re
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
-📝 bump deno.land/std from 0.200.0 to 123.456.789
-📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 bump node-emoji from 2.0.0 to 123.456.789
+📝 bump deno.land/std from 0.200.0 to 0.218.2
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 bump node-emoji from 2.0.0 to 2.1.3
 "
 `;
 
@@ -265,19 +267,19 @@ snapshot[`cli - multiple_modules - "molt mod.ts --commit" 2`] = `
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --prefix :package:" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
-📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 :package: bump node-emoji from 2.0.0 to 123.456.789
+📝 :package: bump deno.land/std from 0.200.0 to 0.218.2
+📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 :package: bump node-emoji from 2.0.0 to 2.1.3
 "
 `;
 
@@ -287,52 +289,58 @@ snapshot[`cli - multiple_modules - "molt mod.ts --commit --prefix :package:" 2`]
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --pre-commit=fmt --post-commit=lint" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
-💾 bump deno.land/std from 0.200.0 to 123.456.789
+💾 bump deno.land/std from 0.200.0 to 0.218.2
 🔨 Running task fmt...
-📝 bump deno.land/std from 0.200.0 to 123.456.789
+📝 bump deno.land/std from 0.200.0 to 0.218.2
 🔨 Running task lint...
 
-💾 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+💾 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
 🔨 Running task fmt...
-📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
 🔨 Running task lint...
 
-💾 bump node-emoji from 2.0.0 to 123.456.789
+💾 bump node-emoji from 2.0.0 to 2.1.3
 🔨 Running task fmt...
-📝 bump node-emoji from 2.0.0 to 123.456.789
+📝 bump node-emoji from 2.0.0 to 2.1.3
 🔨 Running task lint...
 "
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --pre-commit=fmt --post-commit=lint" 2`] = `
 "Checking for updates
+Checked 64 files
+Checked 35 files
+Checked 64 files
+Checked 35 files
+Checked 64 files
+Checked 35 files
 "
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --report body.md" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
-📝 bump deno.land/std from 0.200.0 to 123.456.789
-📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 bump node-emoji from 2.0.0 to 123.456.789
+📝 bump deno.land/std from 0.200.0 to 0.218.2
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 bump node-emoji from 2.0.0 to 2.1.3
 
 📄 title.txt
 📄 body.md
@@ -345,27 +353,27 @@ snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --r
 `;
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --pre-commit=fmt" 1`] = `
-"📦 deno.land/std 0.200.0 => 123.456.789
+"📦 deno.land/std 0.200.0 => 0.218.2
   lib.ts 0.200.0
   mod.ts 0.200.0
 
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
   mod.ts 0.50.0
 
-📦 node-emoji 2.0.0 => 123.456.789
+📦 node-emoji 2.0.0 => 2.1.3
   mod.ts 2.0.0
 
-💾 bump deno.land/std from 0.200.0 to 123.456.789
+💾 bump deno.land/std from 0.200.0 to 0.218.2
 🔨 Running task fmt...
-📝 bump deno.land/std from 0.200.0 to 123.456.789
+📝 bump deno.land/std from 0.200.0 to 0.218.2
 
-💾 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+💾 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
 🔨 Running task fmt...
-📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
 
-💾 bump node-emoji from 2.0.0 to 123.456.789
+💾 bump node-emoji from 2.0.0 to 2.1.3
 🔨 Running task fmt...
-📝 bump node-emoji from 2.0.0 to 123.456.789
+📝 bump node-emoji from 2.0.0 to 2.1.3
 
 📄 title.txt
 "
@@ -373,14 +381,17 @@ snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --p
 
 snapshot[`cli - multiple_modules - "molt mod.ts --commit --summary title.txt --pre-commit=fmt" 2`] = `
 "Checking for updates
+Checked 64 files
+Checked 64 files
+Checked 64 files
 "
 `;
 
 snapshot[`cli - import_map - "molt deno.json" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 "
 `;
 
@@ -390,10 +401,10 @@ snapshot[`cli - import_map - "molt deno.json" 2`] = `
 `;
 
 snapshot[`cli - import_map - "molt deno.json --write" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 
 💾 deno.json
 "
@@ -404,29 +415,29 @@ snapshot[`cli - import_map - "molt deno.json --write" 2`] = `
 "
 `;
 
-snapshot[`cli - import_map - "molt deno.json --commit --prefix :package:" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+snapshot[`cli - import_map - "molt deno.json --commit" 1`] = `
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 
-📝 :package: bump @luca/flag from 1.0.0 to 123.456.789
-📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 :package: bump node-emoji from 2.0.0 to 123.456.789
+📝 bump @luca/flag from 1.0.0 to 1.1.0
+📝 bump deno.land/std from 0.200.0 to 0.218.2
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 bump node-emoji from 2.0.0 to 2.1.3
 "
 `;
 
-snapshot[`cli - import_map - "molt deno.json --commit --prefix :package:" 2`] = `
+snapshot[`cli - import_map - "molt deno.json --commit" 2`] = `
 "Checking for updates
 "
 `;
 
 snapshot[`cli - jsonc - "molt deno.jsonc" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 "
 `;
 
@@ -436,10 +447,10 @@ snapshot[`cli - jsonc - "molt deno.jsonc" 2`] = `
 `;
 
 snapshot[`cli - jsonc - "molt deno.jsonc --write" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 
 💾 deno.jsonc
 "
@@ -450,20 +461,103 @@ snapshot[`cli - jsonc - "molt deno.jsonc --write" 2`] = `
 "
 `;
 
-snapshot[`cli - jsonc - "molt deno.jsonc --commit --prefix :package:" 1`] = `
-"📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 2.0.0 => 123.456.789
+snapshot[`cli - jsonc - "molt deno.jsonc --commit" 1`] = `
+"📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 
-📝 :package: bump @luca/flag from 1.0.0 to 123.456.789
-📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 :package: bump node-emoji from 2.0.0 to 123.456.789
+📝 bump @luca/flag from 1.0.0 to 1.1.0
+📝 bump deno.land/std from 0.200.0 to 0.218.2
+📝 bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 bump node-emoji from 2.0.0 to 2.1.3
 "
 `;
 
-snapshot[`cli - jsonc - "molt deno.jsonc --commit --prefix :package:" 2`] = `
+snapshot[`cli - jsonc - "molt deno.jsonc --commit" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock not_exist.lock" 1`] = `""`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock not_exist.lock" 2`] = `
+\`Checking for updates
+Failed to parse lockfile: not_exist.lock
+NotFound: No such file or directory (os error 2): readfile 'not_exist.lock'
+    at async readTextFile (ext:deno_fs/30_fs.js:872:18)
+    at async Object.<anonymous> (file:///home/hasundue/molt/lib/testing.ts:66:15)
+    at async parseLockFileJson (file:///home/hasundue/molt/lib/lockfile.ts:76:18)
+    at async parseLockFile (file:///home/hasundue/molt/lib/lockfile.ts:95:11)
+    at async collect (file:///home/hasundue/molt/lib/update.ts:189:35)
+    at async collectUpdates (file:///home/hasundue/molt/cli.ts:111:18)
+    at async Command.actionHandler (file:///home/hasundue/molt/cli.ts:71:20)
+    at async Command.execute (https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts:1948:7)
+    at async Command.parseCommand (https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts:1780:14)
+    at async file:///home/hasundue/molt/cli.ts:330:3 {
+  name: "NotFound",
+  code: "ENOENT"
+}
+\`
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock" 1`] = `
+"📦 @core/match 0.1.0 => 0.1.9
+  deno.lock 0.1.0
+
+📦 deno.land/std 0.200.0 => 0.218.2
+  deno.json 0.200.0
+  deno.lock 0.200.0
+
+📦 hono 3.0.0 => 3.12.12
+  deno.lock 3.0.0
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock --write" 1`] = `
+"📦 @core/match 0.1.0 => 0.1.9
+  deno.lock 0.1.0
+
+📦 deno.land/std 0.200.0 => 0.218.2
+  deno.json 0.200.0
+  deno.lock 0.200.0
+
+📦 hono 3.0.0 => 3.12.12
+  deno.lock 3.0.0
+
+💾 deno.json
+💾 deno.lock
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock --write" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock --commit" 1`] = `
+"📦 @core/match 0.1.0 => 0.1.9
+  deno.lock 0.1.0
+
+📦 deno.land/std 0.200.0 => 0.218.2
+  deno.json 0.200.0
+  deno.lock 0.200.0
+
+📦 hono 3.0.0 => 3.12.12
+  deno.lock 3.0.0
+
+📝 bump @core/match from 0.1.0 to 0.1.9
+📝 bump deno.land/std from 0.200.0 to 0.218.2
+📝 bump hono from 3.0.0 to 3.12.12
+"
+`;
+
+snapshot[`cli - lockfile - "molt deno.json --unstable-lock --commit" 2`] = `
 "Checking for updates
 "
 `;

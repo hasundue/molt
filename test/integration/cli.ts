@@ -52,12 +52,20 @@ molt(
 // deno.json
 molt("deno.json", { cwd: "import_map" });
 molt("deno.json --write", { cwd: "import_map" });
-molt("deno.json --commit --prefix :package:", { cwd: "import_map" });
+molt("deno.json --commit", { cwd: "import_map" });
 
 // deno.jsonc
 molt("deno.jsonc", { cwd: "jsonc" });
 molt("deno.jsonc --write", { cwd: "jsonc" });
-molt("deno.jsonc --commit --prefix :package:", { cwd: "jsonc" });
+molt("deno.jsonc --commit", { cwd: "jsonc" });
+
+// lockfile
+molt("deno.json --unstable-lock not_exist.lock", { cwd: "lockfile", code: 1 });
+molt("deno.json --unstable-lock", { cwd: "lockfile" });
+molt("deno.json --unstable-lock --write", { cwd: "lockfile" });
+molt("deno.json --unstable-lock --commit", {
+  cwd: "lockfile",
+});
 
 //-----------------------
 // Test implementation
