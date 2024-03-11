@@ -7,11 +7,19 @@ import {
   WriteOptions,
 } from "./file.ts";
 import { LockPart } from "./lockfile.ts";
-import { CollectResult, DependencyUpdate } from "./update.ts";
+import {
+  CollectResult,
+  DependencyUpdate,
+  SourceType,
+  sourceTypeOf,
+} from "./update.ts";
 
 export interface CommitProps {
   /** The name of the module group */
   group: string;
+  /** Filetypes that are updated */
+  types: SourceType[];
+  /** The version bump by the commit */
   version?: VersionChange;
 }
 
@@ -28,7 +36,7 @@ export interface CommitSequence {
 
 export interface CommitOptions extends WriteOptions {
   groupBy?: (dependency: DependencyUpdate) => string;
-  composeCommitMessage?: (props: CommitProps) => string;
+  composeCommitMessage?: (commit: CommitProps) => string;
   preCommit?: (commit: GitCommit) => void | Promise<void>;
   postCommit?: (commit: GitCommit) => void | Promise<void>;
   gitAddOptions?: string[];
@@ -85,10 +93,12 @@ export function createCommitSequence(
     [group, updates],
   ) => {
     const version = getVersionChange(updates);
+    const types = distinct(updates.map((u) => sourceTypeOf(u)));
     return ({
+      types,
       group,
       version,
-      message: _options.composeCommitMessage({ group, version }),
+      message: _options.composeCommitMessage({ types, group, version }),
       updates,
       locks: result.locks,
     });
