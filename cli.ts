@@ -25,19 +25,9 @@ const main = new Command()
     "Check updates to dependencies in Deno modules and configuration files",
   )
   .versionOption("-v, --version", "Print version info.", versionCommand)
-  .example("Check import maps in a config", "molt deno.json")
-  .example("Check imports in a module", "molt deps.ts")
-  .example("Include multiple modules", "molt mod.ts lib.ts")
-  .example("Target all .ts files", "molt ./**/*.ts")
   .option("--import-map <file:string>", "Specify import map file")
-  .example("Specify an import map", "molt mod.ts --import-map deno.json")
   .option("--ignore=<deps:string[]>", "Ignore dependencies")
-  .example(
-    "Ignore specified dependencies",
-    "molt deps.ts --ignore=deno_graph,node_emoji",
-  )
   .option("--only=<deps:string[]>", "Check specified dependencies")
-  .example("Check deno_std only", "molt deps.ts --only deno.land/std")
   .option("-w, --write", "Write changes to local files", {
     conflicts: ["commit"],
   })
