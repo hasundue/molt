@@ -55,6 +55,10 @@ const main = new Command()
   })
   .option("--summary <file:string>", "Write a summary of changes to file")
   .option("--report <file:string>", "Write a report of changes to file")
+  .option(
+    "--unstable-lock [file:string]",
+    "Enable unstable updating of lockfiles",
+  )
   .arguments("<modules...:string>")
   .action(async function (options, ...files) {
     if (options.importMap) {
@@ -101,10 +105,15 @@ async function collectUpdates(
     ignore?: string[];
     importMap?: string;
     only?: string[];
+    unstableLock?: true | string;
   },
 ): Promise<CollectResult> {
   const result = await $.progress("Checking for updates").with(() =>
     collect(entrypoints, {
+      lock: !!options.unstableLock,
+      lockFile: typeof options.unstableLock === "string"
+        ? options.unstableLock
+        : undefined,
       importMap: options.importMap,
       ignore: options.ignore
         ? (dep) => options.ignore!.some((it) => dep.name.includes(it))
@@ -321,7 +330,7 @@ try {
   await main.parse(Deno.args);
 } catch (error) {
   if (error.message) {
-    console.error(error.message);
+    console.error("Error: " + error.message);
   }
   Deno.exit(1);
 }
