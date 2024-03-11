@@ -63,9 +63,10 @@ molt("deno.jsonc --commit", { cwd: "jsonc" });
 molt("deno.json --unstable-lock not_exist.lock", { cwd: "lockfile", code: 1 });
 molt("deno.json --unstable-lock", { cwd: "lockfile" });
 molt("deno.json --unstable-lock --write", { cwd: "lockfile" });
-molt("deno.json --unstable-lock --commit", {
-  cwd: "lockfile",
-});
+molt(
+  "deno.json --commit --unstable-lock --prefix :package: --prefix-lock :lock:",
+  { cwd: "lockfile" },
+);
 
 //-----------------------
 // Test implementation

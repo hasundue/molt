@@ -10,19 +10,20 @@ Description:
 
 Options:
 
-  -h, --help                 - Show this help.                                              
-  -v, --version              - Print version info.                                          
-  --import-map     <file>    - Specify import map file                                      
-  --ignore         <deps>    - Ignore dependencies                                          
-  --only           <deps>    - Check specified dependencies                                 
-  -w, --write                - Write changes to local files            (Conflicts: --commit)
-  -c, --commit               - Commit changes to local git repository  (Conflicts: --write) 
-  --pre-commit     <tasks>   - Run tasks before each commit            (Depends: --commit)  
-  --post-commit    <tasks>   - Run tasks after each commit             (Depends: --commit)  
-  --prefix         <prefix>  - Prefix for commit messages              (Depends: --commit)  
-  --summary        <file>    - Write a summary of changes to file                           
-  --report         <file>    - Write a report of changes to file                            
-  --unstable-lock  [file]    - Enable unstable updating of lockfiles                        
+  -h, --help                 - Show this help.                                                                         
+  -v, --version              - Print version info.                                                                     
+  --import-map     <file>    - Specify import map file                                                                 
+  --ignore         <deps>    - Ignore dependencies                                                                     
+  --only           <deps>    - Check specified dependencies                                                            
+  -w, --write                - Write changes to local files                        (Conflicts: --commit)               
+  -c, --commit               - Commit changes to local git repository              (Conflicts: --write)                
+  --pre-commit     <tasks>   - Run tasks before each commit                        (Depends: --commit)                 
+  --post-commit    <tasks>   - Run tasks after each commit                         (Depends: --commit)                 
+  --prefix         <prefix>  - Prefix for commit messages                          (Depends: --commit)                 
+  --prefix-lock    <prefix>  - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
+  --summary        <file>    - Write a summary of changes to file                                                      
+  --report         <file>    - Write a report of changes to file                                                       
+  --unstable-lock  [file]    - Enable unstable updating of a lock file                                                 
 
 Examples:
 
@@ -53,19 +54,20 @@ Description:
 
 Options:
 
-  -h, --help                 - Show this help.                                              
-  -v, --version              - Print version info.                                          
-  --import-map     <file>    - Specify import map file                                      
-  --ignore         <deps>    - Ignore dependencies                                          
-  --only           <deps>    - Check specified dependencies                                 
-  -w, --write                - Write changes to local files            (Conflicts: --commit)
-  -c, --commit               - Commit changes to local git repository  (Conflicts: --write) 
-  --pre-commit     <tasks>   - Run tasks before each commit            (Depends: --commit)  
-  --post-commit    <tasks>   - Run tasks after each commit             (Depends: --commit)  
-  --prefix         <prefix>  - Prefix for commit messages              (Depends: --commit)  
-  --summary        <file>    - Write a summary of changes to file                           
-  --report         <file>    - Write a report of changes to file                            
-  --unstable-lock  [file]    - Enable unstable updating of lockfiles                        
+  -h, --help                 - Show this help.                                                                         
+  -v, --version              - Print version info.                                                                     
+  --import-map     <file>    - Specify import map file                                                                 
+  --ignore         <deps>    - Ignore dependencies                                                                     
+  --only           <deps>    - Check specified dependencies                                                            
+  -w, --write                - Write changes to local files                        (Conflicts: --commit)               
+  -c, --commit               - Commit changes to local git repository              (Conflicts: --write)                
+  --pre-commit     <tasks>   - Run tasks before each commit                        (Depends: --commit)                 
+  --post-commit    <tasks>   - Run tasks after each commit                         (Depends: --commit)                 
+  --prefix         <prefix>  - Prefix for commit messages                          (Depends: --commit)                 
+  --prefix-lock    <prefix>  - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
+  --summary        <file>    - Write a summary of changes to file                                                      
+  --report         <file>    - Write a report of changes to file                                                       
+  --unstable-lock  [file]    - Enable unstable updating of a lock file                                                 
 
 Examples:
 
@@ -95,7 +97,7 @@ snapshot[`cli - "molt --version" 2`] = `
 snapshot[`cli - "molt not_exist.ts" 1`] = `""`;
 
 snapshot[`cli - "molt not_exist.ts" 2`] = `
-'Path does not exist: "not_exist.ts"
+'Error: Path does not exist: "not_exist.ts"
 '
 `;
 
@@ -482,23 +484,9 @@ snapshot[`cli - jsonc - "molt deno.jsonc --commit" 2`] = `
 snapshot[`cli - lockfile - "molt deno.json --unstable-lock not_exist.lock" 1`] = `""`;
 
 snapshot[`cli - lockfile - "molt deno.json --unstable-lock not_exist.lock" 2`] = `
-\`Checking for updates
-Failed to parse lockfile: not_exist.lock
-NotFound: No such file or directory (os error 2): readfile 'not_exist.lock'
-    at async readTextFile (ext:deno_fs/30_fs.js:872:18)
-    at async Object.<anonymous> (file:///home/hasundue/molt/lib/testing.ts:66:15)
-    at async parseLockFileJson (file:///home/hasundue/molt/lib/lockfile.ts:76:18)
-    at async parseLockFile (file:///home/hasundue/molt/lib/lockfile.ts:95:11)
-    at async collect (file:///home/hasundue/molt/lib/update.ts:189:35)
-    at async collectUpdates (file:///home/hasundue/molt/cli.ts:111:18)
-    at async Command.actionHandler (file:///home/hasundue/molt/cli.ts:71:20)
-    at async Command.execute (https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts:1948:7)
-    at async Command.parseCommand (https://deno.land/x/cliffy@v1.0.0-rc.3/command/command.ts:1780:14)
-    at async file:///home/hasundue/molt/cli.ts:330:3 {
-  name: "NotFound",
-  code: "ENOENT"
-}
-\`
+"Checking for updates
+Error: Failed to parse lockfile: not_exist.lock
+"
 `;
 
 snapshot[`cli - lockfile - "molt deno.json --unstable-lock" 1`] = `
@@ -540,7 +528,7 @@ snapshot[`cli - lockfile - "molt deno.json --unstable-lock --write" 2`] = `
 "
 `;
 
-snapshot[`cli - lockfile - "molt deno.json --unstable-lock --commit" 1`] = `
+snapshot[`cli - lockfile - "molt deno.json --commit --unstable-lock --prefix :package: --prefix-lock :lock:" 1`] = `
 "📦 @core/match 0.1.0 => 0.1.9
   deno.lock 0.1.0
 
@@ -551,13 +539,13 @@ snapshot[`cli - lockfile - "molt deno.json --unstable-lock --commit" 1`] = `
 📦 hono 3.0.0 => 3.12.12
   deno.lock 3.0.0
 
-📝 bump @core/match from 0.1.0 to 0.1.9
-📝 bump deno.land/std from 0.200.0 to 0.218.2
-📝 bump hono from 3.0.0 to 3.12.12
+📝 :lock: bump @core/match from 0.1.0 to 0.1.9
+📝 :package: bump deno.land/std from 0.200.0 to 0.218.2
+📝 :lock: bump hono from 3.0.0 to 3.12.12
 "
 `;
 
-snapshot[`cli - lockfile - "molt deno.json --unstable-lock --commit" 2`] = `
+snapshot[`cli - lockfile - "molt deno.json --commit --unstable-lock --prefix :package: --prefix-lock :lock:" 2`] = `
 "Checking for updates
 "
 `;
