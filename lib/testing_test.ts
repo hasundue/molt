@@ -13,7 +13,7 @@ Deno.test("CommandStub", async () => {
     signal: null,
   });
   assertSpyCall(Command, 0, {
-    args: ["echo"],
+    args: ["echo", undefined],
   });
   assertSpyCalls(Command, 1);
 });
