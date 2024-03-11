@@ -7,17 +7,74 @@
 > Molt is still being developed actively. The API is not stable yet and may
 > change frequently.
 
-Molt is a [Deno] module to bump versions in import specifiers, like [udd], but
-with some unique concepts:
+Molt is a [Deno] module to bump version strings in import specifiers, like
+[udd], but with some unique concepts:
 
-**The Deno way** - Molt finds dependencies and checks their latest versions in
-the same way as the Deno runtime does.
+**The Deno way** - Molt finds dependencies and checks their latest versions in a
+consistent way as the Deno runtime, with [deno_graph] and [import_map] crates,
+etc.
 
 **Module-first** - The core logic is provided as a Deno module, which enables
 you to write the best scripts for your use cases.
 
 **Git-friendly** - The operations can be easily divided into logical groups for
 subsequent git commits.
+
+## Features
+
+Molt can check updates to dependencies written in different formats and bump
+their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
+
+> [!NOTE]\
+> Molt does NOT bump version ragnges like `1`, `1.x`, `~1.2.3` and `^1.2.3` in
+> `npm:` and `jrs:` specifiers, but only updates a lockfile.
+
+#### Import specifiers in ES modules
+
+```diff
+- import { assert } from "https://deno.land/std@0.200.0/assert/mod.ts";
++ import { assert } from "https://deno.land/std@0.218.2/assert/mod.ts";
+...
+```
+
+#### Import maps
+
+```diff
+  {
+    "imports": {
+      "@core/match": "jsr:@core/match@0.1.x",
+-     "@std/assert": "jsr:@std/assert@0.200.0",
+-     "node-emoji": "npm:node-emoji@2.0.0"
++     "@std/assert": "jsr:@std/assert@0.218.2",
++     "node-emoji": "npm:node-emoji@2.1.3"
+    }
+  }
+```
+
+#### Lock files
+
+> [!WARNING]\
+> This is still an experimental feature and may not work as expected. Requires
+> Deno v1.41.0 or later.
+
+```diff
+  {
+    "version": "3",
+    "packages": {
+      "specifiers": {
+-       "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.0",
++       "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.9",
+        "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
+      },
+      "jsr": {
+-       "@core/match@0.1.0": {
+-         "integrity": "6f1edfca5215735a12aa2dbd920ead331a501eb5e3ad70cba3b9787610c7bfaf",
++       "@core/match@0.1.9": {
++         "integrity": "ceff06cf40212bb720925972a4405bef373efe768690b344ac4fd7ca7189f746",
+          "dependencies": [
+            "npm:ts-toolbelt@9.6.0"
+        ...
+```
 
 ## Usage
 
@@ -30,20 +87,20 @@ subsequent git commits.
 ##### Update all dependencies in a module and write the changes to local files
 
 ```ts
-import { collect, writeAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { collect, write } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await collect("./mod.ts");
-await writeAll(updates);
+const result = await collect("./mod.ts");
+await write(result);
 ```
 
 ##### Update all dependencies in a module and commit the changes to git
 
 ```ts
-import { collect, commitAll } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { collect, commit } from "https://deno.land/x/molt@{VERSION}/mod.ts";
 
-const updates = await collect("./mod.ts");
+const result = await collect("./mod.ts");
 
-await commitAll(updates, {
+await commit(result, {
   groupBy: (dependency) => dependency.name,
   composeCommitMessage: ({ group, version }) =>
     `build(deps): bump ${group} to ${version!.to}`,
@@ -89,28 +146,20 @@ Description:
 
 Options:
 
-  -h, --help               - Show this help.                                              
-  -v, --version            - Print version info.                                          
-  --import-map   <file>    - Specify import map file                                      
-  --ignore       <deps>    - Ignore dependencies                                          
-  --only         <deps>    - Check specified dependencies                                 
-  -w, --write              - Write changes to local files            (Conflicts: --commit)
-  -c, --commit             - Commit changes to local git repository  (Conflicts: --write) 
-  --pre-commit   <tasks>   - Run tasks before each commit            (Depends: --commit)  
-  --post-commit  <tasks>   - Run tasks after each commit             (Depends: --commit)  
-  --prefix       <prefix>  - Prefix for commit messages              (Depends: --commit)  
-  --summary      <file>    - Write a summary of changes to file                           
-  --report       <file>    - Write a report of changes to file                            
-
-Examples:
-
-  Check import maps in a config: molt deno.json                             
-  Check imports in a module:     molt deps.ts                               
-  Include multiple modules:      molt mod.ts lib.ts                         
-  Target all .ts files:          molt ./**/*.ts                             
-  Specify an import map:         molt mod.ts --import-map deno.json         
-  Ignore specified dependencies: molt deps.ts --ignore=deno_graph,node_emoji
-  Check deno_std only:           molt deps.ts --only deno.land/std
+  -h, --help                 - Show this help.                                                                         
+  -v, --version              - Print version info.                                                                     
+  --import-map     <file>    - Specify import map file                                                                 
+  --ignore         <deps>    - Ignore dependencies                                                                     
+  --only           <deps>    - Check specified dependencies                                                            
+  -w, --write                - Write changes to local files                        (Conflicts: --commit)               
+  -c, --commit               - Commit changes to local git repository              (Conflicts: --write)                
+  --pre-commit     <tasks>   - Run tasks before each commit                        (Depends: --commit)                 
+  --post-commit    <tasks>   - Run tasks after each commit                         (Depends: --commit)                 
+  --prefix         <prefix>  - Prefix for commit messages                          (Depends: --commit)                 
+  --prefix-lock    <prefix>  - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
+  --summary        <file>    - Write a summary of changes to file                                                      
+  --report         <file>    - Write a report of changes to file                                                       
+  --unstable-lock  [file]    - Enable unstable updating of a lock file
 ```
 
 > [!Note]\
@@ -124,10 +173,10 @@ Examples:
 
 ```sh
 > molt deno.json
-📦 @luca/flag 1.0.0 => 123.456.789
-📦 deno.land/std 0.200.0 => 123.456.789
-📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-📦 node-emoji 1.0.0 => 123.456.789
+📦 @luca/flag 1.0.0 => 1.1.0
+📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
 ```
 
 ##### Write changes to files
@@ -143,10 +192,10 @@ Examples:
 ```sh
 > molt deno.json --commit --prefix :package:
     ...
-📝 :package: bump @luca/flag from 1.0.0 to 123.456.789
-📝 :package: bump deno.land/std from 0.200.0 to 123.456.789
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-📝 :package: bump node-emoji from 2.0.0 to 123.456.789
+📝 :package: bump @luca/flag from 1.0.0 to 1.1.0
+📝 :package: bump deno.land/std from 0.200.0 to 0.218.2
+📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
+📝 :package: bump node-emoji from 2.0.0 to 2.1.3
 ```
 
 ## Compatibility with registries
@@ -163,10 +212,6 @@ we may implement registry-specific routines for them:
 - [x] [deno.land/x](https://deno.land/x)
 - [x] [jsr](https://jsr.io) (via `jsr:` specifier)
 - [x] [npm](https://www.npmjs.com) (via `npm:` specifier)
-
-> [!NOTE]\
-> Version constraints like `~1.2.3` and `^1.2.3` in `npm:` and `jrs:` specifiers
-> are not updated.
 
 ### Third-party registries
 
@@ -194,8 +239,7 @@ TBW
 
 The following limitations are imposed by the design of Molt:
 
-- Dependencies are always updated to the latest versions. Version constraints
-  are not handled.
+- Version constraints on URL imports are not supported.
 - Dependencies in import specifiers are only targeted.
 
 See [issues] for other known limitations.
@@ -214,5 +258,7 @@ and of full respect to the authors.
 
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
+[import_map]: https://github.com/denoland/import_map
 [udd]: https://github.com/hayd/deno-udd
 [issues]: https://github.com/hasundue/molt/issues
+[dependabot]: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#versioning-strategy
