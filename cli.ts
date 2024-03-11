@@ -13,7 +13,6 @@ import {
   DependencyUpdate,
   execute,
   parse,
-  resolveLatestVersion,
   write,
 } from "./mod.ts";
 
@@ -84,13 +83,8 @@ const main = new Command()
     }
   });
 
-async function versionCommand() {
-  const version = parse(import.meta.url).version ??
-    await $.progress("Fetching version info").with(async () =>
-      await resolveLatestVersion(
-        parse(new URL("https://deno.land/x/molt/cli.ts")),
-      ).then((latest) => latest?.version) ?? "unknown"
-    );
+function versionCommand() {
+  const version = parse(import.meta.url).version ?? "dev";
   console.log(version);
 }
 

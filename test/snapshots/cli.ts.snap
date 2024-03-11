@@ -65,14 +65,11 @@ Options:
 snapshot[`cli - "molt --help" 2`] = `""`;
 
 snapshot[`cli - "molt --version" 1`] = `
-"0.17.0
+"dev
 "
 `;
 
-snapshot[`cli - "molt --version" 2`] = `
-"Fetching version info
-"
-`;
+snapshot[`cli - "molt --version" 2`] = `""`;
 
 snapshot[`cli - "molt not_exist.ts" 1`] = `""`;
 
