@@ -7,8 +7,16 @@ export const assertSnapshot = createAssertSnapshot({
 });
 
 export const CommandStub = {
-  create(CommandSpy = spy(Deno.Command)) {
-    return class CommandStub extends CommandSpy {
+  create(pattern = "") {
+    return class CommandStub extends spy(Deno.Command) {
+      #cmd: string;
+      constructor(
+        command: string | URL,
+        options?: Deno.CommandOptions,
+      ) {
+        super(command, options);
+        this.#cmd = command.toString();
+      }
       #output: Deno.CommandOutput = {
         code: 0,
         stdout: new Uint8Array(),
@@ -17,13 +25,19 @@ export const CommandStub = {
         signal: null,
       };
       outputSync() {
-        return this.#output;
+        return this.#cmd.toString().includes(pattern)
+          ? this.#output
+          : super.outputSync();
       }
       output() {
-        return Promise.resolve(this.#output);
+        return this.#cmd.includes(pattern)
+          ? Promise.resolve(this.#output)
+          : super.output();
       }
       spawn() {
-        return new Deno.ChildProcess();
+        return this.#cmd.includes(pattern)
+          ? new Deno.ChildProcess()
+          : super.spawn();
       }
       static clear() {
         this.calls = [];
@@ -187,11 +201,16 @@ function parseDenoLandUrl(url: URL) {
  * Enables all test stubs.
  */
 export function enableTestMode() {
+  LatestVersionStub.create({
+    "deno.land/std": "0.218.2",
+    "deno_graph": "0.69.7",
+    "node-emoji": "2.1.3",
+    "@luca/flag": "1.0.1",
+  });
   const fs = new FileSystemFake();
   ReadTextFileStub.create(fs, { readThrough: true });
   WriteTextFileStub.create(fs);
-  LatestVersionStub.create("123.456.789");
-  Deno.Command = CommandStub.create();
+  Deno.Command = CommandStub.create("git");
 }
 
 /** Utility function to throw an error. */
