@@ -280,7 +280,12 @@ async function collectFromDependency(
 ): Promise<CollectResult> {
   const resolved = dependencyJson.code?.specifier ??
     dependencyJson.type?.specifier;
-  assertExists(resolved);
+  if (!resolved) {
+    throw new Error(
+      `Could not resolve the dependency: ${dependencyJson.specifier}`,
+      { cause: dependencyJson },
+    );
+  }
   const lock = options.lockFile
     ? await createLockPart(resolved, options.lockFile)
     : undefined;
