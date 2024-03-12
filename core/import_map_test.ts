@@ -124,11 +124,13 @@ Deno.test("resolveInner", async () => {
   const { resolveInner } = await readFromJson(
     new URL("../test/cases/import_map/deno.json", import.meta.url),
   );
+  const referrer = new URL("../test/cases/import_map/mod.ts", import.meta.url);
   assertEquals(
-    resolveInner(
-      "/lib.ts",
-      new URL("../test/cases/import_map/mod.ts", import.meta.url),
-    ),
+    resolveInner("/lib.ts", referrer),
     new URL("../test/cases/import_map/lib.ts", import.meta.url).href,
+  );
+  assertEquals(
+    resolveInner("@std/testing/bdd", referrer),
+    "jsr:/@std/testing@0.200.0/bdd",
   );
 });
