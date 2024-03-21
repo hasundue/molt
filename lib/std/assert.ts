@@ -1,3 +1,4 @@
+export { assert } from "https://deno.land/std@0.219.1/assert/assert.ts";
 export { assertArrayIncludes } from "https://deno.land/std@0.219.1/assert/assert_array_includes.ts";
 export { assertEquals } from "https://deno.land/std@0.219.1/assert/assert_equals.ts";
 export { assertExists } from "https://deno.land/std@0.219.1/assert/assert_exists.ts";

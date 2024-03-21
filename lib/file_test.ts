@@ -5,7 +5,7 @@ import {
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
-import { assertInstanceOf } from "./std/assert.ts";
+import { assert, assertInstanceOf } from "./std/assert.ts";
 import { assertSnapshot } from "./testing.ts";
 import { collect, CollectResult } from "./update.ts";
 import { associateByFile, type FileUpdate, writeFileUpdate } from "./file.ts";
@@ -86,6 +86,9 @@ function test(path: string, name = toName(path)) {
       if (result) {
         await writeFileUpdate(updates);
         await assertFileSystemSnapshot(t, fs);
+        for await (const content of fs.values()) {
+          assert(content.endsWith("\n"), "should end with a newline");
+        }
       }
     });
   });
