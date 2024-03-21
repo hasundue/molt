@@ -2,15 +2,17 @@ import {
   collectUpdateFromLockFile,
   createLockPart,
   createLockPartForEach,
-  parseLockFile,
   parseLockFileJson,
+  readLockFile,
 } from "./lockfile.ts";
 import { assertEquals, assertObjectMatch } from "./std/assert.ts";
 
 Deno.test("parseLockFileJson", async () =>
   assertObjectMatch(
-    await parseLockFileJson(
-      new URL("../test/data/lockfile/deno.updated.lock", import.meta.url),
+    parseLockFileJson(
+      await Deno.readTextFile(
+        new URL("../test/data/lockfile/deno.updated.lock", import.meta.url),
+      ),
     ),
     {
       version: "3",
@@ -55,7 +57,7 @@ Deno.test("createLockPart - npm:hono", async () => {
 
 Deno.test("createLockPartForEach", async () => {
   const updated = await createLockPartForEach(
-    await parseLockFile(
+    await readLockFile(
       new URL("../test/data/lockfile/deno.lock", import.meta.url),
     ),
   );
@@ -95,7 +97,7 @@ Deno.test("createLockPartForEach", async () => {
 
 Deno.test("createLockPartForEach - no updates", async () => {
   const updated = await createLockPartForEach(
-    await parseLockFile(
+    await readLockFile(
       new URL("../test/data/lockfile/deno.lock", import.meta.url),
     ),
     false,
@@ -143,7 +145,7 @@ Deno.test("createLockPartForEach - no updates", async () => {
 
 Deno.test("collectUpdateFromLockFile", async () => {
   const updates = await collectUpdateFromLockFile(
-    await parseLockFile(
+    await readLockFile(
       new URL("../test/data/lockfile/deno.lock", import.meta.url),
     ),
   );
@@ -190,7 +192,7 @@ Deno.test("collectUpdateFromLockFile", async () => {
 
 Deno.test("collectUpdateFromLockFile - with a patch", async () => {
   const updates = await collectUpdateFromLockFile(
-    await parseLockFile(
+    await readLockFile(
       new URL("../test/data/lockfile/deno.lock", import.meta.url),
     ),
     await createLockPart("npm:hono@^3"),
