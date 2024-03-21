@@ -145,11 +145,6 @@ export const LatestVersionStub = {
           return new Response(
             JSON.stringify({
               versions: {
-                "1.0.0": {},
-                "1.0.1": {},
-                "1.0.2": { yanked: true },
-                "1.1.0": {},
-                "1.2.0": { yanked: true },
                 [latest]: {},
               },
             }),
@@ -206,6 +201,7 @@ export function enableTestMode() {
     "deno_graph": "0.69.7",
     "node-emoji": "2.1.3",
     "@luca/flag": "1.0.1",
+    "@std/": "0.218.2",
   });
   const fs = new FileSystemFake();
   ReadTextFileStub.create(fs, { readThrough: true });
