@@ -24,7 +24,7 @@ import {
   createLockPart,
   LockFile,
   LockPart,
-  parseLockFile,
+  readLockFile,
 } from "./lockfile.ts";
 
 export type SourceType = "import_map" | "module" | "lockfile";
@@ -186,7 +186,7 @@ export async function collect(
         ? await maybeFile(new URL("deno.lock", toUrl(importMapPath)))
         : undefined))
     : undefined;
-  const lockFile = lockFilePath ? await parseLockFile(lockFilePath) : undefined;
+  const lockFile = lockFilePath ? await readLockFile(lockFilePath) : undefined;
 
   const urls = [from].flat().map((path) => toUrl(path));
   const [jsons, esms] = partition(urls, isJsonPath);

@@ -68,16 +68,13 @@ export interface LockPart {
  * @param specifier - The URL or path to the lockfile.
  * @returns The parsed JSON object of the lockfile.
  */
-export async function parseLockFileJson(
-  specifier: URL | string,
-): Promise<LockFileJson> {
+export function parseLockFileJson(
+  content: string,
+): LockFileJson {
   try {
-    return ensure(
-      JSON.parse(await Deno.readTextFile(specifier)),
-      isLockFileJson,
-    );
+    return ensure(JSON.parse(content), isLockFileJson);
   } catch (cause) {
-    throw new Error(`Failed to parse lockfile: ${specifier}`, { cause });
+    throw new Error(`Failed to parse lockfile`, { cause });
   }
 }
 
@@ -87,12 +84,12 @@ export async function parseLockFileJson(
  * @param specifier - The URL or path to the lockfile.
  * @returns The parsed `LockFile` object.
  */
-export async function parseLockFile(
+export async function readLockFile(
   specifier: URL | string,
 ): Promise<LockFile> {
   return {
     path: toPath(specifier),
-    data: await parseLockFileJson(specifier),
+    data: parseLockFileJson(await Deno.readTextFile(specifier)),
   };
 }
 
@@ -149,7 +146,7 @@ export async function createLockPart(
   }
   return {
     specifier: dependency,
-    data: await parseLockFileJson(lock.path),
+    data: parseLockFileJson(await Deno.readTextFile(lock.path)),
   };
 }
 

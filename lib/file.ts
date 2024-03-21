@@ -146,7 +146,8 @@ async function writeToImportMap(
 async function writeToLockfile(
   update: FileUpdate<"lockfile">,
 ) {
-  const original = await parseLockFileJson(update.path);
+  const content = await Deno.readTextFile(update.path);
+  const original = parseLockFileJson(content);
 
   for await (const dependency of update.dependencies) {
     const specifier = dependency.code.specifier;
@@ -192,7 +193,10 @@ async function writeToLockfile(
       );
     }
   }
-  await Deno.writeTextFile(update.path, JSON.stringify(original, replacer, 2));
+  await Deno.writeTextFile(
+    update.path,
+    JSON.stringify(original, replacer, 2) + (detectEOL(content) ?? EOL),
+  );
 }
 
 function replacer(
