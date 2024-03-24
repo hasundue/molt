@@ -33,7 +33,7 @@ describe("readFromJson", () => {
   });
 });
 
-describe("resolve()", () => {
+describe("resolve", () => {
   it("resolve specifiers in import maps", async () => {
     const importMap = await readFromJson(
       new URL("../test/data/import_map/deno.json", import.meta.url),
@@ -62,6 +62,14 @@ describe("resolve()", () => {
         resolved: "npm:node-emoji@2.0.0",
         key: "node-emoji",
         value: "npm:node-emoji@2.0.0",
+      },
+    );
+    assertEquals(
+      importMap.resolve("@std/testing/bdd", referrer),
+      {
+        resolved: "jsr:@std/testing@0.200.0/bdd",
+        key: "@std/testing",
+        value: "jsr:@std/testing@0.200.0",
       },
     );
     assertEquals(
@@ -121,11 +129,13 @@ Deno.test("resolveInner", async () => {
   const { resolveInner } = await readFromJson(
     new URL("../test/data/import_map/deno.json", import.meta.url),
   );
+  const referrer = new URL("../test/data/import_map/mod.ts", import.meta.url);
   assertEquals(
-    resolveInner(
-      "/lib.ts",
-      new URL("../test/data/import_map/mod.ts", import.meta.url),
-    ),
+    resolveInner("/lib.ts", referrer),
     new URL("../test/data/import_map/lib.ts", import.meta.url).href,
+  );
+  assertEquals(
+    resolveInner("@std/testing/bdd", referrer),
+    "jsr:/@std/testing@0.200.0/bdd",
   );
 });

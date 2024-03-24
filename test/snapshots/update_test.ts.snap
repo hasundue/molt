@@ -96,6 +96,29 @@ snapshot[`collect - lockfile_not_importable - mod.ts 2`] = `
 ]
 `;
 
+snapshot[`collect - jsr_with_path_in_import_map - deno.json 1`] = `
+[
+  {
+    code: {
+      span: undefined,
+      specifier: "jsr:@std/testing@0.210.0",
+    },
+    from: {
+      name: "@std/testing",
+      path: "",
+      protocol: "jsr:",
+      version: "0.210.0",
+    },
+    to: {
+      name: "@std/testing",
+      path: "",
+      protocol: "jsr:",
+      version: "123.456.789",
+    },
+  },
+]
+`;
+
 snapshot[`collect - multiple_imports.ts 1`] = `
 [
   {

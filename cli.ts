@@ -24,6 +24,7 @@ const main = new Command()
     "Check updates to dependencies in Deno modules and configuration files",
   )
   .versionOption("-v, --version", "Print version info.", versionCommand)
+  .option("--debug", "Enable verbose error messages")
   .option("--import-map <file:string>", "Specify import map file")
   .option("--ignore=<deps:string[]>", "Ignore dependencies")
   .option("--only=<deps:string[]>", "Check specified dependencies")
@@ -323,8 +324,10 @@ try {
   }
   await main.parse(Deno.args);
 } catch (error) {
-  if (error.message) {
-    console.error("Error: " + error.message);
+  if (Deno.args.includes("--debug")) {
+    throw error;
+  } else if (error.message) {
+    console.error(error.message);
   }
   Deno.exit(1);
 }
