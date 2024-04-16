@@ -4,11 +4,11 @@
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
 > [!WARNING]\
-> Molt is still being developed actively. The API is not stable yet and may
+> Molt is still under active development. The API is not stable yet and may
 > change frequently.
 
 Molt is a [Deno] module to bump version strings in import specifiers, like
-[udd], but with some unique concepts:
+[udd], but with different design principles:
 
 **The Deno way** - Molt finds dependencies and checks their latest versions in a
 consistent way as the Deno runtime, with [deno_graph] and [import_map] crates,
@@ -25,7 +25,7 @@ subsequent git commits.
 Molt can check updates to dependencies written in different formats and bump
 their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
 
-> [!NOTE]\
+> [!IMPORTANT]\
 > Molt does NOT bump version ragnges like `1`, `1.x`, `~1.2.3` and `^1.2.3` in
 > `npm:` and `jrs:` specifiers, but only updates a lockfile.
 
@@ -78,7 +78,7 @@ their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
 
 ## Usage
 
-### Deno Module
+### [@molt/core]
 
 #### [API Reference](https://deno.land/x/molt/mod.ts)
 
@@ -87,31 +87,31 @@ their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
 ##### Update all dependencies in a module and write the changes to local files
 
 ```ts
-import { collect, write } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { collect, write } from "jsr:@molt/core";
 
-const result = await collect("./mod.ts");
-await write(result);
+const updates = await collect("./mod.ts");
+await write(updates);
 ```
 
 ##### Update all dependencies in a module and commit the changes to git
 
 ```ts
-import { collect, commit } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+import { collect, commit } from "jsr:@molt/core";
 
-const result = await collect("./mod.ts");
+const updates = await collect("./mod.ts");
 
-await commit(result, {
+await commit(updates, {
   groupBy: (dependency) => dependency.name,
   composeCommitMessage: ({ group, version }) =>
     `build(deps): bump ${group} to ${version!.to}`,
 });
 ```
 
-### CLI
+### [@molt/cli]
 
 Although it is encouraged to write your own scripts, a pre-built CLI tool is
-also provided as `cli.ts` for convenience or a reference implementation, which
-is supposed to cover most of the use cases.
+also provided for convenience or as a reference implementation, which is
+supposed to cover most of the use cases.
 
 #### Installation (optional)
 
@@ -119,7 +119,7 @@ The molt CLI can be installed globally with the following command, for example:
 
 ```sh
 deno install --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
---name molt https://deno.land/x/molt@{VERSION}/cli.ts
+--name molt jsr:@molt/cli
 ```
 
 Alternatively, you may prefer to run the remote script directly through
@@ -128,8 +128,8 @@ Alternatively, you may prefer to run the remote script directly through
 ```json
 {
   "tasks": {
-    "update": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=deno.land https://deno.land/x/molt@{VERSION}/cli.ts ./**/*.ts",
-    "update:commit": "deno task -q update --commit --pre-commit=fmt"
+    "update": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=jsr.io,registry.npmjs.org jsr:@molt/cli ./*.ts",
+    "update:commit": "deno task -q update --commit --pre-commit=fmt,lint"
   }
 }
 ```
@@ -154,11 +154,8 @@ Options:
   -w, --write                - Write changes to local files                        (Conflicts: --commit)               
   -c, --commit               - Commit changes to local git repository              (Conflicts: --write)                
   --pre-commit     <tasks>   - Run tasks before each commit                        (Depends: --commit)                 
-  --post-commit    <tasks>   - Run tasks after each commit                         (Depends: --commit)                 
   --prefix         <prefix>  - Prefix for commit messages                          (Depends: --commit)                 
   --prefix-lock    <prefix>  - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
-  --summary        <file>    - Write a summary of changes to file                                                      
-  --report         <file>    - Write a report of changes to file                                                       
   --unstable-lock  [file]    - Enable unstable updating of a lock file
 ```
 
@@ -177,6 +174,13 @@ Options:
 📦 deno.land/std 0.200.0 => 0.218.2
 📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
 📦 node-emoji 2.0.0 => 2.1.3
+```
+
+You may specify the modules to check, alternatively:
+
+```sh
+> molt main.ts main_test.ts
+    ...
 ```
 
 ##### Write changes to files
@@ -260,5 +264,7 @@ and of full respect to the authors.
 [deno_graph]: https://github.com/denoland/deno_graph
 [import_map]: https://github.com/denoland/import_map
 [udd]: https://github.com/hayd/deno-udd
+[@molt/core]: https://jsr.io/@molt/core
+[@molt/cli]: https://jsr.io/@molt/cli
 [issues]: https://github.com/hasundue/molt/issues
 [dependabot]: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#versioning-strategy

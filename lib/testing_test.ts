@@ -1,5 +1,5 @@
-import { assertObjectMatch } from "./std/assert.ts";
-import { assertSpyCall, assertSpyCalls } from "./std/testing.ts";
+import { assertObjectMatch } from "@std/assert";
+import { assertSpyCall, assertSpyCalls } from "@std/testing/mock";
 import { CommandStub } from "./testing.ts";
 
 Deno.test("CommandStub", async () => {

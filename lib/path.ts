@@ -1,4 +1,4 @@
-import { dirname, fromFileUrl, join, resolve, toFileUrl } from "./std/path.ts";
+import { dirname, fromFileUrl, join, resolve, toFileUrl } from "@std/path";
 
 /**
  * Convert a path to a string URL

@@ -1,6 +1,6 @@
-import { spy, Stub, stub } from "./std/testing.ts";
-import { formatEOL, LF } from "./std/fs.ts";
-import { dirname } from "./std/path.ts";
+import { spy, type Stub, stub } from "@std/testing/mock";
+import { format, LF } from "@std/fs/eol";
+import { dirname } from "@std/path";
 
 export const CommandStub = {
   create(pattern = "") {
@@ -80,7 +80,7 @@ export const WriteTextFileStub = {
         if (path.toString().startsWith(tmp)) {
           return original(path, data);
         } else {
-          fs.set(path.toString(), formatEOL(data.toString(), LF));
+          fs.set(path.toString(), format(data.toString(), LF));
           return Promise.resolve();
         }
       },
@@ -186,23 +186,6 @@ function parseDenoLandUrl(url: URL) {
     // Web servers.
     path: path.replace(/\/$/, ""),
   };
-}
-
-/**
- * Enables all test stubs.
- */
-export function enableTestMode() {
-  LatestVersionStub.create({
-    "deno.land/std": "0.218.2",
-    "deno_graph": "0.69.7",
-    "node-emoji": "2.1.3",
-    "@luca/flag": "1.0.1",
-    "@std/": "0.218.2",
-  });
-  const fs = new FileSystemFake();
-  ReadTextFileStub.create(fs, { readThrough: true });
-  WriteTextFileStub.create(fs);
-  Deno.Command = CommandStub.create("git");
 }
 
 /** Utility function to throw an error. */

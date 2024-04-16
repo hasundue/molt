@@ -1,0 +1,20 @@
+{
+  "name": "@molt/integration",
+  "version": "0.18.0",
+  "exports": {
+    ".": "./mod.ts",
+    "./github": "./github.ts",
+    "./package": "./package.ts",
+    "./repository": "./repository.ts"
+  },
+  "publish": {
+    "exclude": [
+      "*_test.ts"
+    ]
+  },
+  "imports": {
+    "@molt/core": "jsr:@molt/core@0.18.0",
+    "@std/path": "jsr:@std/path@^0.222.1",
+    "@std/testing": "jsr:@std/testing@^0.222.1"
+  }
+}

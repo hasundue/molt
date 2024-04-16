@@ -8,7 +8,7 @@
  * To update all dependencies in a module and write the changes to files:
  *
  * ```ts
- * import { collect, write } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { collect, write } from "jsr:@molt/core@{VERSION}";
  *
  * const result = await collect("./mod.ts");
  * await write(result);
@@ -17,7 +17,7 @@
  * To update all dependencies in a module and commit the changes to local git repository:
  *
  * ```ts
- * import { collect, commit } from "https://deno.land/x/molt@{VERSION}/mod.ts";
+ * import { collect, commit } from "jsr:@molt/core@{VERSION}";
  *
  * const result = await collect("./mod.ts");
  *
@@ -31,4 +31,33 @@
  * @module
  */
 
-export * from "./core/mod.ts";
+export {
+  type Dependency,
+  parse,
+  resolveLatestVersion,
+  stringify,
+  type UpdatedDependency,
+} from "./dependency.ts";
+
+export {
+  associateByFile,
+  type FileUpdate,
+  write,
+  type WriteOptions,
+} from "./file.ts";
+
+export {
+  commit,
+  type CommitSequence,
+  createCommitSequence,
+  execute,
+  type GitCommit,
+} from "./git.ts";
+
+export {
+  collect,
+  type CollectOptions,
+  type CollectResult,
+  type DependencyUpdate,
+  type SourceType,
+} from "./update.ts";
