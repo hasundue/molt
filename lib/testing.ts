@@ -1,10 +1,6 @@
-import { createAssertSnapshot, spy, Stub, stub } from "./std/testing.ts";
+import { spy, Stub, stub } from "./std/testing.ts";
 import { formatEOL, LF } from "./std/fs.ts";
-import { dirname, fromFileUrl } from "./std/path.ts";
-
-export const assertSnapshot = createAssertSnapshot({
-  dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
-});
+import { dirname } from "./std/path.ts";
 
 export const CommandStub = {
   create(pattern = "") {

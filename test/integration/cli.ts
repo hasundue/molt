@@ -1,7 +1,7 @@
 import { assertEquals } from "../../lib/std/assert.ts";
 import { stripAnsiCode } from "../../lib/std/fmt.ts";
-import { join } from "../../lib/std/path.ts";
-import { assertSnapshot } from "../../lib/testing.ts";
+import { fromFileUrl, join } from "../../lib/std/path.ts";
+import { createAssertSnapshot } from "../../lib/std/testing.ts";
 
 // basic commands
 molt("", { code: 2 });
@@ -115,3 +115,7 @@ function stringify(data: Uint8Array) {
   }
   return stripAnsiCode(text);
 }
+
+const assertSnapshot = createAssertSnapshot({
+  dir: fromFileUrl(new URL("../snapshots/", import.meta.url)),
+});

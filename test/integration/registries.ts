@@ -1,4 +1,5 @@
-import { assertSnapshot } from "../../lib/testing.ts";
+import { fromFileUrl } from "../../lib/std/path.ts";
+import { createAssertSnapshot } from "../../lib/std/testing.ts";
 import { parse, resolveLatestVersion } from "../../lib/dependency.ts";
 
 type RegistryTestSpec = [
@@ -80,3 +81,7 @@ for (const spec of SPECS) {
     await assert(updated);
   });
 }
+
+const assertSnapshot = createAssertSnapshot({
+  dir: fromFileUrl(new URL("../snapshots/", import.meta.url)),
+});
