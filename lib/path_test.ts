@@ -1,5 +1,5 @@
-import { assertEquals, assertRejects } from "./std/assert.ts";
-import { dirname, fromFileUrl, resolve } from "./std/path.ts";
+import { assertEquals, assertRejects } from "@std/assert";
+import { dirname, fromFileUrl, resolve } from "@std/path";
 import { findFileUp, toPath, toUrl } from "./path.ts";
 
 const isWindows = Deno.build.os === "windows";
@@ -85,8 +85,8 @@ Deno.test("toPath (Windows)", { ignore: !isWindows }, () => {
 Deno.test("findFileUp", async () => {
   const dir = dirname(toPath(import.meta.url));
   assertEquals(
-    await findFileUp(dir, "deno.json"),
-    fromFileUrl(new URL("../deno.json", import.meta.url)),
+    await findFileUp(dir, "LICENSE"),
+    fromFileUrl(new URL("../LICENSE", import.meta.url)),
   );
   // Throws for a non-directory path
   assertRejects(
