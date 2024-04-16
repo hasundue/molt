@@ -1,15 +1,16 @@
 import { basename, dirname } from "./std/path.ts";
 import { formatEOL, LF } from "./std/fs.ts";
+import { assert, assertInstanceOf } from "./std/assert.ts";
+import { fromFileUrl } from "./std/path.ts";
+import { createAssertSnapshot } from "./std/testing.ts";
+import { collect, CollectResult } from "./update.ts";
+import { associateByFile, type FileUpdate, writeFileUpdate } from "./file.ts";
 import {
   FileSystemFake,
+  LatestVersionStub,
   ReadTextFileStub,
   WriteTextFileStub,
 } from "./testing.ts";
-import { assert, assertInstanceOf } from "./std/assert.ts";
-import { assertSnapshot } from "./testing.ts";
-import { collect, CollectResult } from "./update.ts";
-import { associateByFile, type FileUpdate, writeFileUpdate } from "./file.ts";
-import { LatestVersionStub } from "./testing.ts";
 
 function toName(path: string) {
   const base = basename(path);
@@ -17,6 +18,10 @@ function toName(path: string) {
     ? basename(dirname(path)) + "/" + base
     : base;
 }
+
+const assertSnapshot = createAssertSnapshot({
+  dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
+});
 
 async function assertFileUpdateSnapshot(
   t: Deno.TestContext,

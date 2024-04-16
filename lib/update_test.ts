@@ -1,10 +1,14 @@
 import { dirname } from "./std/path.ts";
 import { assertEquals, assertInstanceOf } from "./std/assert.ts";
 import { filterKeys } from "./std/collections.ts";
-import { basename } from "./std/path.ts";
-import { assertSnapshot } from "./testing.ts";
+import { basename, fromFileUrl } from "./std/path.ts";
+import { createAssertSnapshot } from "./std/testing.ts";
 import { LatestVersionStub } from "./testing.ts";
 import { collect, DependencyUpdate } from "./update.ts";
+
+const assertSnapshot = createAssertSnapshot({
+  dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
+});
 
 function test(
   path: string,
