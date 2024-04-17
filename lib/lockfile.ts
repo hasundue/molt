@@ -139,7 +139,14 @@ export async function createLockPart(
   // Create a lockfile for the dummy module.
   await using lock = await createTempFile();
   const { code, stderr } = await new Deno.Command("deno", {
-    args: ["cache", "--lock-write", "--lock", lock.path, mod.path],
+    args: [
+      "cache",
+      "--no-config",
+      "--lock-write",
+      "--lock",
+      lock.path,
+      mod.path,
+    ],
   }).output();
   if (code !== 0) {
     throw new CommandError(new TextDecoder().decode(stderr));
