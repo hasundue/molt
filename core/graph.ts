@@ -1,27 +1,13 @@
 import {
   createGraph,
   type CreateGraphOptions,
-  init as initDenoGraph,
   load as defaultLoad,
-} from "x/deno_graph";
+} from "@deno/graph";
 
-class DenoGraph {
-  static #initialized = false;
-
-  static async ensureInit() {
-    if (this.#initialized) {
-      return;
-    }
-    await initDenoGraph();
-    this.#initialized = true;
-  }
-}
-
-export async function createGraphLocally(
+export function createGraphLocally(
   specifiers: string[],
   options?: CreateGraphOptions & { resolveLocal?: boolean },
 ) {
-  await DenoGraph.ensureInit();
   return createGraph(specifiers, {
     load: async (specifier) => {
       const url = new URL(specifier); // should not throw
