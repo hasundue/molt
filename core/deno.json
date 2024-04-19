@@ -11,6 +11,7 @@
   },
   "imports": {
     "@core/unknownutil": "jsr:@core/unknownutil@^3.18.0",
+    "@deno/graph": "jsr:@deno/graph@^0.73.1",
     "@lambdalisue/async": "jsr:@lambdalisue/async@^2.1.1",
     "@molt/lib": "jsr:@molt/lib@^0.18.0",
     "@std/assert": "jsr:@std/assert@^0.222.1",
@@ -21,7 +22,6 @@
     "@std/path": "jsr:@std/path@^0.222.1",
     "@std/semver": "jsr:@std/semver@^0.222.1",
     "@std/testing": "jsr:@std/testing@^0.222.1",
-    "x/deno_graph": "./vendor/deno.land/x/deno_graph@0.69.6/mod.ts",
     "x/import_map": "./vendor/deno.land/x/import_map@v0.19.1/mod.ts"
   },
   "scopes": {

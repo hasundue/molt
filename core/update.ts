@@ -2,7 +2,7 @@ import { findFileUp, toPath, toUrl } from "@molt/lib/path";
 import { assertExists } from "@std/assert";
 import { partition } from "@std/collections";
 import { exists } from "@std/fs";
-import type { ModuleJson } from "x/deno_graph";
+import type { ModuleJson } from "@deno/graph";
 import { createGraphLocally } from "./graph.ts";
 import {
   type ImportMap,
