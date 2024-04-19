@@ -250,6 +250,9 @@ async function _resolveLatestVersion(
         ([version, { yanked }]) => !yanked && !isPreRelease(version),
       );
       const semvers = Object.keys(candidates).map(SemVer.parse);
+      if (!semvers.length) {
+        break;
+      }
       const latest = SemVer.format(semvers.sort(SemVer.compare).reverse()[0]);
       if (isPreRelease(latest)) {
         break;
