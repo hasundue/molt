@@ -36,7 +36,10 @@ export function toPath(path: string | URL): string {
  * @param files - The name of the files to search for.
  * @returns The first file path found or undefined if no file was found.
  */
-export async function findFileUp(dir: string | URL, ...files: string[]) {
+export async function findFileUp(
+  dir: string | URL,
+  ...files: string[]
+): Promise<string | undefined> {
   dir = toPath(dir);
   for (;;) {
     for await (const dirEntry of Deno.readDir(dir)) {
