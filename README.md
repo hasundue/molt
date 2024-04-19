@@ -146,17 +146,20 @@ Description:
 
 Options:
 
-  -h, --help                 - Show this help.                                                                         
-  -v, --version              - Print version info.                                                                     
-  --import-map     <file>    - Specify import map file                                                                 
-  --ignore         <deps>    - Ignore dependencies                                                                     
-  --only           <deps>    - Check specified dependencies                                                            
-  -w, --write                - Write changes to local files                        (Conflicts: --commit)               
-  -c, --commit               - Commit changes to local git repository              (Conflicts: --write)                
-  --pre-commit     <tasks>   - Run tasks before each commit                        (Depends: --commit)                 
-  --prefix         <prefix>  - Prefix for commit messages                          (Depends: --commit)                 
-  --prefix-lock    <prefix>  - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
-  --unstable-lock  [file]    - Enable unstable updating of a lock file
+  -h, --help                       - Show this help.                                                                         
+  -v, --version                    - Print version info                                                                      
+  -w, --write                      - Write changes to local files                        (Conflicts: --commit)               
+  -c, --commit                     - Commit changes to local git repository              (Conflicts: --write)                
+  --changelog      [commit_types]  - Show a curated changelog for each update                                                
+  --debug                          - Print debug information                                                                 
+  --import-map     <file>          - Specify import map file                                                                 
+  --ignore         <deps>          - Ignore dependencies                                                                     
+  --no-resolve                     - Do not resolve local imports                                                         
+  --only           <deps>          - Check specified dependencies                                                            
+  --pre-commit     <tasks>         - Run tasks before each commit                        (Depends: --commit)                 
+  --prefix         <prefix>        - Prefix for commit messages                          (Depends: --commit)                 
+  --prefix-lock    <prefix>        - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
+  --unstable-lock  [file]          - Enable unstable updating of a lock file
 ```
 
 > [!Note]\

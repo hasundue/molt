@@ -20,6 +20,7 @@ const main = new Command()
   .option("--debug", "Print debug information")
   .option("--import-map <file:string>", "Specify import map file")
   .option("--ignore=<deps:string[]>", "Ignore dependencies")
+  .option("--no-resolve", "Do not resolve local imports")
   .option("--only=<deps:string[]>", "Check specified dependencies")
   .option("--pre-commit=<tasks:string[]>", "Run tasks before each commit", {
     depends: ["commit"],

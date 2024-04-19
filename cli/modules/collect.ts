@@ -4,6 +4,7 @@ import { collect, type CollectResult } from "@molt/core";
 export default async function (
   entrypoints: string[],
   options: {
+    resolve?: boolean;
     ignore?: string[];
     importMap?: string;
     only?: string[];
@@ -23,6 +24,7 @@ export default async function (
       only: options.only
         ? (dep) => options.only!.some((it) => dep.name.includes(it))
         : undefined,
+      resolveLocal: options.resolve,
     })
   );
   if (!result.updates.length) {

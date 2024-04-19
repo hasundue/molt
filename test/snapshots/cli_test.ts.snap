@@ -18,6 +18,7 @@ Options:
   --debug                          - Print debug information                                                                 
   --import-map     <file>          - Specify import map file                                                                 
   --ignore         <deps>          - Ignore dependencies                                                                     
+  --no-resolve                     - Do not resolve local imports                                                            
   --only           <deps>          - Check specified dependencies                                                            
   --pre-commit     <tasks>         - Run tasks before each commit                        (Depends: --commit)                 
   --prefix         <prefix>        - Prefix for commit messages                          (Depends: --commit)                 
@@ -51,6 +52,7 @@ Options:
   --debug                          - Print debug information                                                                 
   --import-map     <file>          - Specify import map file                                                                 
   --ignore         <deps>          - Ignore dependencies                                                                     
+  --no-resolve                     - Do not resolve local imports                                                            
   --only           <deps>          - Check specified dependencies                                                            
   --pre-commit     <tasks>         - Run tasks before each commit                        (Depends: --commit)                 
   --prefix         <prefix>        - Prefix for commit messages                          (Depends: --commit)                 
@@ -417,6 +419,18 @@ snapshot[`cli - lockfile - "molt deno.json --commit --unstable-lock --prefix :pa
 `;
 
 snapshot[`cli - lockfile - "molt deno.json --commit --unstable-lock --prefix :package: --prefix-lock :lock:" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - multiple_modules - "molt mod.ts --no-resolve" 1`] = `
+"📦 deno.land/std 0.200.0 => 0.218.2
+📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
+📦 node-emoji 2.0.0 => 2.1.3
+"
+`;
+
+snapshot[`cli - multiple_modules - "molt mod.ts --no-resolve" 2`] = `
 "Checking for updates
 "
 `;

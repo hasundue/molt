@@ -137,6 +137,11 @@ export interface CollectOptions {
    * ```
    */
   only?: (dependency: Dependency) => boolean;
+  /**
+   * Whether to resolve local submodules.
+   * @default true
+   */
+  resolveLocal?: boolean;
 }
 
 /**
@@ -193,6 +198,7 @@ export async function collect(
 
   const graph = await createGraphLocally(esms, {
     resolve: importMap?.resolveInner,
+    resolveLocal: options.resolveLocal ??= true,
   });
 
   const _options: CollectInnerOptions = {

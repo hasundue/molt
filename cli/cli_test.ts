@@ -53,6 +53,9 @@ molt(
   { dir: "lockfile" },
 );
 
+// --no-resolve
+molt("mod.ts --no-resolve", { dir: "multiple_modules" });
+
 //-----------------------
 // Test implementation
 //-----------------------

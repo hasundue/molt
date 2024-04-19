@@ -19,7 +19,7 @@ class DenoGraph {
 
 export async function createGraphLocally(
   specifiers: string[],
-  options?: CreateGraphOptions,
+  options?: CreateGraphOptions & { resolveLocal?: boolean },
 ) {
   await DenoGraph.ensureInit();
   return createGraph(specifiers, {
@@ -40,6 +40,14 @@ export async function createGraphLocally(
             specifier,
           };
         case "file:":
+          if (
+            options?.resolveLocal === false && !specifiers.includes(specifier)
+          ) {
+            return {
+              kind: "external",
+              specifier,
+            };
+          }
           return await defaultLoad(specifier);
         default:
           throw new Error(`Unsupported protocol: ${url.protocol}`);
