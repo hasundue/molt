@@ -10,9 +10,9 @@ export type TaskRecord = Record<string, string[]>;
 
 export async function getTasks() {
   const tasks: TaskRecord = {
-    fmt: ["fmt"],
-    lint: ["lint"],
-    test: ["test"],
+    fmt: ["fmt", "--no-config"],
+    lint: ["lint", "--no-config"],
+    test: ["test", "--no-config"],
   };
   const config = await findFileUp(Deno.cwd(), "deno.json", "deno.jsonc");
   if (!config) {
