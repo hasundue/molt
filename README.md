@@ -26,7 +26,7 @@ Molt can check updates to dependencies written in different formats and bump
 their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
 
 > [!IMPORTANT]\
-> Molt does NOT bump version ragnges like `1`, `1.x`, `~1.2.3` and `^1.2.3` in
+> Molt does NOT bump version ranges like `1`, `1.x`, `~1.2.3` and `^1.2.3` in
 > `npm:` and `jrs:` specifiers, but only updates a lockfile.
 
 #### Import specifiers in ES modules
