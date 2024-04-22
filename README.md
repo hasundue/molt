@@ -1,3 +1,9 @@
+> [!CAUTION]\
+> **@molt/core** and **@molt/cli** published on [jsr.io](jsr.io) are currently
+> BROKEN.\
+> Please use https://deno.land/x/molt until
+> https://github.com/hasundue/molt/issues/160 is closed.
+
 # 🦕 Molt
 
 [![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
