@@ -138,6 +138,9 @@ export const LatestVersionStub = {
             { status: 200 },
           );
         case "jsr.io":
+          if (!url.pathname.endsWith("meta.json")) {
+            return init.original(request, init);
+          }
           return new Response(
             JSON.stringify({
               versions: {
