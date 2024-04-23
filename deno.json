@@ -11,7 +11,7 @@
     "install": "deno install -Afg --config ./deno.json --name molt ./cli/main.ts",
     "update": "deno run --unstable-kv --config ./deno.json --allow-env --allow-read --allow-write --allow-net=deno.land,jsr.io,registry.npmjs.org --allow-run=git,deno ./cli/main.ts ./deno.json --changelog --unstable-lock",
     "update:commit": "deno task -q update --commit --prefix 'build(deps):' --prefix-lock 'build(lock)'",
-    "vendor": "deno vendor --no-config https://deno.land/x/deno_graph/mod.ts https://deno.land/x/import_map/mod.ts"
+    "vendor": "deno vendor -qf --no-config --output ./core/vendor https://deno.land/x/import_map/mod.ts && curl -fsSL -o ./core/vendor/deno.land/x/import_map@v0.19.1/import_map_bg.wasm https://deno.land/x/import_map@v0.19.1/import_map_bg.wasm"
   },
   "imports": {
     "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.4",
@@ -44,7 +44,8 @@
       "@molt/integration/commits": "./integration/commits.ts",
       "@molt/integration/github": "./integration/github.ts",
       "@molt/integration/packages": "./integration/packages.ts",
-      "@molt/integration/repository": "./integration/repository.ts"
+      "@molt/integration/repository": "./integration/repository.ts",
+      "x/import_map": "./core/vendor/deno.land/x/import_map@v0.19.1/mod.ts"
     }
   },
   "fmt": {
