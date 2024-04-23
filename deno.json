@@ -43,8 +43,7 @@
       "@molt/integration/commits": "./integration/commits.ts",
       "@molt/integration/github": "./integration/github.ts",
       "@molt/integration/packages": "./integration/packages.ts",
-      "@molt/integration/repository": "./integration/repository.ts",
-      "x/import_map": "./core/vendor/deno.land/x/import_map@v0.19.1/mod.ts"
+      "@molt/integration/repository": "./integration/repository.ts"
     }
   },
   "fmt": {
