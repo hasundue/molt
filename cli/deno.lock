@@ -6,14 +6,23 @@
       "jsr:@cliffy/command@1.0.0-rc.4": "jsr:@cliffy/command@1.0.0-rc.4",
       "jsr:@cliffy/flags@1.0.0-rc.4": "jsr:@cliffy/flags@1.0.0-rc.4",
       "jsr:@cliffy/table@1.0.0-rc.4": "jsr:@cliffy/table@1.0.0-rc.4",
+      "jsr:@core/match@^0.2.5": "jsr:@core/match@0.2.5",
       "jsr:@core/unknownutil@3.18.0": "jsr:@core/unknownutil@3.18.0",
+      "jsr:@core/unknownutil@^3.18.0": "jsr:@core/unknownutil@3.18.0",
       "jsr:@david/dax@0.40.0": "jsr:@david/dax@0.40.0",
       "jsr:@david/which@0.3": "jsr:@david/which@0.3.0",
+      "jsr:@deno/graph@^0.73.1": "jsr:@deno/graph@0.73.1",
+      "jsr:@lambdalisue/async@^2.1.1": "jsr:@lambdalisue/async@2.1.1",
+      "jsr:@molt/core@0.18.0": "jsr:@molt/core@0.18.0",
+      "jsr:@molt/core@^0.18.1": "jsr:@molt/core@0.18.1",
+      "jsr:@molt/integration@0.18.0": "jsr:@molt/integration@0.18.0",
+      "jsr:@molt/lib@^0.18.0": "jsr:@molt/lib@0.18.0",
       "jsr:@std/assert@0.222.1": "jsr:@std/assert@0.222.1",
       "jsr:@std/assert@^0.221.0": "jsr:@std/assert@0.221.0",
       "jsr:@std/assert@^0.222.1": "jsr:@std/assert@0.222.1",
       "jsr:@std/bytes@^0.221.0": "jsr:@std/bytes@0.221.0",
       "jsr:@std/collections@0.222.1": "jsr:@std/collections@0.222.1",
+      "jsr:@std/collections@^0.222.1": "jsr:@std/collections@0.222.1",
       "jsr:@std/console@0.221": "jsr:@std/console@0.221.0",
       "jsr:@std/encoding@0.221": "jsr:@std/encoding@0.221.0",
       "jsr:@std/fmt@0.221": "jsr:@std/fmt@0.221.0",
@@ -27,15 +36,21 @@
       "jsr:@std/io@^0.221.0": "jsr:@std/io@0.221.0",
       "jsr:@std/json@^0.222.1": "jsr:@std/json@0.222.1",
       "jsr:@std/jsonc@0.222.1": "jsr:@std/jsonc@0.222.1",
+      "jsr:@std/jsonc@^0.222.1": "jsr:@std/jsonc@0.222.1",
       "jsr:@std/path@0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/path@0.222.1": "jsr:@std/path@0.222.1",
       "jsr:@std/path@^0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/path@^0.222.1": "jsr:@std/path@0.222.1",
       "jsr:@std/semver@0.222.1": "jsr:@std/semver@0.222.1",
+      "jsr:@std/semver@^0.222.1": "jsr:@std/semver@0.222.1",
       "jsr:@std/streams@0.221.0": "jsr:@std/streams@0.221.0",
       "jsr:@std/testing@0.222.1": "jsr:@std/testing@0.222.1",
+      "jsr:@std/testing@^0.222.1": "jsr:@std/testing@0.222.1",
       "jsr:@std/text@0.221": "jsr:@std/text@0.221.0",
-      "npm:@octokit/rest@20.1.0": "npm:@octokit/rest@20.1.0_@octokit+core@5.2.0"
+      "npm:@conventional-commits/parser@^0.4.1": "npm:@conventional-commits/parser@0.4.1",
+      "npm:@octokit/rest@20.1.0": "npm:@octokit/rest@20.1.0_@octokit+core@5.2.0",
+      "npm:@octokit/rest@^20.1.0": "npm:@octokit/rest@20.1.0_@octokit+core@5.2.0",
+      "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
     },
     "jsr": {
       "@cliffy/ansi@1.0.0-rc.4": {
@@ -64,6 +79,12 @@
           "jsr:@std/console@0.221"
         ]
       },
+      "@core/match@0.2.5": {
+        "integrity": "55f38d482ce845958883571e543afa9da2eb89f6fe1825f38764bbd0e7585594",
+        "dependencies": [
+          "npm:ts-toolbelt@9.6.0"
+        ]
+      },
       "@core/unknownutil@3.18.0": {
         "integrity": "bff7ab4a2f554bbade301127519523b0d3baa4273ecbed51287133ac00a48738"
       },
@@ -80,6 +101,50 @@
       },
       "@david/which@0.3.0": {
         "integrity": "6bdb62c40ac90edcf328e854fa8103a8db21e7c326089cbe3c3a1cf7887d3204"
+      },
+      "@deno/graph@0.73.1": {
+        "integrity": "cd69639d2709d479037d5ce191a422eabe8d71bb68b0098344f6b07411c84d41"
+      },
+      "@lambdalisue/async@2.1.1": {
+        "integrity": "1fc9bc6f4ed50215cd2f7217842b18cea80f81c25744f88f8c5eb4be5a1c9ab4"
+      },
+      "@molt/core@0.18.0": {
+        "integrity": "1476bda0c71b70a600ef237619ef33f53868d14196b417e50148061e9308ec59"
+      },
+      "@molt/core@0.18.1": {
+        "integrity": "d2aa5a9e5de08a72f011cc427bd9dec7d5339c588ef3812cf1813c5292686072",
+        "dependencies": [
+          "jsr:@core/unknownutil@^3.18.0",
+          "jsr:@deno/graph@^0.73.1",
+          "jsr:@lambdalisue/async@^2.1.1",
+          "jsr:@std/assert@^0.222.1",
+          "jsr:@std/collections@^0.222.1",
+          "jsr:@std/fs@^0.222.1",
+          "jsr:@std/jsonc@^0.222.1",
+          "jsr:@std/path@^0.222.1",
+          "jsr:@std/semver@^0.222.1"
+        ]
+      },
+      "@molt/integration@0.18.0": {
+        "integrity": "647ce52410725c305e75e2df18f07091f5ae99d6dcb6849da57dc1f2893d5c2c",
+        "dependencies": [
+          "jsr:@core/match@^0.2.5",
+          "jsr:@core/unknownutil@^3.18.0",
+          "jsr:@molt/core@0.18.0",
+          "jsr:@std/jsonc@^0.222.1",
+          "jsr:@std/path@^0.222.1",
+          "npm:@octokit/rest@^20.1.0"
+        ]
+      },
+      "@molt/lib@0.18.0": {
+        "integrity": "c5b10f134f8ba68f6f6a389ad08fedca705a12d3d1d12ec2b45b06cf67b9b9e1",
+        "dependencies": [
+          "jsr:@std/collections@^0.222.1",
+          "jsr:@std/fs@^0.222.1",
+          "jsr:@std/path@^0.222.1",
+          "jsr:@std/testing@^0.222.1",
+          "npm:@conventional-commits/parser@^0.4.1"
+        ]
       },
       "@std/assert@0.221.0": {
         "integrity": "a5f1aa6e7909dbea271754fd4ab3f4e687aeff4873b4cef9a320af813adb489a"
@@ -176,6 +241,13 @@
       }
     },
     "npm": {
+      "@conventional-commits/parser@0.4.1": {
+        "integrity": "sha512-H2ZmUVt6q+KBccXfMBhbBF14NlANeqHTXL4qCL6QGbMzrc4HDXyzWuxPxPNbz71f/5UkR5DrycP5VO9u7crahg==",
+        "dependencies": {
+          "unist-util-visit": "unist-util-visit@2.0.3",
+          "unist-util-visit-parents": "unist-util-visit-parents@3.1.1"
+        }
+      },
       "@octokit/auth-token@4.0.0": {
         "integrity": "sha512-tY/msAuJo6ARbK6SPIxZrPBms3xPbfwBrulZe0Wtr/DIY9lje2HeV1uoebShn6mx7SjCHif6EjMvoREj+gZ+SA==",
         "dependencies": {}
@@ -273,6 +345,10 @@
           "@octokit/openapi-types": "@octokit/openapi-types@22.1.0"
         }
       },
+      "@types/unist@2.0.10": {
+        "integrity": "sha512-IfYcSBWE3hLpBg8+X2SEa8LVkJdJEkT2Ese2aaLs3ptGdVtABxndrMaxuFlQ1qdFf9Q5rDvDpxI3WwgvKFAsQA==",
+        "dependencies": {}
+      },
       "before-after-hook@2.2.3": {
         "integrity": "sha512-NzUnlZexiaH/46WDhANlyR2bXRopNg4F/zuSA3OpZnllCUgRaOF2znDioDWrmbNVsuZk6l9pMquQB38cfBZwkQ==",
         "dependencies": {}
@@ -285,6 +361,29 @@
         "integrity": "sha512-lNaJgI+2Q5URQBkccEKHTQOPaXdUxnZZElQTZY0MFUAuaEqe1E+Nyvgdz/aIyNi6Z9MzO5dv1H8n58/GELp3+w==",
         "dependencies": {
           "wrappy": "wrappy@1.0.2"
+        }
+      },
+      "ts-toolbelt@9.6.0": {
+        "integrity": "sha512-nsZd8ZeNUzukXPlJmTBwUAuABDe/9qtVDelJeT/qW0ow3ZS3BsQJtNkan1802aM9Uf68/Y8ljw86Hu0h5IUW3w==",
+        "dependencies": {}
+      },
+      "unist-util-is@4.1.0": {
+        "integrity": "sha512-ZOQSsnce92GrxSqlnEEseX0gi7GH9zTJZ0p9dtu87WRb/37mMPO2Ilx1s/t9vBHrFhbgweUwb+t7cIn5dxPhZg==",
+        "dependencies": {}
+      },
+      "unist-util-visit-parents@3.1.1": {
+        "integrity": "sha512-1KROIZWo6bcMrZEwiH2UrXDyalAa0uqzWCxCJj6lPOvTve2WkfgCytoDTPaMnodXh1WrXOq0haVYHj99ynJlsg==",
+        "dependencies": {
+          "@types/unist": "@types/unist@2.0.10",
+          "unist-util-is": "unist-util-is@4.1.0"
+        }
+      },
+      "unist-util-visit@2.0.3": {
+        "integrity": "sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==",
+        "dependencies": {
+          "@types/unist": "@types/unist@2.0.10",
+          "unist-util-is": "unist-util-is@4.1.0",
+          "unist-util-visit-parents": "unist-util-visit-parents@3.1.1"
         }
       },
       "universal-user-agent@6.0.1": {
@@ -418,14 +517,17 @@
       "jsr:@cliffy/command@1.0.0-rc.4",
       "jsr:@core/unknownutil@3.18.0",
       "jsr:@david/dax@0.40.0",
-      "jsr:@molt/core@0.14.3",
+      "jsr:@molt/core@^0.18.1",
+      "jsr:@molt/integration@0.18.0",
+      "jsr:@molt/lib@^0.18.0",
       "jsr:@std/assert@0.222.1",
       "jsr:@std/collections@0.222.1",
       "jsr:@std/fmt@0.222.1",
       "jsr:@std/jsonc@0.222.1",
       "jsr:@std/path@0.222.1",
       "jsr:@std/semver@0.222.1",
-      "jsr:@std/testing@0.222.1"
+      "jsr:@std/testing@0.222.1",
+      "npm:@conventional-commits/parser@^0.4.1"
     ]
   }
 }
