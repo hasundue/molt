@@ -118,7 +118,7 @@ supposed to cover most of the use cases.
 The molt CLI can be installed globally with the following command, for example:
 
 ```sh
-deno install --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
+deno install --global --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
 --name molt jsr:@molt/cli
 ```
 
