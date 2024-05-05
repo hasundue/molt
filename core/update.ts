@@ -210,9 +210,13 @@ export async function collect(
   const result = reduceCollectResult(
     await Promise.all([
       ...graph.modules.flatMap((mod) =>
-        (mod.dependencies ?? []).map((dependency) =>
-          collectFromDependency(dependency, mod.specifier, _options)
-        )
+        (mod.dependencies ?? [])
+          .filter((dependency) =>
+            (dependency.code?.specifier ?? dependency.type?.specifier) != null
+          )
+          .map((dependency) =>
+            collectFromDependency(dependency, mod.specifier, _options)
+          )
       ),
       ...jsons.map((url) => collectFromImportMap(url, _options)),
     ]),
