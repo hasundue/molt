@@ -11,10 +11,7 @@
       "jsr:@core/unknownutil@^3.18.0": "jsr:@core/unknownutil@3.18.0",
       "jsr:@david/dax@0.40.0": "jsr:@david/dax@0.40.0",
       "jsr:@david/which@0.3": "jsr:@david/which@0.3.0",
-      "jsr:@deno/graph@^0.73.1": "jsr:@deno/graph@0.73.1",
-      "jsr:@lambdalisue/async@^2.1.1": "jsr:@lambdalisue/async@2.1.1",
       "jsr:@molt/core@0.18.0": "jsr:@molt/core@0.18.0",
-      "jsr:@molt/core@^0.18.1": "jsr:@molt/core@0.18.1",
       "jsr:@molt/integration@0.18.0": "jsr:@molt/integration@0.18.0",
       "jsr:@molt/lib@^0.18.0": "jsr:@molt/lib@0.18.0",
       "jsr:@std/assert@0.222.1": "jsr:@std/assert@0.222.1",
@@ -102,28 +99,8 @@
       "@david/which@0.3.0": {
         "integrity": "6bdb62c40ac90edcf328e854fa8103a8db21e7c326089cbe3c3a1cf7887d3204"
       },
-      "@deno/graph@0.73.1": {
-        "integrity": "cd69639d2709d479037d5ce191a422eabe8d71bb68b0098344f6b07411c84d41"
-      },
-      "@lambdalisue/async@2.1.1": {
-        "integrity": "1fc9bc6f4ed50215cd2f7217842b18cea80f81c25744f88f8c5eb4be5a1c9ab4"
-      },
       "@molt/core@0.18.0": {
         "integrity": "1476bda0c71b70a600ef237619ef33f53868d14196b417e50148061e9308ec59"
-      },
-      "@molt/core@0.18.1": {
-        "integrity": "d2aa5a9e5de08a72f011cc427bd9dec7d5339c588ef3812cf1813c5292686072",
-        "dependencies": [
-          "jsr:@core/unknownutil@^3.18.0",
-          "jsr:@deno/graph@^0.73.1",
-          "jsr:@lambdalisue/async@^2.1.1",
-          "jsr:@std/assert@^0.222.1",
-          "jsr:@std/collections@^0.222.1",
-          "jsr:@std/fs@^0.222.1",
-          "jsr:@std/jsonc@^0.222.1",
-          "jsr:@std/path@^0.222.1",
-          "jsr:@std/semver@^0.222.1"
-        ]
       },
       "@molt/integration@0.18.0": {
         "integrity": "647ce52410725c305e75e2df18f07091f5ae99d6dcb6849da57dc1f2893d5c2c",
@@ -517,7 +494,7 @@
       "jsr:@cliffy/command@1.0.0-rc.4",
       "jsr:@core/unknownutil@3.18.0",
       "jsr:@david/dax@0.40.0",
-      "jsr:@molt/core@^0.18.1",
+      "jsr:@molt/core@^0.18.2",
       "jsr:@molt/integration@0.18.0",
       "jsr:@molt/lib@^0.18.0",
       "jsr:@std/assert@0.222.1",
