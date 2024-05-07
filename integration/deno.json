@@ -16,7 +16,7 @@
   "imports": {
     "@core/match": "jsr:@core/match@^0.2.5",
     "@core/unknownutil": "jsr:@core/unknownutil@^3.18.0",
-    "@molt/core": "jsr:@molt/core@0.18.0",
+    "@molt/core": "jsr:@molt/core@^0.18.0",
     "@octokit/rest": "npm:@octokit/rest@^20.1.0",
     "@std/jsonc": "jsr:@std/jsonc@^0.222.1",
     "@std/path": "jsr:@std/path@^0.222.1"
