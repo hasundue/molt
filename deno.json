@@ -8,8 +8,8 @@
     "test:integration": "deno task -q test --no-lock ./integration ./cli",
     "pre-commit": "deno fmt && deno lint && deno task -q check && deno task -q test",
     "run": "deno run -A --unstable-kv --config ./deno.json ./cli/main.ts",
-    "update": "deno run --unstable-kv --config ./deno.json --allow-env --allow-read --allow-write --allow-net=deno.land,jsr.io,registry.npmjs.org --allow-run=git,deno ./cli/main.ts ./deno.json --changelog --unstable-lock",
-    "update:commit": "deno task -q update --commit --prefix 'build(deps):' --prefix-lock 'build(lock)'",
+    "update": "deno run --unstable-kv --config ./deno.json --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno ./cli/main.ts ./deno.json ./*/deno.json --changelog",
+    "update:commit": "deno task -q update --commit --prefix 'build(deps):'",
     "vendor": "deno vendor -qf --no-config --output ./core/vendor https://deno.land/x/import_map/mod.ts && curl -fsSL -o ./core/vendor/deno.land/x/import_map@v0.19.1/import_map_bg.wasm https://deno.land/x/import_map@v0.19.1/import_map_bg.wasm"
   },
   "imports": {
