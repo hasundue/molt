@@ -2,7 +2,7 @@
   "tasks": {
     "cache": "deno cache ./lib/*.ts ./core/*.ts ./integration/*.ts ./cli/**/*.ts --lock",
     "lock": "deno task -q cache --lock-write",
-    "check": "deno check ./*.ts ./lib/*.ts ./core/*.ts ./integration/*.ts ./cli/**/*.ts",
+    "check": "deno check ./lib/*.ts ./core/*.ts ./integration/*.ts ./cli/**/*.ts",
     "test": "deno test -A --unstable-kv --no-check",
     "test:unit": "deno task -q test ./lib ./core",
     "test:integration": "deno task -q test --no-lock ./integration ./cli",
