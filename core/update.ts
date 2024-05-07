@@ -2,7 +2,11 @@ import { findFileUp, toPath, toUrl } from "@molt/lib/path";
 import { assertExists } from "@std/assert";
 import { partition } from "@std/collections";
 import { exists } from "@std/fs";
-import type { ModuleJson } from "@deno/graph";
+import type {
+  DependencyJson,
+  ModuleJson,
+  ResolvedDependency,
+} from "@deno/graph/types";
 import { createGraphLocally } from "./graph.ts";
 import {
   type ImportMap,
@@ -207,12 +211,33 @@ export async function collect(
     importMap,
     lockFile,
   };
+  const showResolveWarning = (
+    mod: ModuleJson,
+    errorDependency: ErrorResolvedDependency,
+  ) => {
+    const { error, span: { start } } = errorDependency;
+    console.warn(
+      `Failed to resolve dependency at ${mod.specifier}:${start.line}:${start.character}: ${error}`,
+    );
+  };
   const result = reduceCollectResult(
     await Promise.all([
       ...graph.modules.flatMap((mod) =>
-        (mod.dependencies ?? []).map((dependency) =>
-          collectFromDependency(dependency, mod.specifier, _options)
-        )
+        (mod.dependencies ?? [])
+          .filter((dependency) => {
+            if (isErrorResolvdDependency(dependency.code)) {
+              showResolveWarning(mod, dependency.code);
+              return false;
+            }
+            if (isErrorResolvdDependency(dependency.type)) {
+              showResolveWarning(mod, dependency.type);
+              return false;
+            }
+            return true;
+          })
+          .map((dependency) =>
+            collectFromDependency(dependency, mod.specifier, _options)
+          )
       ),
       ...jsons.map((url) => collectFromImportMap(url, _options)),
     ]),
@@ -228,8 +253,6 @@ export async function collect(
 // Inner functions and types
 //
 //----------------------------------
-
-type DependencyJson = NonNullable<ModuleJson["dependencies"]>[number];
 
 interface CollectInnerOptions
   extends Omit<CollectOptions, "importMap" | "lockFile"> {
@@ -429,4 +452,14 @@ function normalizeWithUpdated(
     ...updated,
     version: undefined,
   };
+}
+
+type ErrorResolvedDependency = ResolvedDependency & {
+  error: NonNullable<ResolvedDependency["error"]>;
+};
+
+function isErrorResolvdDependency(
+  x: ResolvedDependency | undefined,
+): x is ErrorResolvedDependency {
+  return x?.error != null;
 }
