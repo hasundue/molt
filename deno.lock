@@ -352,6 +352,8 @@
   },
   "remote": {
     "https://deno.land/x/dir@1.5.1/data_local_dir/mod.ts": "91eb1c4bfadfbeda30171007bac6d85aadacd43224a5ed721bbe56bc64e9eb66",
+    "https://deno.land/x/import_map@v0.19.1/import_map.generated.js": "c46023bef881ccecc740740962331f98decbfe72d88644396bf674145c20dd1e",
+    "https://deno.land/x/import_map@v0.19.1/mod.ts": "dd4c4e20639dcfd720a6d41f47bea250db86137901a08988102094678c6b7859",
     "https://deno.land/x/wasmbuild@0.15.1/cache.ts": "9d01b5cb24e7f2a942bbd8d14b093751fa690a6cde8e21709ddc97667e6669ed",
     "https://deno.land/x/wasmbuild@0.15.1/loader.ts": "8c2fc10e21678e42f84c5135d8ab6ab7dc92424c3f05d2354896a29ccfd02a63"
   },
