@@ -9,8 +9,7 @@
     "pre-commit": "deno fmt && deno lint && deno task -q check && deno task -q test",
     "run": "deno run -A --unstable-kv --config ./deno.json ./cli/main.ts",
     "update": "deno run --unstable-kv --config ./deno.json --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno ./cli/main.ts ./deno.json ./*/deno.json --changelog",
-    "update:commit": "deno task -q update --commit --prefix 'build(deps):'",
-    "vendor": "deno vendor -qf --no-config --output ./core/vendor https://deno.land/x/import_map/mod.ts && curl -fsSL -o ./core/vendor/deno.land/x/import_map@v0.19.1/import_map_bg.wasm https://deno.land/x/import_map@v0.19.1/import_map_bg.wasm"
+    "update:commit": "deno task -q update --commit --prefix 'build(deps):'"
   },
   "imports": {
     "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.4",
@@ -30,8 +29,7 @@
     "@std/jsonc": "jsr:@std/jsonc@^0.222.1",
     "@std/path": "jsr:@std/path@^0.222.1",
     "@std/semver": "jsr:@std/semver@^0.222.1",
-    "@std/testing": "jsr:@std/testing@^0.222.1",
-    "x/import_map": "https://deno.land/x/import_map@v0.19.1/mod.ts"
+    "@std/testing": "jsr:@std/testing@^0.222.1"
   },
   "scopes": {
     ".": {
@@ -46,11 +44,6 @@
       "@molt/integration/repository": "./integration/repository.ts"
     }
   },
-  "fmt": {
-    "exclude": [
-      "CHANGELOG.md"
-    ]
-  },
   "lint": {
     "exclude": [
       "test/cases",
@@ -61,5 +54,8 @@
         "no-sync-fn-in-async-fn"
       ]
     }
-  }
+  },
+  "exclude": [
+    "core/import_map"
+  ]
 }

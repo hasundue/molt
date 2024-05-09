@@ -3,7 +3,8 @@ import { maxBy } from "@std/collections";
 import { parse as parseJsonc } from "@std/jsonc";
 import { ensure, is } from "@core/unknownutil";
 import { toPath } from "@molt/lib/path";
-import { type ImportMapJson, parseFromJson } from "x/import_map";
+import { type ImportMapJson, parseFromJson } from "./import_map/js/mod.ts";
+import { parse, stringify } from "./dependency.ts";
 
 export type { ImportMapJson };
 
@@ -98,13 +99,22 @@ export async function readFromJson(
         return;
       }
       const url = new URL(resolved);
-      // Find which key is used for the resolution.
-      // This is ridiculously inefficient, but we prefer not to reimplement
-      // the whole import_map module. Maybe we should rather contribute to
-      // the original import_map module.
+      // Find which key is used for the resolution. This is ridiculously
+      // inefficient, but we prefer not to reimplement the whole
+      // import_map module.
+      // TODO: migrate to our own import_map wasm
       const replacement = maxBy(
         Object.entries(json.imports)
-          .filter(([, value]) => resolved.includes(value))
+          .filter(([, value]) =>
+            resolved.includes(
+              // We need this because import_map adds a heading slash to the
+              // dependency when a jsr import has a path.
+              // e.g. jsr:/@std/testing@0.210.0/
+              value.startsWith("jsr:")
+                ? stringify(parse(value), { protocol: false, path: true })
+                : value,
+            )
+          )
           .map(([key, value]) => ({ key, value })),
         ({ value }) => value.length,
       );

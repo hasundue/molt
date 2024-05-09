@@ -128,6 +128,101 @@ snapshot[`write - lockfile_not_importable/mod.ts 2`] = `
 ]
 `;
 
+snapshot[`write - jsr_with_path_in_import_map/deno.json 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@std/testing@0.210.0",
+        },
+        from: {
+          name: "@std/testing",
+          path: "",
+          protocol: "jsr:",
+          version: "0.210.0",
+        },
+        map: {
+          key: "@std/testing",
+          resolved: "jsr:@std/testing@0.210.0",
+        },
+        to: {
+          name: "@std/testing",
+          path: "",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - jsr_with_path_in_import_map/deno.json 2`] = `
+[
+  '{
+  "imports": {
+    "@std/testing": "jsr:@std/testing@123.456.789"
+  }
+}
+',
+]
+`;
+
+snapshot[`write - jsr_with_path_in_import_map/mod.ts 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 43,
+              line: 0,
+            },
+            start: {
+              character: 25,
+              line: 0,
+            },
+          },
+          specifier: "@std/testing/bdd",
+        },
+        from: {
+          name: "@std/testing",
+          path: "",
+          protocol: "jsr:",
+          version: "0.210.0",
+        },
+        map: {
+          key: "@std/testing",
+          resolved: "jsr:/@std/testing@0.210.0/bdd",
+        },
+        to: {
+          name: "@std/testing",
+          path: "",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - jsr_with_path_in_import_map/mod.ts 2`] = `
+[
+  '{
+  "imports": {
+    "@std/testing": "jsr:@std/testing@123.456.789"
+  }
+}
+',
+]
+`;
+
 snapshot[`write - multiple_imports.ts 1`] = `
 [
   {

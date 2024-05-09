@@ -56,6 +56,10 @@ molt(
 // --no-resolve
 molt("mod.ts --no-resolve", { dir: "multiple_modules" });
 
+// jsr import with path
+molt("mod.ts", { dir: "jsr_with_path_in_import_map" });
+molt("deno.json", { dir: "jsr_with_path_in_import_map" });
+
 //-----------------------
 // Test implementation
 //-----------------------

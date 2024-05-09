@@ -19,9 +19,11 @@ jobs:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     with:
       task: test:unit
+      submodules: true
 
   integration:
     name: Integration
     uses: hasundue/actions/.github/workflows/integration-deno.yml@main
     with:
       task: test:integration
+      submodules: true

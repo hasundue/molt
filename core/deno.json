@@ -21,12 +21,6 @@
     "@std/jsonc": "jsr:@std/jsonc@^0.222.1",
     "@std/path": "jsr:@std/path@^0.222.1",
     "@std/semver": "jsr:@std/semver@^0.222.1",
-    "@std/testing": "jsr:@std/testing@^0.222.1",
-    "x/import_map": "./vendor/deno.land/x/import_map@v0.19.1/mod.ts"
-  },
-  "scopes": {
-    "./vendor/": {
-      "https://deno.land/": "./vendor/deno.land/"
-    }
+    "@std/testing": "jsr:@std/testing@^0.222.1"
   }
 }
