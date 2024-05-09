@@ -77,6 +77,7 @@ describe("resolve()", () => {
       },
     );
   });
+
   it("do not resolve an url", async () => {
     const importMap = await readFromJson(
       new URL(
@@ -97,6 +98,7 @@ describe("resolve()", () => {
       undefined,
     );
   });
+
   it("resolve specifiers in a referred import map", async () => {
     const importMap = await readFromJson(
       new URL(
@@ -118,6 +120,23 @@ describe("resolve()", () => {
       },
     );
   });
+
+  it("resolve a jsr specifier with path", async () => {
+    const dir = "../test/cases/jsr_with_path_in_import_map";
+    const importMap = await readFromJson(
+      new URL(`${dir}/deno.json`, import.meta.url),
+    );
+    assertExists(importMap);
+    const referrer = new URL(`${dir}/mod.ts`, import.meta.url);
+    assertEquals(
+      importMap.resolve("@std/testing/bdd", referrer),
+      {
+        resolved: "jsr:/@std/testing@0.210.0/bdd",
+        key: "@std/testing",
+        value: "jsr:@std/testing@0.210.0",
+      },
+    );
+  });
 });
 
 Deno.test("resolveInner", async () => {
@@ -128,9 +147,5 @@ Deno.test("resolveInner", async () => {
   assertEquals(
     resolveInner("/lib.ts", referrer),
     new URL("../test/cases/import_map/lib.ts", import.meta.url).href,
-  );
-  assertEquals(
-    resolveInner("@std/testing/bdd", referrer),
-    "jsr:/@std/testing@0.200.0/bdd",
   );
 });

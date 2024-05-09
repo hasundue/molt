@@ -119,6 +119,38 @@ snapshot[`collect - jsr_with_path_in_import_map - deno.json 1`] = `
 ]
 `;
 
+snapshot[`collect - jsr_with_path_in_import_map - mod.ts 1`] = `
+[
+  {
+    code: {
+      span: {
+        end: {
+          character: 43,
+          line: 0,
+        },
+        start: {
+          character: 25,
+          line: 0,
+        },
+      },
+      specifier: "@std/testing/bdd",
+    },
+    from: {
+      name: "@std/testing",
+      path: "",
+      protocol: "jsr:",
+      version: "0.210.0",
+    },
+    to: {
+      name: "@std/testing",
+      path: "",
+      protocol: "jsr:",
+      version: "123.456.789",
+    },
+  },
+]
+`;
+
 snapshot[`collect - multiple_imports.ts 1`] = `
 [
   {

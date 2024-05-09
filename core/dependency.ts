@@ -123,11 +123,18 @@ function addSeparator(protocol: string): string {
  * // -> "https://deno.land/std@1.0.0/fs/mod.ts"
  * ```
  */
-export function stringify(dependency: Dependency, includePath = true): string {
-  const header = addSeparator(dependency.protocol);
+export function stringify(
+  dependency: Dependency,
+  include: { protocol?: boolean; path?: boolean } = {},
+): string {
+  include.protocol ??= true;
+  const header = include.protocol ? addSeparator(dependency.protocol) : "";
+
   const version = dependency.version ? "@" + dependency.version : "";
   const path = dependency.path;
-  return `${header}${dependency.name}${version}` + (includePath ? path : "");
+
+  include.path ??= true;
+  return `${header}${dependency.name}${version}` + (include.path ? path : "");
 }
 
 export function hasVersionRange(

@@ -434,3 +434,23 @@ snapshot[`cli - multiple_modules - "molt mod.ts --no-resolve" 2`] = `
 "Checking for updates
 "
 `;
+
+snapshot[`cli - jsr_with_path_in_import_map - "molt mod.ts" 1`] = `
+"📦 @std/testing 0.210.0 => 0.218.2
+"
+`;
+
+snapshot[`cli - jsr_with_path_in_import_map - "molt mod.ts" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - jsr_with_path_in_import_map - "molt deno.json" 1`] = `
+"📦 @std/testing 0.210.0 => 0.218.2
+"
+`;
+
+snapshot[`cli - jsr_with_path_in_import_map - "molt deno.json" 2`] = `
+"Checking for updates
+"
+`;
