@@ -65,7 +65,7 @@ Options:
 snapshot[`cli - "molt --help" 2`] = `""`;
 
 snapshot[`cli - "molt --version" 1`] = `
-"0.18.2
+"0.18.3
 "
 `;
 
