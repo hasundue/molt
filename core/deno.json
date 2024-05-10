@@ -1,12 +1,18 @@
 {
   "name": "@molt/core",
-  "version": "0.18.2",
+  "version": "0.18.3",
   "exports": {
     ".": "./mod.ts"
   },
   "publish": {
+    "include": [
+      "deno.json",
+      "*.ts",
+      "import_map/js"
+    ],
     "exclude": [
-      "*_test.ts"
+      "*_test.ts",
+      "!import_map/js"
     ]
   },
   "imports": {
