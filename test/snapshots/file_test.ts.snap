@@ -758,6 +758,103 @@ snapshot[`write - import_map/mod.ts 2`] = `
 ]
 `;
 
+snapshot[`write - import_map_duplicated_imports/deno.json 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: undefined,
+          specifier: "jsr:@std/testing@0.210.0/bdd",
+        },
+        from: {
+          name: "@std/testing",
+          path: "/bdd",
+          protocol: "jsr:",
+          version: "0.210.0",
+        },
+        map: {
+          key: "@std/testing/bdd",
+          resolved: "jsr:@std/testing@0.210.0/bdd",
+        },
+        to: {
+          name: "@std/testing",
+          path: "/bdd",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - import_map_duplicated_imports/deno.json 2`] = `
+[
+  '{
+  "imports": {
+    "@std/testing": "jsr:@std/testing@^0.210.0",
+    "@std/testing/bdd": "jsr:@std/testing@123.456.789/bdd"
+  }
+}
+',
+]
+`;
+
+snapshot[`write - import_map_duplicated_imports/mod.ts 1`] = `
+[
+  {
+    dependencies: [
+      {
+        code: {
+          span: {
+            end: {
+              character: 43,
+              line: 0,
+            },
+            start: {
+              character: 25,
+              line: 0,
+            },
+          },
+          specifier: "@std/testing/bdd",
+        },
+        from: {
+          name: "@std/testing",
+          path: "/bdd",
+          protocol: "jsr:",
+          version: "0.210.0",
+        },
+        map: {
+          key: "@std/testing/bdd",
+          resolved: "jsr:@std/testing@0.210.0/bdd",
+        },
+        to: {
+          name: "@std/testing",
+          path: "/bdd",
+          protocol: "jsr:",
+          version: "123.456.789",
+        },
+      },
+    ],
+    kind: "import_map",
+  },
+]
+`;
+
+snapshot[`write - import_map_duplicated_imports/mod.ts 2`] = `
+[
+  '{
+  "imports": {
+    "@std/testing": "jsr:@std/testing@^0.210.0",
+    "@std/testing/bdd": "jsr:@std/testing@123.456.789/bdd"
+  }
+}
+',
+]
+`;
+
 snapshot[`write - npm.ts 1`] = `
 [
   {

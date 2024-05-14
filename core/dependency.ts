@@ -166,6 +166,13 @@ export async function resolveLatestVersion(
   dependency: Dependency,
   options?: { cache?: boolean },
 ): Promise<UpdatedDependency | undefined> {
+  const constraint = dependency.version
+    ? SemVer.tryParseRange(dependency.version)
+    : undefined;
+  // Do not update inequality ranges.
+  if (constraint && constraint.flat().length > 1) {
+    return;
+  }
   using cache = options?.cache
     ? new LatestVersionCache(dependency.name)
     : undefined;
@@ -175,13 +182,6 @@ export async function resolveLatestVersion(
   }
   if (cached === null) {
     // The dependency is already found to be up to date or unable to resolve.
-    return;
-  }
-  const constraint = dependency.version
-    ? SemVer.tryParseRange(dependency.version)
-    : undefined;
-  // Do not update inequality ranges.
-  if (constraint && constraint.flat().length > 1) {
     return;
   }
   const result = await _resolveLatestVersion(dependency);

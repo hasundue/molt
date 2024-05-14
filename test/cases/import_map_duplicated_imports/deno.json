@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@std/testing": "jsr:@std/testing@^0.210.0",
+    "@std/testing/bdd": "jsr:@std/testing@0.210.0/bdd"
+  }
+}

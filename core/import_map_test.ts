@@ -121,6 +121,23 @@ describe("resolve()", () => {
     );
   });
 
+  it("resolve a jsr specifier with a caret", async () => {
+    const dir = "../test/cases/import_map_duplicated_imports";
+    const importMap = await readFromJson(
+      new URL(`${dir}/deno.json`, import.meta.url),
+    );
+    assertExists(importMap);
+    const referrer = new URL(`${dir}/mod.ts`, import.meta.url);
+    assertEquals(
+      importMap.resolve("@std/testing", referrer),
+      {
+        resolved: "jsr:@std/testing@^0.210.0",
+        key: "@std/testing",
+        value: "jsr:@std/testing@^0.210.0",
+      },
+    );
+  });
+
   it("resolve a jsr specifier with path", async () => {
     const dir = "../test/cases/jsr_with_path_in_import_map";
     const importMap = await readFromJson(
