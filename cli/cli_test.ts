@@ -60,6 +60,9 @@ molt("mod.ts --no-resolve", { dir: "multiple_modules" });
 molt("mod.ts", { dir: "jsr_with_path_in_import_map" });
 molt("deno.json", { dir: "jsr_with_path_in_import_map" });
 
+// identical dependencies with and without a range specifier
+molt("deno.json", { dir: "import_map_duplicated_imports" });
+
 //-----------------------
 // Test implementation
 //-----------------------
