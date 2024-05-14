@@ -1,6 +1,6 @@
 {
   "name": "@molt/core",
-  "version": "0.18.3",
+  "version": "0.18.4",
   "exports": {
     ".": "./mod.ts"
   },
