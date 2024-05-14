@@ -65,7 +65,7 @@ Options:
 snapshot[`cli - "molt --help" 2`] = `""`;
 
 snapshot[`cli - "molt --version" 1`] = `
-"0.18.3
+"0.18.4
 "
 `;
 
@@ -451,6 +451,16 @@ snapshot[`cli - jsr_with_path_in_import_map - "molt deno.json" 1`] = `
 `;
 
 snapshot[`cli - jsr_with_path_in_import_map - "molt deno.json" 2`] = `
+"Checking for updates
+"
+`;
+
+snapshot[`cli - import_map_duplicated_imports - "molt deno.json" 1`] = `
+"📦 @std/testing 0.210.0 => 0.218.2
+"
+`;
+
+snapshot[`cli - import_map_duplicated_imports - "molt deno.json" 2`] = `
 "Checking for updates
 "
 `;
