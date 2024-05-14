@@ -541,6 +541,61 @@ snapshot[`collect - import_map - mod.ts 1`] = `
 ]
 `;
 
+snapshot[`collect - import_map_duplicated_imports - deno.json 1`] = `
+[
+  {
+    code: {
+      span: undefined,
+      specifier: "jsr:@std/testing@0.210.0/bdd",
+    },
+    from: {
+      name: "@std/testing",
+      path: "/bdd",
+      protocol: "jsr:",
+      version: "0.210.0",
+    },
+    to: {
+      name: "@std/testing",
+      path: "/bdd",
+      protocol: "jsr:",
+      version: "123.456.789",
+    },
+  },
+]
+`;
+
+snapshot[`collect - import_map_duplicated_imports - mod.ts 1`] = `
+[
+  {
+    code: {
+      span: {
+        end: {
+          character: 43,
+          line: 0,
+        },
+        start: {
+          character: 25,
+          line: 0,
+        },
+      },
+      specifier: "@std/testing/bdd",
+    },
+    from: {
+      name: "@std/testing",
+      path: "/bdd",
+      protocol: "jsr:",
+      version: "0.210.0",
+    },
+    to: {
+      name: "@std/testing",
+      path: "/bdd",
+      protocol: "jsr:",
+      version: "123.456.789",
+    },
+  },
+]
+`;
+
 snapshot[`collect - npm.ts 1`] = `
 [
   {
