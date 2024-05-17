@@ -1,4 +1,4 @@
-name: Update
+name: update
 
 on:
   schedule:
@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   update:
-    name: Update
-    uses: hasundue/actions/.github/workflows/update-deno.yml@main
-    secrets:
-      GH_TOKEN: ${{ secrets.PAT_UPDATE }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hasundue/molt-action@v1-rc
