@@ -356,6 +356,9 @@
       "jsr:@david/dax@^0.40.0",
       "jsr:@deno/graph@^0.73.1",
       "jsr:@lambdalisue/async@^2.1.1",
+      "jsr:@molt/core@^0.18.4",
+      "jsr:@molt/integration@^0.18.0",
+      "jsr:@molt/lib@^0.18.0",
       "jsr:@std/assert@^0.222.1",
       "jsr:@std/collections@^0.222.1",
       "jsr:@std/dotenv@^0.222.1",
@@ -367,6 +370,12 @@
       "jsr:@std/testing@^0.222.1",
       "npm:@conventional-commits/parser@^0.4.1",
       "npm:@octokit/rest@^20.1.0"
-    ]
+    ],
+    "members": {
+      "@molt/cli": {},
+      "@molt/core": {},
+      "@molt/integration": {},
+      "@molt/lib": {}
+    }
   }
 }
