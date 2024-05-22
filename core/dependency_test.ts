@@ -1,7 +1,12 @@
 import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertExists, assertObjectMatch } from "@std/assert";
 import { LatestVersionStub } from "@molt/lib/testing";
-import { isPreRelease, parse, resolveLatestVersion } from "./dependency.ts";
+import {
+  isPreRelease,
+  parse,
+  resolveLatestVersion,
+  stringify,
+} from "./dependency.ts";
 
 describe("parse", () => {
   it("deno.land/std", () =>
@@ -70,6 +75,62 @@ describe("parse", () => {
         version: "^1.0.0",
         path: "/flag.ts",
       },
+    ));
+});
+
+describe("stringify", () => {
+  it("full", () =>
+    assertEquals(
+      stringify({
+        protocol: "https:",
+        name: "deno.land/std",
+        version: "0.1.0",
+        path: "/version.ts",
+      }),
+      "https://deno.land/std@0.1.0/version.ts",
+    ));
+
+  it("no version", () =>
+    assertEquals(
+      stringify({
+        protocol: "https:",
+        name: "deno.land/std",
+        path: "/version.ts",
+      }, { version: false }),
+      "https://deno.land/std/version.ts",
+    ));
+
+  it("no path", () =>
+    assertEquals(
+      stringify({
+        protocol: "https:",
+        name: "deno.land/std",
+        version: "0.1.0",
+        path: "/version.ts",
+      }, { path: false }),
+      "https://deno.land/std@0.1.0",
+    ));
+
+  it("no protocol", () =>
+    assertEquals(
+      stringify({
+        protocol: "https:",
+        name: "deno.land/std",
+        version: "0.1.0",
+        path: "/version.ts",
+      }, { protocol: false }),
+      "deno.land/std@0.1.0/version.ts",
+    ));
+
+  it("name only", () =>
+    assertEquals(
+      stringify({
+        protocol: "https:",
+        name: "deno.land/std",
+        version: "0.1.0",
+        path: "/version.ts",
+      }, { protocol: false, version: false, path: false }),
+      "deno.land/std",
     ));
 });
 

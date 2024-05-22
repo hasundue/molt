@@ -125,16 +125,17 @@ function addSeparator(protocol: string): string {
  */
 export function stringify(
   dependency: Dependency,
-  include: { protocol?: boolean; path?: boolean } = {},
+  include: { protocol?: boolean; version?: boolean; path?: boolean } = {},
 ): string {
-  include.protocol ??= true;
+  include = { protocol: true, version: true, path: true, ...include };
+
   const header = include.protocol ? addSeparator(dependency.protocol) : "";
+  const version = include.version
+    ? dependency.version ? "@" + dependency.version : ""
+    : "";
+  const path = include.path ? dependency.path : "";
 
-  const version = dependency.version ? "@" + dependency.version : "";
-  const path = dependency.path;
-
-  include.path ??= true;
-  return `${header}${dependency.name}${version}` + (include.path ? path : "");
+  return `${header}${dependency.name}${version}` + path;
 }
 
 export function hasVersionRange(
@@ -178,6 +179,8 @@ export async function resolveLatestVersion(
     : undefined;
   const cached = cache?.get(dependency.name);
   if (cached) {
+    console.log(dependency);
+    console.log(cached);
     return { ...cached, path: dependency.path };
   }
   if (cached === null) {
@@ -215,6 +218,13 @@ class LatestVersionCache implements Disposable {
     assertExists(mutex);
     mutex.release();
   }
+}
+
+function reparseUnversionedWithCached(
+  dependency: Dependency & { version: undefined },
+  cached: UpdatedDependency,
+) {
+  const { name, version, path } = cached;
 }
 
 async function _resolveLatestVersion(
