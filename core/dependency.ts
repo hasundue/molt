@@ -179,9 +179,12 @@ export async function resolveLatestVersion(
     : undefined;
   const cached = cache?.get(dependency.name);
   if (cached) {
-    console.log(dependency);
-    console.log(cached);
-    return { ...cached, path: dependency.path };
+    dependency.version === undefined
+      ? {
+        name: cached.name,
+        path: dependency.name.slice(cached.name.length),
+      }
+      : { ...cached, path: dependency.path };
   }
   if (cached === null) {
     // The dependency is already found to be up to date or unable to resolve.
@@ -218,13 +221,6 @@ class LatestVersionCache implements Disposable {
     assertExists(mutex);
     mutex.release();
   }
-}
-
-function reparseUnversionedWithCached(
-  dependency: Dependency & { version: undefined },
-  cached: UpdatedDependency,
-) {
-  const { name, version, path } = cached;
 }
 
 async function _resolveLatestVersion(
