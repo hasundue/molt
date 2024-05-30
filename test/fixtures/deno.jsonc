@@ -15,7 +15,7 @@
     // JSR - updated
     "@std/yaml": "jsr:@std/yaml@123.456.789",
     // Local
-    "lib/": "./lib",
+    "lib/": "./lib/",
     // HTTP
     "x/deno_graph": "https://deno.land/x/deno_graph@0.50.0/mod.ts",
     // HTTP - prefix

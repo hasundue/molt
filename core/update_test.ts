@@ -4,8 +4,8 @@ import {
   assertExists,
   assertObjectMatch,
 } from "@std/assert";
-import { LatestVersionStub } from "@molt/lib/testing";
 import { collect } from "./update.ts";
+import { LatestVersionStub } from "../test/mock.ts";
 
 Deno.test("collect - deno.jsonc", async () => {
   using _stub = LatestVersionStub.create("123.456.789");

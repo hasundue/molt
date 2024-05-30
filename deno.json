@@ -12,6 +12,7 @@
     "update:commit": "deno task -q update --commit --prefix 'build(deps):'"
   },
   "imports": {
+    "@chiezo/amber": "jsr:@chiezo/amber@^0.0.4",
     "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.4",
     "@cliffy/command": "jsr:@cliffy/command@1.0.0-rc.4",
     "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.4.1",
@@ -32,7 +33,8 @@
     "@std/jsonc": "jsr:@std/jsonc@^0.222.1",
     "@std/path": "jsr:@std/path@^0.222.1",
     "@std/semver": "jsr:@std/semver@^0.222.1",
-    "@std/testing": "jsr:@std/testing@^0.222.1"
+    "@std/testing": "jsr:@std/testing@^0.222.1",
+    "dedent": "npm:dedent@^1.5.3"
   },
   "lint": {
     "exclude": [
