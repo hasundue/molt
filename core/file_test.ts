@@ -1,123 +1,124 @@
-import { basename, dirname } from "@std/path";
-import { format, LF } from "@std/fs/eol";
-import { assert, assertInstanceOf } from "@std/assert";
-import { fromFileUrl } from "@std/path";
-import { createAssertSnapshot } from "@std/testing/snapshot";
-import {
-  FileSystemFake,
-  LatestVersionStub,
-  ReadTextFileStub,
-  WriteTextFileStub,
-} from "@molt/lib/testing";
-import { associateByFile, type FileUpdate, writeFileUpdate } from "./file.ts";
-import { collect, type CollectResult } from "./update.ts";
+import * as fs from "@chiezo/amber/fs";
+import { assertArrayIncludes, assertObjectMatch } from "@std/assert";
+import { EOL } from "@std/fs/eol";
+import * as Jsonc from "@std/jsonc";
+import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
+import { write } from "./file.ts";
+import { collect } from "./update.ts";
+import { LatestVersionStub } from "../test/mock.ts";
 
-function toName(path: string) {
-  const base = basename(path);
-  return base === "mod.ts" || base.endsWith(".json") || base.endsWith(".jsonc")
-    ? basename(dirname(path)) + "/" + base
-    : base;
-}
+describe("write", () => {
+  let vstub: LatestVersionStub;
 
-const assertSnapshot = createAssertSnapshot({
-  dir: fromFileUrl(new URL("../test/snapshots/", import.meta.url)),
-});
-
-async function assertFileUpdateSnapshot(
-  t: Deno.TestContext,
-  results: FileUpdate[],
-) {
-  await assertSnapshot(
-    t,
-    results.map((file) => ({
-      dependencies: file.dependencies.map((it) => ({
-        code: it.code,
-        from: it.from,
-        map: it.map
-          ? {
-            key: it.map.key,
-            resolved: it.map.resolved,
-          }
-          : undefined,
-        to: it.to,
-      })),
-      kind: file.kind,
-    })),
-  );
-}
-
-async function assertFileSystemSnapshot(
-  t: Deno.TestContext,
-  fs: FileSystemFake,
-) {
-  await assertSnapshot(
-    t,
-    Array.from(fs.entries()).map(([, content]) => format(content, LF)),
-  );
-}
-
-const fs = new FileSystemFake();
-ReadTextFileStub.create(fs, { readThrough: true });
-WriteTextFileStub.create(fs);
-
-LatestVersionStub.create({ "deno.land/std": "0.218.0", _: "123.456.789" });
-
-function test(path: string, name = toName(path)) {
-  Deno.test("write - " + name, async (t) => {
-    let result: CollectResult | undefined = undefined;
-    let updates: FileUpdate[] = [];
-    await t.step("associateByFile", async () => {
-      try {
-        result = await collect(new URL(path, import.meta.url), {
-          cwd: new URL(dirname(path), import.meta.url),
-          lock: path.includes("lockfile"),
-        });
-        updates = associateByFile(result);
-        await assertFileUpdateSnapshot(t, updates);
-      } catch (error) {
-        if (path.includes("import_map_referred/deno.json")) {
-          // deno.json just reffers to another import_map.json
-          assertInstanceOf(error, SyntaxError, error);
-        } else if (path.includes("lockfile_not_importable/deno.json")) {
-          // can't lock an import specifier that is not importable as is
-          assertInstanceOf(error, Deno.errors.NotSupported);
-        } else {
-          throw error;
-        }
-      }
-    });
-    await t.step("writeFileUpdate", async () => {
-      fs.clear();
-      if (result) {
-        await writeFileUpdate(updates);
-        await assertFileSystemSnapshot(t, fs);
-        for await (const content of fs.values()) {
-          assert(content.endsWith("\n"), "should end with a newline");
-        }
-      }
-    });
+  beforeEach(() => {
+    vstub = LatestVersionStub.create("123.456.789");
+    fs.stub(new URL("../test/fixtures", import.meta.url));
+    fs.mock();
   });
-}
 
-// Test the all cases in test/cases
-for await (
-  const testCase of Deno.readDir(new URL("../test/cases", import.meta.url))
-) {
-  if (testCase.isFile && testCase.name.endsWith(".ts")) {
-    test(`../test/cases/${testCase.name}`);
-  }
-  if (testCase.isDirectory) {
-    for await (
-      const entry of Deno.readDir(
-        new URL("../test/cases/" + testCase.name, import.meta.url),
-      )
-    ) {
-      if (
-        entry.isFile && entry.name === "mod.ts" ||
-        entry.name.endsWith(".json") || entry.name.endsWith(".jsonc")
-      ) {
-        test(`../test/cases/${testCase.name}/${entry.name}`);
-      }
-    }
-  }
-}
+  afterEach(() => {
+    fs.dispose();
+    vstub.restore();
+  });
+
+  it("deno.jsonc", async () => {
+    const source = new URL("../test/fixtures/deno.jsonc", import.meta.url);
+    await write(await collect(source));
+    assertObjectMatch(
+      // deno-lint-ignore no-explicit-any
+      Jsonc.parse(await Deno.readTextFile(source)) as any,
+      {
+        imports: {
+          "@octokit/core": "npm:@octokit/core@123.456.789",
+          "@std/assert": "jsr:@std/assert@123.456.789",
+          "@std/bytes": "jsr:@std/bytes@123.456.789",
+          "@std/jsonc": "jsr:@std/jsoc@0.222.x",
+          "@std/testing": "jsr:@std/testing@^0.222.0",
+          "@std/testing/bdd": "jsr:@std/testing@123.456.789/bdd",
+          "@std/yaml": "jsr:@std/yaml@123.456.789",
+          "lib/": "./lib/",
+          "x/deno_graph": "https://deno.land/x/deno_graph@123.456.789/mod.ts",
+          "std/": "https://deno.land/std@123.456.789/",
+          "std/assert": "https://deno.land/std@123.456.789/assert/mod.ts",
+        },
+      },
+    );
+  });
+
+  it("deps.ts", async () => {
+    const source = new URL("../test/fixtures/deps.ts", import.meta.url);
+    await write(await collect(source));
+    const actual = await Deno.readTextFile(source);
+    assertArrayIncludes(
+      actual.split(EOL).filter((line) => line.startsWith("import")),
+      [
+        'import "npm:@octokit/core@123.456.789";',
+        'import "jsr:@std/assert@123.456.789";',
+        'import "jsr:@std/bytes@123.456.789";',
+        'import "jsr:@std/jsonc@0.222.x";',
+        'import "jsr:@std/testing@^0.222.0";',
+        'import "jsr:@std/testing@123.456.789/bdd";',
+        'import "jsr:@std/yaml@123.456.789";',
+        'import "https://deno.land/x/deno_graph@123.456.789/mod.ts";',
+        'import "https://deno.land/std@123.456.789/";',
+        'import "https://deno.land/std@123.456.789/assert/mod.ts";',
+      ],
+    );
+  });
+
+  it("mod.ts", async () => {
+    const source = new URL("../test/fixtures/mod.ts", import.meta.url);
+    await write(await collect(source));
+    const actual = await Deno.readTextFile(source);
+    assertArrayIncludes(
+      actual.split(EOL).filter((line) => line.startsWith("export")),
+      [
+        'export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";',
+      ],
+    );
+  });
+
+  it("mod_test.ts", async () => {
+    const source = new URL("../test/fixtures/mod_test.ts", import.meta.url);
+    await write(
+      await collect(source, { importMap: new URL("deno.jsonc", source) }),
+    );
+    assertArrayIncludes(
+      (await Deno.readTextFile(source))
+        .split(EOL).filter((line) => line.startsWith("import")),
+      [
+        'import { assertEquals } from "jsr:@std/assert@123.456.789";',
+        'import { describe, it } from "@std/testing/bdd";',
+        'import { createGraph } from "./mod.ts";',
+      ],
+    );
+    assertArrayIncludes(
+      (await Deno.readTextFile(new URL("mod.ts", source)))
+        .split(EOL).filter((line) => line.startsWith("export")),
+      [
+        'export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";',
+      ],
+    );
+    assertObjectMatch(
+      Jsonc.parse(
+        await Deno.readTextFile(new URL("deno.jsonc", source)),
+        // deno-lint-ignore no-explicit-any
+      ) as any,
+      {
+        imports: {
+          "@octokit/core": "npm:@octokit/core@6.1.0",
+          "@std/assert": "jsr:@std/assert@0.222.0",
+          "@std/bytes": "jsr:@std/bytes",
+          "@std/jsonc": "jsr:@std/jsoc@0.222.x",
+          "@std/testing": "jsr:@std/testing@^0.222.0",
+          "@std/testing/bdd": "jsr:@std/testing@123.456.789/bdd",
+          "@std/yaml": "jsr:@std/yaml@123.456.789",
+          "lib/": "./lib/",
+          "x/deno_graph": "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+          "std/": "https://deno.land/std@0.222.0/",
+          "std/assert": "https://deno.land/std/assert/mod.ts",
+        },
+      },
+    );
+  });
+});

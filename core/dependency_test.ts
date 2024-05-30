@@ -1,12 +1,12 @@
 import { afterAll, beforeAll, describe, it } from "@std/testing/bdd";
 import { assertEquals, assertExists, assertObjectMatch } from "@std/assert";
-import { LatestVersionStub } from "@molt/lib/testing";
 import {
   isPreRelease,
   parse,
   resolveLatestVersion,
   stringify,
 } from "./dependency.ts";
+import { LatestVersionStub } from "../test/mock.ts";
 
 describe("parse", () => {
   it("deno.land/std", () =>

@@ -3,8 +3,7 @@
   "version": "0.18.0",
   "exports": {
     "./changelog": "./changelog.ts",
-    "./path": "./path.ts",
-    "./testing": "./testing.ts"
+    "./path": "./path.ts"
   },
   "publish": {
     "exclude": [

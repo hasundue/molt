@@ -1,24 +1,12 @@
-import {
-  CommandStub,
-  FileSystemFake,
-  LatestVersionStub,
-  ReadTextFileStub,
-  WriteTextFileStub,
-} from "@molt/lib/testing";
+import { all, cmd, fs } from "@chiezo/amber";
+import { LatestVersionStub } from "../../test/mock.ts";
 
 /**
  * Enables all test stubs.
  */
 export default function () {
-  LatestVersionStub.create({
-    "deno.land/std": "0.218.2",
-    "deno_graph": "0.69.7",
-    "node-emoji": "2.1.3",
-    "@luca/flag": "1.0.1",
-    "@std/": "0.218.2",
-  });
-  const fs = new FileSystemFake();
-  ReadTextFileStub.create(fs, { readThrough: true });
-  WriteTextFileStub.create(fs);
-  Deno.Command = CommandStub.create("git");
+  LatestVersionStub.create("123.456.789");
+  fs.stub(new URL("../../test/fixtures", import.meta.url));
+  cmd.stub("git");
+  all(cmd, fs).mock();
 }

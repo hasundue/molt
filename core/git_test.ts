@@ -1,22 +1,25 @@
-import { assertArrayIncludes, assertEquals, assertThrows } from "@std/assert";
-import { describe, it } from "@std/testing/bdd";
-import { assertSpyCall } from "@std/testing/mock";
-import { basename, relative } from "@std/path";
-import { commit, getVersionChange } from "./git.ts";
-import { collect } from "./update.ts";
+import { all, cmd, fs } from "@chiezo/amber";
 import {
-  CommandStub,
-  FileSystemFake,
-  LatestVersionStub,
-  ReadTextFileStub,
-  WriteTextFileStub,
-} from "@molt/lib/testing";
-
-//--------------------------------------------------------------------
-//
-// Unit tests
-//
-//--------------------------------------------------------------------
+  assertArrayIncludes,
+  assertEquals,
+  assertObjectMatch,
+  assertThrows,
+} from "@std/assert";
+import { EOL } from "@std/fs/eol";
+import * as Jsonc from "@std/jsonc";
+import { basename, relative } from "@std/path";
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  it,
+} from "@std/testing/bdd";
+import { assertSpyCall } from "@std/testing/mock";
+import { commit, getVersionChange } from "./git.ts";
+import { collect, type CollectResult } from "./update.ts";
+import { LatestVersionStub } from "../test/mock.ts";
 
 describe("getVersionChange", () => {
   it("single version", () => {
@@ -159,92 +162,126 @@ describe("getVersionChange", () => {
   });
 });
 
-//--------------------------------------------------------------------
-//
-// Integration tests
-//
-//--------------------------------------------------------------------
-
-Deno.test("commit", async (t) => {
-  const DIR = "test/cases/multiple_modules";
-
+describe("commit", () => {
+  const DIR = "test/fixtures";
   const LATEST = "123.456.789";
-  LatestVersionStub.create(LATEST);
 
-  const EXPECTED = [
-    `import { assert } from "https://deno.land/std@${LATEST}/assert/assert.ts";
-import { createGraph } from "https://deno.land/x/deno_graph@${LATEST}/mod.ts";
-import emoji from "npm:node-emoji@${LATEST}";
-import { noop } from "./lib.ts";
-`,
-    `import { assertEquals } from "https://deno.land/std@${LATEST}/assert/assert_equals.ts";
-export const noop = () => {};
-`,
-  ];
-  const assertFileSystem = (
-    fs: FileSystemFake,
-  ) => assertArrayIncludes(Array.from(fs.values()), EXPECTED);
-
-  const cs = CommandStub.create();
-  Deno.Command = cs;
-
-  const fs = new FileSystemFake();
-  ReadTextFileStub.create(fs, { readThrough: true });
-  WriteTextFileStub.create(fs);
+  let calls: number;
+  let git: cmd.Stub<"git">;
+  let result: CollectResult;
+  let vers: LatestVersionStub;
 
   const normalizePath = (path: string) =>
     Deno.build.os === "windows" ? path.replaceAll("/", "\\") : path;
 
-  let calls = 0;
   const assertGitAdd = (
     ...paths: string[]
   ) =>
-    assertSpyCall(cs, calls++, {
+    assertSpyCall(git, calls++, {
       args: [
         "git",
         { args: ["add", ...paths.map(normalizePath)] },
       ],
     });
+
   const assertGitCommit = (
     message: string,
   ) =>
-    assertSpyCall(cs, calls++, {
+    assertSpyCall(git, calls++, {
       args: [
         "git",
         { args: ["commit", "-m", message] },
       ],
     });
 
-  const result = await collect(
-    new URL(`../${DIR}/mod.ts`, import.meta.url),
-  );
+  const assertFileSystem = async () => {
+    assertArrayIncludes(
+      (await Deno.readTextFile(
+        new URL(`../${DIR}/mod_test.ts`, import.meta.url),
+      ))
+        .split(EOL).filter((line) => line.startsWith("import")),
+      [
+        'import { assertEquals } from "jsr:@std/assert@123.456.789";',
+        'import { describe, it } from "@std/testing/bdd";',
+        'import { createGraph } from "./mod.ts";',
+      ],
+    );
+    assertArrayIncludes(
+      (await Deno.readTextFile(new URL(`../${DIR}/mod.ts`, import.meta.url)))
+        .split(EOL).filter((line) => line.startsWith("export")),
+      [
+        'export { createGraph } from "https://deno.land/x/deno_graph@123.456.789/mod.ts";',
+      ],
+    );
+    assertObjectMatch(
+      Jsonc.parse(
+        await Deno.readTextFile(
+          new URL(`../${DIR}/deno.jsonc`, import.meta.url),
+        ),
+        // deno-lint-ignore no-explicit-any
+      ) as any,
+      {
+        imports: {
+          "@octokit/core": "npm:@octokit/core@6.1.0",
+          "@std/assert": "jsr:@std/assert@0.222.0",
+          "@std/bytes": "jsr:@std/bytes",
+          "@std/jsonc": "jsr:@std/jsoc@0.222.x",
+          "@std/testing": "jsr:@std/testing@^0.222.0",
+          "@std/testing/bdd": "jsr:@std/testing@123.456.789/bdd",
+          "@std/yaml": "jsr:@std/yaml@123.456.789",
+          "lib/": "./lib/",
+          "x/deno_graph": "https://deno.land/x/deno_graph@0.50.0/mod.ts",
+          "std/": "https://deno.land/std@0.222.0/",
+          "std/assert": "https://deno.land/std/assert/mod.ts",
+        },
+      },
+    );
+  };
 
-  await t.step("no grouping", async () => {
-    await commit(result);
-    assertGitAdd(`${DIR}/lib.ts`, `${DIR}/mod.ts`);
-    assertGitCommit("build(deps): update dependencies");
-    assertFileSystem(fs);
+  beforeAll(() => {
+    vers = LatestVersionStub.create(LATEST);
   });
 
-  fs.clear();
+  beforeEach(async () => {
+    calls = 0;
+    fs.stub(DIR);
+    git = cmd.stub("git");
+    all(cmd, fs).mock();
+    result = await collect(new URL(`../${DIR}/mod_test.ts`, import.meta.url), {
+      importMap: new URL(`../${DIR}/deno.jsonc`, import.meta.url),
+    });
+  });
 
-  await t.step("group by dependency name", async () => {
+  afterEach(() => {
+    all(cmd, fs).dispose();
+  });
+
+  afterAll(() => {
+    vers.restore();
+  });
+
+  it("no grouping", async () => {
+    await commit(result);
+    assertGitAdd(`${DIR}/deno.jsonc`, `${DIR}/mod_test.ts`, `${DIR}/mod.ts`);
+    assertGitCommit("build(deps): update dependencies");
+    await assertFileSystem();
+  });
+
+  it("group by dependency name", async () => {
     await commit(result, {
       groupBy: (update) => update.to.name,
       composeCommitMessage: ({ group }) => `build(deps): update ${group}`,
     });
-    assertGitAdd(`${DIR}/lib.ts`, `${DIR}/mod.ts`);
-    assertGitCommit("build(deps): update deno.land/std");
+    assertGitAdd(`${DIR}/mod_test.ts`);
+    assertGitCommit("build(deps): update @std/assert");
+    assertGitAdd(`${DIR}/deno.jsonc`);
+    assertGitCommit("build(deps): update @std/testing");
     assertGitAdd(`${DIR}/mod.ts`);
     assertGitCommit("build(deps): update deno.land/x/deno_graph");
-    assertGitAdd(`${DIR}/mod.ts`);
-    assertGitCommit("build(deps): update node-emoji");
-    assertFileSystem(fs);
+    await assertFileSystem();
   });
 
-  fs.clear();
-
-  await t.step("group by module (file) name", async () => {
+  it("group by module (file) name", async () => {
     await commit(result, {
       groupBy: (update) => basename(update.referrer),
       composeCommitMessage: ({ group }) => {
@@ -252,10 +289,10 @@ export const noop = () => {};
         return `build(deps): update ${path}`;
       },
     });
-    assertGitAdd(`${DIR}/lib.ts`);
-    assertGitCommit(`build(deps): update lib.ts`);
+    assertGitAdd(`${DIR}/deno.jsonc`, `${DIR}/mod_test.ts`);
+    assertGitCommit(`build(deps): update mod_test.ts`);
     assertGitAdd(`${DIR}/mod.ts`);
     assertGitCommit(`build(deps): update mod.ts`);
-    assertFileSystem(fs);
+    await assertFileSystem();
   });
 });

@@ -88,6 +88,10 @@ Deno.test("findFileUp", async () => {
     await findFileUp(dir, "LICENSE"),
     fromFileUrl(new URL("../LICENSE", import.meta.url)),
   );
+  assertEquals(
+    await findFileUp(dir, "deno.json"),
+    fromFileUrl(new URL("deno.json", import.meta.url)),
+  );
   // Throws for a non-directory path
   assertRejects(
     () => findFileUp(import.meta.url, "deno.json"),
