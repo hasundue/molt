@@ -286,6 +286,9 @@ async function collectFromDependency(
       { cause: dependencyJson },
     );
   }
+  if (resolved.startsWith("file:")) {
+    return { locks: [], updates: [] };
+  }
   const lock = options.lockFile
     ? await createLockPart(resolved, options.lockFile)
     : undefined;
