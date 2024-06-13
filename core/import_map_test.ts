@@ -1,10 +1,10 @@
 import { assertEquals, assertExists, assertRejects } from "@std/assert";
 import { fromFileUrl, toFileUrl } from "@std/path";
-import { describe, it } from "@std/testing/bdd";
-import { readFromJson } from "./import_map.ts";
+import { beforeAll, describe, it } from "@std/testing/bdd";
+import { type ImportMap, readFromJson } from "./import_map.ts";
 
 describe("readFromJson", () => {
-  it("throws for an empty deno.json", async () => {
+  it("should throw for an empty deno.json", async () => {
     const f = await Deno.makeTempFile();
     // use this cool stuff once it lands in deno
     // using cleanup = new DisposableStack();
@@ -15,104 +15,135 @@ describe("readFromJson", () => {
     await Deno.remove(f);
   });
 
-  it("test/cases/import_map/deno.json", async () => {
-    const url = new URL("../test/cases/import_map/deno.json", import.meta.url);
-    const importMap = await readFromJson(url);
-    assertExists(importMap);
-    assertEquals(importMap.path, fromFileUrl(url));
-  });
-
-  it("test/cases/import_map_referred/import_map.json", async () => {
+  it("should parse deno.jsonc", async () => {
     const url = new URL(
-      "../test/cases/import_map_referred/import_map.json",
+      "../test/fixtures/deno.jsonc",
       import.meta.url,
     );
     const importMap = await readFromJson(url);
     assertExists(importMap);
     assertEquals(importMap.path, fromFileUrl(url));
+  });
+
+  it("should parse a referred import map", async () => {
+    const url = new URL(
+      "../test/fixtures/import_map/deno.json",
+      import.meta.url,
+    );
+    const importMap = await readFromJson(url);
+    assertExists(importMap);
+    assertEquals(importMap.path, fromFileUrl(new URL("import_map.json", url)));
   });
 });
 
-describe("resolve()", () => {
-  it("resolve specifiers in import maps", async () => {
-    const importMap = await readFromJson(
-      new URL("../test/cases/import_map/deno.json", import.meta.url),
+describe("resolve", () => {
+  const referrer = new URL("../test/fixtures/mod.ts", import.meta.url);
+  let map: ImportMap;
+
+  beforeAll(async () => {
+    map = await readFromJson(
+      new URL("../test/fixtures/deno.jsonc", import.meta.url),
     );
-    assertExists(importMap);
-    const referrer = new URL(
-      "../test/cases/import_map/mod.ts",
-      import.meta.url,
-    );
+  });
+
+  it("should resolve a jsr specifier", () => {
     assertEquals(
-      importMap.resolve("std/version.ts", referrer),
+      map.resolve("@std/assert", referrer),
       {
-        resolved: "https://deno.land/std@0.200.0/version.ts",
-        key: "std/",
-        value: "https://deno.land/std@0.200.0/",
+        resolved: "jsr:@std/assert@0.222.0",
+        key: "@std/assert",
+        value: "jsr:@std/assert@0.222.0",
       },
     );
+  });
+
+  it("should resolve a jsr specifier with a caret", () => {
     assertEquals(
-      importMap.resolve("deno_graph", referrer),
+      map.resolve("@std/testing", referrer),
+      {
+        resolved: "jsr:@std/testing@^0.222.0",
+        key: "@std/testing",
+        value: "jsr:@std/testing@^0.222.0",
+      },
+    );
+  });
+
+  it("should resolve a jsr specifier with an entrypoint", () => {
+    assertEquals(
+      map.resolve("@std/assert/assert-equals", referrer),
+      {
+        resolved: "jsr:/@std/assert@0.222.0/assert-equals",
+        key: "@std/assert",
+        value: "jsr:@std/assert@0.222.0",
+      },
+    );
+  });
+
+  it("should resolve a npm specifier", () => {
+    assertEquals(
+      map.resolve("@octokit/core", referrer),
+      {
+        resolved: "npm:@octokit/core@6.1.0",
+        key: "@octokit/core",
+        value: "npm:@octokit/core@6.1.0",
+      },
+    );
+  });
+
+  it("should resolve an url specifier", () => {
+    assertEquals(
+      map.resolve("x/deno_graph", referrer),
       {
         resolved: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
-        key: "deno_graph",
+        key: "x/deno_graph",
         value: "https://deno.land/x/deno_graph@0.50.0/mod.ts",
       },
     );
+  });
+
+  it("should resolve an url prefix specifier", () => {
     assertEquals(
-      importMap.resolve("node-emoji", referrer),
+      map.resolve("std/assert/mod.ts", referrer),
       {
-        resolved: "npm:node-emoji@2.0.0",
-        key: "node-emoji",
-        value: "npm:node-emoji@2.0.0",
+        resolved: "https://deno.land/std@0.222.0/assert/mod.ts",
+        key: "std/",
+        value: "https://deno.land/std@0.222.0/",
       },
     );
+  });
+
+  it("should resolve a local mapping", () => {
     assertEquals(
-      importMap.resolve("/lib.ts", referrer),
+      map.resolve("lib/path.ts", referrer),
       {
-        resolved:
-          new URL("../test/cases/import_map/lib.ts", import.meta.url).href,
+        resolved: new URL("../test/fixtures/lib/path.ts", import.meta.url).href,
         key: undefined,
         value: undefined,
       },
     );
   });
 
-  it("do not resolve an url", async () => {
-    const importMap = await readFromJson(
-      new URL(
-        "../test/cases/import_map_no_resolve/deno.json",
-        import.meta.url,
-      ),
-    );
-    assertExists(importMap);
-    const referrer = new URL(
-      "../test/cases/import_map_no_resolve/deps.ts",
-      import.meta.url,
-    );
+  it("should not resolve a complete url specifier", () => {
     assertEquals(
-      importMap.resolve(
-        "https://deno.land/std@0.171.0/testing/asserts.ts",
-        referrer,
-      ),
+      map.resolve("https://deno.land/std@0.222.0/assert/mod.ts", referrer),
       undefined,
     );
   });
 
   it("resolve specifiers in a referred import map", async () => {
-    const importMap = await readFromJson(
+    const map = await readFromJson(
       new URL(
-        "../test/cases/import_map_referred/deno.json",
+        "../test/fixtures/import_map/deno.json",
         import.meta.url,
       ),
     );
-    assertExists(importMap);
+    assertExists(map);
     const referrer = new URL(
-      "../test/cases/import_map_referred/mod.ts",
+      "../test/fixtures/import_map/mod.ts",
       import.meta.url,
     );
     assertEquals(
-      importMap.resolve("dax", referrer),
+      map.resolve("dax", referrer),
       {
         resolved: "https://deno.land/x/dax@0.17.0/mod.ts",
         key: "dax",
@@ -120,49 +151,15 @@ describe("resolve()", () => {
       },
     );
   });
-
-  it("resolve a jsr specifier with a caret", async () => {
-    const dir = "../test/cases/import_map_duplicated_imports";
-    const importMap = await readFromJson(
-      new URL(`${dir}/deno.json`, import.meta.url),
-    );
-    assertExists(importMap);
-    const referrer = new URL(`${dir}/mod.ts`, import.meta.url);
-    assertEquals(
-      importMap.resolve("@std/testing", referrer),
-      {
-        resolved: "jsr:@std/testing@^0.210.0",
-        key: "@std/testing",
-        value: "jsr:@std/testing@^0.210.0",
-      },
-    );
-  });
-
-  it("resolve a jsr specifier with path", async () => {
-    const dir = "../test/cases/jsr_with_path_in_import_map";
-    const importMap = await readFromJson(
-      new URL(`${dir}/deno.json`, import.meta.url),
-    );
-    assertExists(importMap);
-    const referrer = new URL(`${dir}/mod.ts`, import.meta.url);
-    assertEquals(
-      importMap.resolve("@std/testing/bdd", referrer),
-      {
-        resolved: "jsr:/@std/testing@0.210.0/bdd",
-        key: "@std/testing",
-        value: "jsr:@std/testing@0.210.0",
-      },
-    );
-  });
 });
 
 Deno.test("resolveInner", async () => {
   const { resolveInner } = await readFromJson(
-    new URL("../test/cases/import_map/deno.json", import.meta.url),
+    new URL("../test/fixtures/deno.jsonc", import.meta.url),
   );
-  const referrer = new URL("../test/cases/import_map/mod.ts", import.meta.url);
+  const referrer = new URL("../test/fixtures/mod.ts", import.meta.url);
   assertEquals(
-    resolveInner("/lib.ts", referrer),
-    new URL("../test/cases/import_map/lib.ts", import.meta.url).href,
+    resolveInner("lib/path.ts", referrer),
+    new URL("../test/fixtures/lib/path.ts", import.meta.url).href,
   );
 });

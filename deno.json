@@ -6,7 +6,7 @@
     "test": "deno test -A --unstable-kv --no-check --no-lock",
     "test:unit": "deno task -q test ./lib ./core",
     "test:integration": "deno task -q test ./integration ./cli",
-    "pre-commit": "deno fmt && deno lint && deno task -q check && deno task -q test",
+    "pre-commit": "deno fmt && deno lint && deno task -q check && deno task -q test:unit",
     "run": "deno run -A --unstable-kv --config ./deno.json ./cli/main.ts",
     "update": "deno run --unstable-kv --config ./deno.json --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno ./cli/main.ts ./deno.json ./*/deno.json --changelog",
     "update:commit": "deno task -q update --commit --prefix 'build(deps):'"
@@ -38,7 +38,7 @@
   },
   "lint": {
     "exclude": [
-      "test/cases",
+      "test/fixtures",
       "test/snapshots"
     ],
     "rules": {
