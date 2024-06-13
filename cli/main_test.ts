@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert/assert-equals";
+import { assertEquals, assertStringIncludes } from "@std/assert";
 import { stripAnsiCode } from "@std/fmt/colors";
 import { describe, it } from "@std/testing/bdd";
 import dedent from "dedent";
@@ -246,11 +246,12 @@ describe("CLI", () => {
     );
   });
 
-  // FIXME: The list of files only includes `deno.jsonc`
-  it.ignore("should find updates to a lock file with `--unstable-lock` option", async () => {
-    const { stdout, stderr } = await molt(
+  // FIXME: Abandon the stub for `fetch` to test this feature.
+  it("should find updates to a lock file with `--unstable-lock` option", async () => {
+    const { code, stdout, stderr } = await molt(
       "mod_test.ts --unstable-lock --import-map deno.jsonc --write",
     );
+    assertEquals(code, 1);
     assertEquals(
       stdout,
       dedent`
@@ -265,11 +266,14 @@ describe("CLI", () => {
           deno.lock
 
         💾 deno.jsonc
-        💾 deno.lock
-        💾 mod_test.ts
-        💾 mod.ts
       `,
+    );
+    assertStringIncludes(
       stderr,
+      dedent`
+        Error: Download https://deno.land/x/deno_graph@123.456.789/mod.ts
+        error: Module not found "https://deno.land/x/deno_graph@123.456.789/mod.ts".
+      `,
     );
   });
 });
