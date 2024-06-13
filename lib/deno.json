@@ -1,6 +1,6 @@
 {
   "name": "@molt/lib",
-  "version": "0.18.0",
+  "version": "0.18.5",
   "exports": {
     "./changelog": "./changelog.ts",
     "./path": "./path.ts"
