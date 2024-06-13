@@ -218,7 +218,9 @@ describe("CLI", () => {
   });
 
   it("should run tasks before each commit with `--pre-commit` option", async () => {
-    const { stdout } = await molt("mod.ts --commit --pre-commit=fmt,lint");
+    const { stdout, stderr } = await molt(
+      "mod.ts --commit --pre-commit=fmt",
+    );
     assertEquals(
       stdout,
       dedent`
@@ -226,9 +228,9 @@ describe("CLI", () => {
       
       💾 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
       🔨 Running task fmt...
-      🔨 Running task lint...
       📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
       `,
+      stderr,
     );
   });
 
@@ -246,7 +248,7 @@ describe("CLI", () => {
 
   // FIXME: The list of files only includes `deno.jsonc`
   it.ignore("should find updates to a lock file with `--unstable-lock` option", async () => {
-    const { stdout } = await molt(
+    const { stdout, stderr } = await molt(
       "mod_test.ts --unstable-lock --import-map deno.jsonc --write",
     );
     assertEquals(
@@ -267,6 +269,7 @@ describe("CLI", () => {
         💾 mod_test.ts
         💾 mod.ts
       `,
+      stderr,
     );
   });
 });

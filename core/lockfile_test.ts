@@ -1,3 +1,4 @@
+import { assertEquals, assertObjectMatch } from "@std/assert";
 import {
   collectUpdateFromLockFile,
   createLockPart,
@@ -5,13 +6,12 @@ import {
   parseLockFileJson,
   readLockFile,
 } from "./lockfile.ts";
-import { assertEquals, assertObjectMatch } from "@std/assert";
 
 Deno.test("parseLockFileJson", async () =>
   assertObjectMatch(
     parseLockFileJson(
       await Deno.readTextFile(
-        new URL("../test/cases/lockfile/deno.updated.lock", import.meta.url),
+        new URL("../test/fixtures/lockfile/deno.updated.lock", import.meta.url),
       ),
     ),
     {
@@ -58,7 +58,7 @@ Deno.test("createLockPart - npm:hono", async () => {
 Deno.test("createLockPartForEach", async () => {
   const updated = await createLockPartForEach(
     await readLockFile(
-      new URL("../test/cases/lockfile/deno.lock", import.meta.url),
+      new URL("../test/fixtures/lockfile/deno.lock", import.meta.url),
     ),
   );
   assertEquals(updated.length, 3);
@@ -98,7 +98,7 @@ Deno.test("createLockPartForEach", async () => {
 Deno.test("createLockPartForEach - no updates", async () => {
   const updated = await createLockPartForEach(
     await readLockFile(
-      new URL("../test/cases/lockfile/deno.lock", import.meta.url),
+      new URL("../test/fixtures/lockfile/deno.lock", import.meta.url),
     ),
     false,
   );
@@ -146,7 +146,7 @@ Deno.test("createLockPartForEach - no updates", async () => {
 Deno.test("collectUpdateFromLockFile", async () => {
   const updates = await collectUpdateFromLockFile(
     await readLockFile(
-      new URL("../test/cases/lockfile/deno.lock", import.meta.url),
+      new URL("../test/fixtures/lockfile/deno.lock", import.meta.url),
     ),
   );
   assertEquals(updates.length, 2);
@@ -193,7 +193,7 @@ Deno.test("collectUpdateFromLockFile", async () => {
 Deno.test("collectUpdateFromLockFile - with a patch", async () => {
   const updates = await collectUpdateFromLockFile(
     await readLockFile(
-      new URL("../test/cases/lockfile/deno.lock", import.meta.url),
+      new URL("../test/fixtures/lockfile/deno.lock", import.meta.url),
     ),
     await createLockPart("npm:hono@^3"),
   );
