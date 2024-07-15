@@ -1,3 +1,0 @@
-[submodule "core/import_map"]
-	path = core/import_map
-	url = https://github.com/hasundue/import_map.git

@@ -12,29 +12,30 @@
     "update:commit": "deno task -q update --commit --prefix 'build(deps):'"
   },
   "imports": {
-    "@chiezo/amber": "jsr:@chiezo/amber@^0.0.4",
-    "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.4",
-    "@cliffy/command": "jsr:@cliffy/command@1.0.0-rc.4",
+    "@chiezo/amber": "jsr:@chiezo/amber@^0.0.6",
+    "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.5",
+    "@cliffy/command": "jsr:@cliffy/command@1.0.0-rc.5",
     "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.4.1",
-    "@core/match": "jsr:@core/match@^0.2.5",
-    "@core/unknownutil": "jsr:@core/unknownutil@^3.18.0",
-    "@david/dax": "jsr:@david/dax@^0.40.0",
-    "@deno/graph": "jsr:@deno/graph@^0.73.1",
+    "@core/match": "jsr:@core/match@^0.3.1",
+    "@core/unknownutil": "jsr:@core/unknownutil@^3.18.1",
+    "@david/dax": "jsr:@david/dax@^0.41.0",
+    "@deno/graph": "jsr:@deno/graph@^0.80.1",
     "@lambdalisue/async": "jsr:@lambdalisue/async@^2.1.1",
-    "@molt/core": "jsr:@molt/core@^0.18.4",
+    "@molt/core": "jsr:@molt/core@^0.18.5",
     "@molt/integration": "jsr:@molt/integration@^0.18.0",
-    "@molt/lib": "jsr:@molt/lib@^0.18.0",
-    "@octokit/rest": "npm:@octokit/rest@^20.1.0",
-    "@std/assert": "jsr:@std/assert@^0.222.1",
-    "@std/collections": "jsr:@std/collections@^0.222.1",
-    "@std/dotenv": "jsr:@std/dotenv@^0.222.1",
-    "@std/fmt": "jsr:@std/fmt@^0.222.1",
-    "@std/fs": "jsr:@std/fs@^0.222.1",
-    "@std/jsonc": "jsr:@std/jsonc@^0.222.1",
-    "@std/path": "jsr:@std/path@^0.222.1",
-    "@std/semver": "jsr:@std/semver@^0.222.1",
-    "@std/testing": "jsr:@std/testing@^0.222.1",
-    "dedent": "npm:dedent@^1.5.3"
+    "@molt/lib": "jsr:@molt/lib@^0.18.5",
+    "@octokit/rest": "npm:@octokit/rest@^21.0.0",
+    "@std/assert": "jsr:@std/assert@^1.0.0",
+    "@std/collections": "jsr:@std/collections@^1.0.4",
+    "@std/dotenv": "jsr:@std/dotenv@^0.224.2",
+    "@std/fmt": "jsr:@std/fmt@^0.225.6",
+    "@std/fs": "jsr:@std/fs@^0.229.3",
+    "@std/jsonc": "jsr:@std/jsonc@^0.224.3",
+    "@std/path": "jsr:@std/path@^1.0.0",
+    "@std/semver": "jsr:@std/semver@^0.224.3",
+    "@std/testing": "jsr:@std/testing@^0.225.3",
+    "dedent": "npm:dedent@^1.5.3",
+    "x/import_map": "https://deno.land/x/import_map@v0.20.0/mod.ts"
   },
   "lint": {
     "exclude": [
@@ -47,9 +48,6 @@
       ]
     }
   },
-  "exclude": [
-    "core/import_map"
-  ],
   "workspaces": [
     "cli",
     "core",

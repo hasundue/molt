@@ -1,6 +1,6 @@
 import { mapEntries } from "@std/collections/map-entries";
 import { parse as parseJsonc } from "@std/jsonc";
-import { colors } from "@cliffy/ansi";
+import { colors } from "@cliffy/ansi/colors";
 import { ensure, is } from "@core/unknownutil";
 import { findFileUp } from "@molt/lib/path";
 

@@ -3,7 +3,7 @@ import { maxBy } from "@std/collections";
 import { parse as parseJsonc } from "@std/jsonc";
 import { ensure, is } from "@core/unknownutil";
 import { toPath } from "@molt/lib/path";
-import { type ImportMapJson, parseFromJson } from "./import_map/js/mod.ts";
+import { type ImportMapJson, parseFromJson } from "x/import_map";
 import { parse, stringify } from "./dependency.ts";
 
 export type { ImportMapJson };
@@ -88,7 +88,7 @@ export async function readFromJson(
   if (!isImportMapJson(json)) {
     throw new SyntaxError(`${url} does not have a valid import map`);
   }
-  const inner = await parseFromJson(url, json);
+  const inner = await parseFromJson(url, json, { expandImports: true });
 
   return {
     path: toPath(url),

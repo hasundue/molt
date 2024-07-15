@@ -14,5 +14,6 @@
       "*_test.ts",
       "!import_map/js"
     ]
-  }
+  },
+  "imports": {}
 }

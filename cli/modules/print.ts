@@ -1,6 +1,6 @@
 import { distinct, mapNotNullish } from "@std/collections";
 import { relative } from "@std/path";
-import { colors } from "@cliffy/ansi";
+import { colors } from "@cliffy/ansi/colors";
 import type { CollectResult, DependencyUpdate } from "@molt/core";
 
 const { gray, yellow, bold } = colors;
