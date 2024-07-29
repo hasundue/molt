@@ -1,4 +1,4 @@
-import { dirname, fromFileUrl, join, resolve, toFileUrl } from "@std/path";
+import { fromFileUrl, resolve, toFileUrl } from "@std/path";
 
 /**
  * Convert a path to a string URL
@@ -26,32 +26,4 @@ export function toPath(path: string | URL): string {
     return path.startsWith("file:") ? fromFileUrl(path) : path;
   }
   return resolve(path);
-}
-
-/**
- * Recursively searches for file(s) with the specified name in parent directories
- * starting from the given starting directory.
- *
- * @param dir - The path to the directory to start searching from.
- * @param files - The name of the files to search for.
- * @returns The first file path found or undefined if no file was found.
- */
-export async function findFileUp(
-  dir: string | URL,
-  ...files: string[]
-): Promise<string | undefined> {
-  dir = toPath(dir);
-  for (;;) {
-    for await (const dirEntry of Deno.readDir(dir)) {
-      if (files.includes(dirEntry.name)) {
-        return join(dir, dirEntry.name);
-      }
-    }
-    const newDir = dirname(dir);
-    if (newDir === dir) {
-      // reached the system root
-      return undefined;
-    }
-    dir = newDir;
-  }
 }
