@@ -1,5 +1,6 @@
 import { match, placeholder as _ } from "@core/match";
-import type { Dependency } from "@molt/core";
+import type { DependencySpec } from "@molt/core/specs";
+import * as Spec from "@molt/core/specs";
 import type { Repository } from "./repository.ts";
 import * as github from "./github.ts";
 
@@ -129,9 +130,10 @@ export function is(str: string, pkg: Package): boolean {
  * fromDependency(dependency); // { registry: "jsr", scope: "molt", name: "core" }
  * ```
  */
-export function fromDependency(dependency: Dependency): Package | undefined {
-  const { protocol, name } = dependency;
-  return tryParse(protocol + name);
+export function fromDependency(
+  dependency: DependencySpec,
+): Package | undefined {
+  return tryParse(Spec.stringify(dependency, "kind", "name"));
 }
 
 export function resolvePackageRoot(

@@ -1,9 +1,4 @@
-import {
-  assertEquals,
-  assertExists,
-  assertObjectMatch,
-  assertThrows,
-} from "@std/assert";
+import { assertEquals, assertExists, assertThrows } from "@std/assert";
 import {
   fromDependency,
   is,
@@ -14,25 +9,25 @@ import {
 } from "./packages.ts";
 
 Deno.test("parse", () => {
-  assertObjectMatch(
+  assertEquals(
     parse("jsr:@std/collections"),
     {
       registry: "jsr",
       scope: "std",
       name: "collections",
-    } satisfies Package,
+    },
   );
   assertThrows(() => parse("std/collections"));
 });
 
 Deno.test("tryParse", () => {
-  assertObjectMatch(
+  assertEquals(
     tryParse("jsr:@std/collections"),
     {
       registry: "jsr",
       scope: "std",
       name: "collections",
-    } satisfies Package,
+    },
   );
   assertEquals(
     tryParse("std/collections"),
@@ -72,13 +67,13 @@ Deno.test("is", () => {
 
 Deno.test("fromDependency - JSR", () => {
   const result = fromDependency({
-    protocol: "jsr:",
+    kind: "jsr",
     name: "@std/collections",
-    version: "0.200.0",
+    constraint: "0.200.0",
     path: "/fs",
   });
   assertExists(result);
-  assertObjectMatch(
+  assertEquals(
     result,
     {
       registry: "jsr",
@@ -90,9 +85,9 @@ Deno.test("fromDependency - JSR", () => {
 
 Deno.test("fromDependency - deno.land", () => {
   const result = fromDependency({
-    protocol: "https:",
+    kind: "https",
     name: "https://deno.land/std",
-    version: "0.200.0",
+    constraint: "0.200.0",
     path: "/fs/mod.ts",
   });
   assertEquals(result, undefined);

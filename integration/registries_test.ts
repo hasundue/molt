@@ -1,5 +1,6 @@
-import { parse, resolveLatestVersion } from "@molt/core";
-import { assertEquals } from "@std/assert";
+import { tryParse } from "@molt/core/specs";
+import { get as getUpdate } from "@molt/core/updates";
+import { assertEquals, assertFalse } from "@std/assert";
 
 type RegistryTestSpec = [
   name: string,
@@ -45,7 +46,7 @@ const SPECS = [
   ],
   [
     "cdn.skypack.dev",
-    "https://cdn.skypack.dev/preact@10.19.0",
+    "https://cdn.skypack.dev/canvas-confetti@1.9.0",
     false,
   ],
   [
@@ -87,10 +88,13 @@ const SPECS = [
 
 Deno.test("registries", async (t) => {
   for (const spec of SPECS) {
-    const name = "registry - " + spec[0];
-    await t.step(name, async () => {
-      const updated = await resolveLatestVersion(parse(spec[1]));
-      assertEquals(!!updated, spec[2]);
+    await t.step("registry - " + spec[0], async () => {
+      const dep = tryParse(spec[1]);
+      if (!dep) {
+        return assertFalse(spec[2]);
+      }
+      const updated = await getUpdate(dep);
+      assertEquals(!!updated, spec[2], Deno.inspect(updated));
     });
   }
 });
