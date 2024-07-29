@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert/assert-equals";
+import { assertEquals } from "@std/assert";
 import "@std/dotenv/load";
 import { compareCommits, resolvePackageRoot } from "./github.ts";
 import { parse } from "./packages.ts";
