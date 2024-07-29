@@ -4,17 +4,17 @@
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
 > [!WARNING]\
-> Molt is still under active development. The API is not stable yet and may
-> change frequently.
+> The project is still under active development. The API is not stable yet and
+> may change frequently.
 
-Molt is a [Deno] module to bump version strings in import specifiers, like
-[udd], but with different design principles:
+Molt is a project to provide Deno modules and a CLI to manage dependencies in
+Deno projects. Inspired by [udd], but built from scratch with different design
+principles:
 
-**The Deno way** - Molt finds dependencies and checks their latest versions in a
-consistent way as the Deno runtime, with [deno_graph] and [import_map] crates,
-etc.
+**The Deno way** - Internal logics of the Deno runtime are reused as much as
+possible, through the [deno_graph] and [deno_lockfile] crates, etc.
 
-**Module-first** - The core logic is provided as a Deno module, which enables
+**Module-first** - The core features are provided as Deno modules, which enables
 you to write the best scripts for your use cases.
 
 **Git-friendly** - The operations can be easily divided into logical groups for
@@ -22,18 +22,14 @@ subsequent git commits.
 
 ## Features
 
-Molt can check updates to dependencies written in different formats and bump
-their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
+Molt can update to dependencies written in different formats. URL imports,
+`npm:` and `jsr:` specifiers are all supported:
 
-> [!IMPORTANT]\
-> Molt does NOT bump version ranges like `1`, `1.x`, `~1.2.3` and `^1.2.3` in
-> `npm:` and `jrs:` specifiers, but only updates a lockfile.
-
-#### Import specifiers in ES modules
+#### ES modules
 
 ```diff
-- import { assert } from "https://deno.land/std@0.200.0/assert/mod.ts";
-+ import { assert } from "https://deno.land/std@0.218.2/assert/mod.ts";
+- import { copy } from "https://deno.land/std@0.222.0/bytes/copy.ts";
++ import { copy } from "https://deno.land/std@0.224.0/bytes/copy.ts";
 ...
 ```
 
@@ -42,178 +38,64 @@ their versions. URL imports, `npm:` and `jsr:` specifiers are all supported:
 ```diff
   {
     "imports": {
-      "@core/match": "jsr:@core/match@0.1.x",
--     "@std/assert": "jsr:@std/assert@0.200.0",
--     "node-emoji": "npm:node-emoji@2.0.0"
-+     "@std/assert": "jsr:@std/assert@0.218.2",
-+     "node-emoji": "npm:node-emoji@2.1.3"
+-     "std/": "https://deno.land/std@0.222.0/",
++     "std/": "https://deno.land/std@0.224.0/",
+      "@luca/flag": "jsr:@luca/flag@^1.0.0",
+-     "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.3.0"
++     "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.4.0"
     }
   }
 ```
 
 #### Lock files
 
-> [!WARNING]\
-> This is still an experimental feature and may not work as expected. Requires
-> Deno v1.41.0 or later.
-
 ```diff
   {
     "version": "3",
     "packages": {
       "specifiers": {
--       "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.0",
-+       "jsr:@core/match@0.1.x": "jsr:@core/match@0.1.9",
-        "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
+-       "jsr:@luca/flag@^1.0.0": "jsr:@luca/flag@1.0.0",
+-       "npm:@conventional-commits/parser@^0.3.0": "npm:@conventional-commits/parser@0.3.0"
++       "jsr:@luca/flag@^1.0.0": "jsr:@luca/flag@1.0.1",
++       "npm:@conventional-commits/parser@^0.3.0": "npm:@conventional-commits/parser@0.4.1"
       },
       "jsr": {
--       "@core/match@0.1.0": {
--         "integrity": "6f1edfca5215735a12aa2dbd920ead331a501eb5e3ad70cba3b9787610c7bfaf",
-+       "@core/match@0.1.9": {
-+         "integrity": "ceff06cf40212bb720925972a4405bef373efe768690b344ac4fd7ca7189f746",
-          "dependencies": [
-            "npm:ts-toolbelt@9.6.0"
-        ...
+-       "@luca/flag@1.0.0": {
+-         "integrity": "1c76cf54839a86d0929a619c61bd65bb73d7d8a4e31788e48c720dbc46c5d546"
++       "@luca/flag@1.0.1": {
++         "integrity": "dce7eb4159b1bdb1606fe05c2e5388dcff5ae3b0b84184b934bc623143742408"
+        }
+      },
+      ...
 ```
 
-## Usage
-
-### [@molt/core]
-
-#### [API Reference](https://deno.land/x/molt/mod.ts)
-
-#### Examples
-
-##### Update all dependencies in a module and write the changes to local files
-
-```ts
-import { collect, write } from "jsr:@molt/core";
-
-const updates = await collect("./mod.ts");
-await write(updates);
-```
-
-##### Update all dependencies in a module and commit the changes to git
-
-```ts
-import { collect, commit } from "jsr:@molt/core";
-
-const updates = await collect("./mod.ts");
-
-await commit(updates, {
-  groupBy: (dependency) => dependency.name,
-  composeCommitMessage: ({ group, version }) =>
-    `build(deps): bump ${group} to ${version!.to}`,
-});
-```
+## Packages
 
 ### [@molt/cli]
 
-Although it is encouraged to write your own scripts, a pre-built CLI tool is
-also provided for convenience or as a reference implementation, which is
-supposed to cover most of the use cases.
+A CLI to check updates to dependencies in Deno modules or a configuration file.
 
-#### Installation (optional)
+### [@molt/core]
 
-The molt CLI can be installed globally with the following command, for example:
+Deno modules to collect and manipulate dependencies and updates.
 
-```sh
-deno install --global --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
---name molt jsr:@molt/cli
-```
+### [@molt/integration]
 
-Alternatively, you may prefer to run the remote script directly through
-`deno task` for better security or reproducibility:
+Modules to integrate Molt with thrid-party platforms.
 
-```json
-{
-  "tasks": {
-    "update": "deno run --allow-env --allow-read --allow-write=. --allow-run=git,deno --allow-net=jsr.io,registry.npmjs.org jsr:@molt/cli ./*.ts",
-    "update:commit": "deno task -q update --commit --pre-commit=fmt,lint"
-  }
-}
-```
+### [@molt/lib]
 
-#### Usage
-
-```
-> molt --help
-Usage: molt <modules...>
-
-Description:
-
-  Check updates to dependencies in Deno modules and configuration files
-
-Options:
-
-  -h, --help                       - Show this help.                                                                         
-  -v, --version                    - Print version info                                                                      
-  -w, --write                      - Write changes to local files                        (Conflicts: --commit)               
-  -c, --commit                     - Commit changes to local git repository              (Conflicts: --write)                
-  --changelog      [commit_types]  - Show a curated changelog for each update                                                
-  --debug                          - Print debug information                                                                 
-  --import-map     <file>          - Specify import map file                                                                 
-  --ignore         <deps>          - Ignore dependencies                                                                     
-  --no-resolve                     - Do not resolve local imports                                                         
-  --only           <deps>          - Check specified dependencies                                                            
-  --pre-commit     <tasks>         - Run tasks before each commit                        (Depends: --commit)                 
-  --prefix         <prefix>        - Prefix for commit messages                          (Depends: --commit)                 
-  --prefix-lock    <prefix>        - Prefix for commit messages of updating a lock file  (Depends: --commit, --unstable-lock)
-  --unstable-lock  [file]          - Enable unstable updating of a lock file
-```
-
-> [!Note]\
-> Molt CLI automatically finds `deno.json` or `deno.jsonc` in the current
-> working directory or its parent directories and uses import maps defined in
-> the file if available.
-
-#### Examples
-
-##### Check for updates
-
-```sh
-> molt deno.json
-📦 @luca/flag 1.0.0 => 1.1.0
-📦 deno.land/std 0.200.0 => 0.218.2
-📦 deno.land/x/deno_graph 0.50.0 => 0.69.7
-📦 node-emoji 2.0.0 => 2.1.3
-```
-
-You may specify the modules to check, alternatively:
-
-```sh
-> molt main.ts main_test.ts
-    ...
-```
-
-##### Write changes to files
-
-```sh
-> molt deno.json --write
-    ...
-💾 deno.json
-```
-
-##### Commit changes to git
-
-```sh
-> molt deno.json --commit --prefix :package:
-    ...
-📝 :package: bump @luca/flag from 1.0.0 to 1.1.0
-📝 :package: bump deno.land/std from 0.200.0 to 0.218.2
-📝 :package: bump deno.land/x/deno_graph from 0.50.0 to 0.69.7
-📝 :package: bump node-emoji from 2.0.0 to 2.1.3
-```
+General-purpose utilities developed for Molt, but may be used independently.
 
 ## Compatibility with registries
 
 We check compatibility with various registries in
-[an integration test](./test/integration/registries.ts).
+[an integration test](./integration/registries_test.ts).
 
 ### Deno's official registries
 
-Molt offers first-class support for the following registries, which means that
-we may implement registry-specific routines for them:
+Molt offers first-class support for the following registries, implementing
+registry-specific routines for them:
 
 - [x] [deno.land/std](https://deno.land/std)
 - [x] [deno.land/x](https://deno.land/x)
@@ -238,19 +120,6 @@ The following registries are not compatible with Molt:
 - [raw.githubusercontent.com](https://github.com)
 - [x.nest.land](https://x.nest.land)
 
-## How it works
-
-TBW
-
-## Limitations
-
-The following limitations are imposed by the design of Molt:
-
-- Version constraints on URL imports are not supported.
-- Dependencies in import specifiers are only targeted.
-
-See [issues] for other known limitations.
-
 ## References
 
 Molt is inspired by prior works such as
@@ -266,8 +135,11 @@ and of full respect to the authors.
 [Deno]: https://deno.land
 [deno_graph]: https://github.com/denoland/deno_graph
 [import_map]: https://github.com/denoland/import_map
+[deno_lockfile]: https://github.com/denoland/deno_lockfile
 [udd]: https://github.com/hayd/deno-udd
-[@molt/core]: https://jsr.io/@molt/core
 [@molt/cli]: https://jsr.io/@molt/cli
+[@molt/core]: https://jsr.io/@molt/core
+[@molt/integration]: https://jsr.io/@molt/integration
+[@molt/lib]: https://jsr.io/@molt/lib
 [issues]: https://github.com/hasundue/molt/issues
 [dependabot]: https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#versioning-strategy
