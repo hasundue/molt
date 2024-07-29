@@ -1,110 +1,113 @@
 import { Command } from "@cliffy/command";
 import $ from "@david/dax";
+import { collect } from "@molt/core";
+import type { Update } from "@molt/core/types";
+
+import { printChangelog } from "./src/changelog.ts";
+import { findConfig, findLock, findSource } from "./src/files.ts";
+import { runTasks } from "./src/tasks.ts";
+import { print, printRefs } from "./src/updates.ts";
 
 const main = new Command()
   .name("molt")
-  .description(
-    "Check updates to dependencies in Deno modules and configuration files",
-  )
-  .versionOption("-v, --version", "Print version info", versionCommand)
-  .option("-w, --write", "Write changes to local files", {
+  .description("Check updates to dependencies in a Deno project.")
+  .versionOption("-v, --version", "Print version info.", version)
+  .option("-w, --write", "Write changes to the local files.", {
     conflicts: ["commit"],
   })
-  .option("-c, --commit", "Commit changes to local git repository", {
+  .option("-c, --commit", "Commit changes to the local git repository.", {
     conflicts: ["write"],
   })
   .option(
-    "--changelog=[commit_types:string[]]",
-    "Show a curated changelog for each update",
+    "--changelog=[types:string[]]",
+    "Print a curated changelog for each update.",
   )
-  .option("--debug", "Print debug information")
-  .option("--import-map <file:string>", "Specify import map file")
-  .option("--ignore=<deps:string[]>", "Ignore dependencies")
-  .option("--no-resolve", "Do not resolve local imports")
-  .option("--only=<deps:string[]>", "Check specified dependencies")
+  .option("--config <file:string>", "Specify the Deno configuration file.")
+  .option("--dry-run", "See what would happen without actually doing it.")
+  .option("--ignore <pattern:string>", "Specify dependencies to ignore.")
+  .option("--only <pattern:string>", "Specify dependencies to check.")
+  .option("--lock <file:string>", "Specify the lock file.")
+  .option("--no-config", "Disable automatic loading of the configuration file.")
+  .option("--no-lock", "Disable automatic loading of the lock file.")
   .option("--pre-commit=<tasks:string[]>", "Run tasks before each commit", {
     depends: ["commit"],
   })
   .option("--prefix <prefix:string>", "Prefix for commit messages", {
     depends: ["commit"],
   })
-  .option(
-    "--prefix-lock <prefix:string>",
-    "Prefix for commit messages of updating a lock file",
-    { depends: ["commit", "unstable-lock"] },
-  )
-  .option(
-    "--unstable-lock [file:string]",
-    "Enable unstable updating of a lock file",
-  )
-  .arguments("<modules...:string>")
-  .action(async function (options, ...files) {
-    if (
-      options.importMap && await $.path(options.importMap).exists() === false
-    ) {
-      throw new Error(`Import map ${options.importMap} does not exist.`);
-    }
-    ensureFiles(files);
-    const updates = await import("./modules/collect.ts").then((mod) =>
-      mod.default(files, options)
-    );
-    await import("./modules/print.ts").then((mod) =>
-      mod.default(files, updates, options)
-    );
-    if (options.write) {
-      await import("./modules/write.ts").then((mod) => mod.default(updates));
-    }
-    if (options.commit) {
-      const tasks = await import("./modules/tasks.ts").then((mod) =>
-        mod.getTasks()
-      );
-      const { filterKeys } = await import("@std/collections/filter-keys");
-      await import("./modules/commit.ts").then((mod) =>
-        mod.default(updates, {
-          ...options,
-          preCommit: filterKeys(
-            tasks,
-            (key) => options.preCommit?.includes(key) ?? false,
-          ),
-        })
-      );
-    }
-  });
+  .option("--referrer", "Print files that import the dependency.")
+  .arguments("[source...:string]");
 
-async function versionCommand() {
+async function version() {
   const { default: configs } = await import("./deno.json", {
     with: { type: "json" },
   });
   console.log(configs.version);
 }
 
-function ensureFiles(paths: string[]) {
-  for (const path of paths) {
-    try {
-      if (!Deno.statSync(path).isFile) {
-        throw new Error(`Not a valid file: "${path}"`);
-      }
-    } catch {
-      throw new Error(`Path does not exist: "${path}"`);
-    }
-  }
-}
+main.action(async function (options, ...source) {
+  const config = options.config === false
+    ? undefined
+    : options.config ?? await findConfig();
 
-if (import.meta.main) {
-  const debug = Deno.args.includes("--debug");
-  try {
-    const env = await Deno.permissions.query({ name: "env" });
-    if (env.state === "granted" && Deno.env.get("MOLT_TEST")) {
-      (await import("./modules/testing.ts")).default();
-    }
-    await main.parse(Deno.args);
-  } catch (error) {
-    if (debug) {
-      throw error;
-    }
-    if (error.message) {
-      console.error("Error: " + error.message);
-    }
-    Deno.exit(1);
+  const lock = options.lock === false
+    ? undefined
+    : options.lock ?? await findLock();
+
+  source = source.length ? source : config ? [] : await findSource();
+
+  if (options.dryRun) {
+    const paths = [config, lock, ...source].filter((it) => it != null);
+    await import("./src/mock.ts").then((m) => m.mock(paths));
   }
-}
+
+  const deps = await $.progress("Collecting dependencies").with(
+    () => collect({ config, lock, source }),
+  );
+  const filtered = deps
+    .filter((dep) => options.only ? dep.name.match(options.only) : true)
+    .filter((dep) => options.ignore ? !dep.name.match(options.ignore) : true);
+
+  const updates = (await $.progress("Fetching updates").with(() =>
+    Promise.all(filtered.map((dep) =>
+      dep.check()
+    ))
+  )).filter((u) => u != null).sort(compare);
+
+  for (const update of updates) {
+    print(update);
+    if (options.referrer) {
+      printRefs(update);
+    }
+    if (options.changelog) {
+      await $.progress("Fetching changelog").with(() =>
+        printChangelog(update, options)
+      );
+    }
+  }
+
+  if (options.write) {
+    await $.progress("Writing changes").with(async () => {
+      for (const update of updates) {
+        await update.write();
+      }
+    });
+  }
+
+  if (options.commit) {
+    for (const update of updates) {
+      const message = update.summary(options.prefix);
+      await $.progress(`Committing ${message}`).with(async () => {
+        await update.write();
+        if (options.preCommit) {
+          await runTasks(options.preCommit, config);
+        }
+        await update.commit(message);
+      });
+    }
+  }
+});
+
+const compare = (a: Update, b: Update) => a.dep.name.localeCompare(b.dep.name);
+
+await main.parse(Deno.args);

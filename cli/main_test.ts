@@ -1,11 +1,8 @@
-import { assertEquals, assertStringIncludes } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { stripAnsiCode } from "@std/fmt/colors";
+import { fromFileUrl } from "@std/path";
 import { describe, it } from "@std/testing/bdd";
 import dedent from "dedent";
-
-const BIN = new URL("./main.ts", import.meta.url).pathname;
-const DIR = new URL("../test/fixtures", import.meta.url).pathname;
-const CONFIG = new URL("../deno.json", import.meta.url).pathname;
 
 interface CommandResult {
   code: number;
@@ -15,14 +12,16 @@ interface CommandResult {
 
 async function molt(argstr: string): Promise<CommandResult> {
   const args = argstr.split(" ").filter((it) => it.length);
+  const main = fromFileUrl(new URL("./main.ts", import.meta.url));
+
   const { code, stderr, stdout } = await new Deno.Command("deno", {
-    args: ["run", "-A", "--unstable-kv", "--config", CONFIG, BIN, ...args],
-    env: { MOLT_TEST: "1" },
-    cwd: DIR,
+    args: ["run", "-A", main, "--dry-run", ...args],
+    cwd: new URL("./fixtures", import.meta.url),
   }).output();
-  const decoder = new TextDecoder();
+
   const format = (bytes: Uint8Array) =>
-    stripAnsiCode(decoder.decode(bytes)).trim();
+    stripAnsiCode(new TextDecoder().decode(bytes)).trim();
+
   return {
     code,
     stderr: format(stderr),
@@ -31,248 +30,143 @@ async function molt(argstr: string): Promise<CommandResult> {
 }
 
 describe("CLI", () => {
-  it("should error without arguments", async () => {
-    const { code, stderr } = await molt("");
-    assertEquals(code, 2);
-    assertEquals(stderr, "error: Missing argument(s): modules");
-  });
-
-  it("should print the version", async () => {
-    const { stdout } = await molt("--version");
-    const { default: config } = await import("./deno.json", {
-      with: { type: "json" },
-    });
-    assertEquals(stdout, config.version);
-  });
-
-  it("should find updates from `deno.jsonc`", async () => {
-    const { stdout } = await molt("deno.jsonc");
+  it("should find updates in `deno.json` by default", async () => {
+    const { stderr, stdout } = await molt("");
     assertEquals(
       stdout,
       dedent`
-        📦 @octokit/core 6.1.0 => 123.456.789
-        📦 @std/assert 0.222.0 => 123.456.789
-        📦 @std/bytes  => 123.456.789
-        📦 @std/testing 0.222.0 => 123.456.789
-        📦 deno.land/std 0.222.0,  => 123.456.789
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
       `,
-    );
-  });
-
-  it("should update `deno.jsonc`", async () => {
-    const { code, stdout } = await molt("deno.jsonc --write");
-    assertEquals(code, 0);
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @octokit/core 6.1.0 => 123.456.789
-        📦 @std/assert 0.222.0 => 123.456.789
-        📦 @std/bytes  => 123.456.789
-        📦 @std/testing 0.222.0 => 123.456.789
-        📦 deno.land/std 0.222.0,  => 123.456.789
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-
-        💾 deno.jsonc
-      `,
-    );
-  });
-
-  it("should commit changes to `deno.jsonc`", async () => {
-    const { code, stdout } = await molt("deno.jsonc --commit");
-    assertEquals(code, 0);
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @octokit/core 6.1.0 => 123.456.789
-        📦 @std/assert 0.222.0 => 123.456.789
-        📦 @std/bytes  => 123.456.789
-        📦 @std/testing 0.222.0 => 123.456.789
-        📦 deno.land/std 0.222.0,  => 123.456.789
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-
-        📝 bump @octokit/core from 6.1.0 to 123.456.789
-        📝 bump @std/assert from 0.222.0 to 123.456.789
-        📝 bump @std/bytes to 123.456.789
-        📝 bump @std/testing from 0.222.0 to 123.456.789
-        📝 bump deno.land/std from 0.222.0 to 123.456.789
-        📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-      `,
-    );
-  });
-
-  it("should find updates to mod_test.ts", async () => {
-    // FIXME: We must pass `--import-map` explicitly because `@chiezo/amber`
-    // does not support `Deno.readDir` yet, which is called by `findFileUp`.
-    const { stdout } = await molt("mod_test.ts --import-map deno.jsonc");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-          mod_test.ts
-        📦 @std/testing 0.222.0 => 123.456.789
-          deno.jsonc
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-          mod.ts
-      `,
-    );
-  });
-
-  it("should write updates collected from mod_test.ts", async () => {
-    const { code, stdout } = await molt(
-      "mod_test.ts --import-map deno.jsonc --write",
-    );
-    assertEquals(code, 0);
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-          mod_test.ts
-        📦 @std/testing 0.222.0 => 123.456.789
-          deno.jsonc
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-          mod.ts
-
-        💾 deno.jsonc
-        💾 mod_test.ts
-        💾 mod.ts
-      `,
-    );
-  });
-
-  it("should commit updates collected from mod_test.ts", async () => {
-    const { code, stdout } = await molt(
-      "mod_test.ts --import-map deno.jsonc --commit",
-    );
-    assertEquals(code, 0);
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-          mod_test.ts
-        📦 @std/testing 0.222.0 => 123.456.789
-          deno.jsonc
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-          mod.ts
-
-        📝 bump @std/assert from 0.222.0 to 123.456.789
-        📝 bump @std/testing from 0.222.0 to 123.456.789
-        📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-      `,
-    );
-  });
-
-  it("should ignore dependencies with `--ignore` option", async () => {
-    const { stdout } = await molt("deno.jsonc --ignore std");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @octokit/core 6.1.0 => 123.456.789
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-      `,
-    );
-  });
-
-  it("should accept multiple entries for `--ignore` option", async () => {
-    const { stdout } = await molt("deno.jsonc --ignore=std,octokit");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-      `,
-    );
-  });
-
-  it("should filter updates with `--only` option", async () => {
-    const { stdout } = await molt("deno.jsonc --only std");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-        📦 @std/bytes  => 123.456.789
-        📦 @std/testing 0.222.0 => 123.456.789
-        📦 deno.land/std 0.222.0,  => 123.456.789
-      `,
-    );
-  });
-
-  it("should accept multiple entries for `--only` option", async () => {
-    const { stdout } = await molt("deno.jsonc --only=octokit,deno_graph");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @octokit/core 6.1.0 => 123.456.789
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-      `,
-    );
-  });
-
-  it("should not resolve local imports with `--no-resolve` option", async () => {
-    const { stdout } = await molt("mod_test.ts --no-resolve");
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-      `,
-    );
-  });
-
-  it("should run tasks before each commit with `--pre-commit` option", async () => {
-    const { stdout, stderr } = await molt(
-      "mod.ts --commit --pre-commit=fmt",
     );
     assertEquals(
-      stdout,
-      dedent`
-      📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-      
-      💾 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-      🔨 Running task fmt...
-      📝 bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-      `,
-      stderr,
-    );
-  });
-
-  it("should prefix commit messages with `--prefix` option", async () => {
-    const { stdout } = await molt("mod.ts --commit --prefix=chore:");
-    assertEquals(
-      stdout,
-      dedent`
-      📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-      
-      📝 chore: bump deno.land/x/deno_graph from 0.50.0 to 123.456.789
-      `,
-    );
-  });
-
-  // FIXME: Abandon the stub for `fetch` to test this feature.
-  it("should find updates to a lock file with `--unstable-lock` option", async () => {
-    const { code, stdout, stderr } = await molt(
-      "mod_test.ts --unstable-lock --import-map deno.jsonc --write",
-    );
-    assertEquals(code, 1);
-    assertEquals(
-      stdout,
-      dedent`
-        📦 @std/assert 0.222.0 => 123.456.789
-          mod_test.ts
-          deno.lock
-        📦 @std/testing 0.222.0 => 123.456.789
-          deno.jsonc
-          deno.lock
-        📦 deno.land/x/deno_graph 0.50.0 => 123.456.789
-          mod.ts
-          deno.lock
-
-        💾 deno.jsonc
-      `,
-    );
-    assertStringIncludes(
       stderr,
       dedent`
-        Error: Download https://deno.land/x/deno_graph@123.456.789/mod.ts
-        error: Module not found "https://deno.land/x/deno_graph@123.456.789/mod.ts".
+        Collecting dependencies
+        Fetching updates
+      `,
+    );
+  });
+
+  it("should update `deno.json` with `--write`", async () => {
+    const { stderr, stdout } = await molt("--write");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+    assertEquals(
+      stderr,
+      dedent`
+        Collecting dependencies
+        Fetching updates
+        Writing changes
+      `,
+    );
+  });
+
+  it("should commit updates with `--commit`", async () => {
+    const { stderr, stdout } = await molt("--commit --prefix chore:");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+    assertEquals(
+      stderr,
+      dedent`
+        Collecting dependencies
+        Fetching updates
+        Committing chore: bump @conventional-commits/parser to 0.4.1
+        Committing chore: bump @luca/flag from 1.0.0 to 1.0.1
+        Committing chore: bump deno.land/std from 0.222.0 to 0.224.0
+      `,
+    );
+  });
+
+  it("should find the same updates with `--lock deno.lock`", async () => {
+    const { stdout } = await molt("--lock deno.lock");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+  });
+
+  it("should only find updates to constraints with `--no-lock`", async () => {
+    const { stdout } = await molt("--no-lock");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser ^0.3.0 →  ^0.4.0
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+  });
+
+  it("should filter dependencies with `--only`", async () => {
+    const { stdout } = await molt("--only flag");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @luca/flag 1.0.0 →  1.0.1
+      `,
+    );
+  });
+
+  it("should filter out dependencies with `--ignore`", async () => {
+    const { stdout } = await molt("--ignore flag");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+  });
+
+  it("should find updates in modules with `--no-config`", async () => {
+    const { stdout } = await molt("--no-config");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+  });
+
+  it("should find updates in the specified module", async () => {
+    const { stdout } = await molt("--no-config mod.ts");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
+      `,
+    );
+  });
+
+  it("should also find updates in modules with `--no-config` and `--no-lock`", async () => {
+    const { stdout } = await molt("--no-config --no-lock");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser 0.3.0 →  0.4.1
+        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 deno.land/std 0.222.0 →  0.224.0
       `,
     );
   });

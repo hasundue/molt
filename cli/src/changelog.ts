@@ -2,21 +2,29 @@ import { minWith } from "@std/collections";
 import { curateChangeLog } from "@molt/lib/changelog";
 import {
   compareCommits,
-  fromDependency,
   resolveCreatedDate,
   resolvePackageRoot,
   resolveRepository,
+  tryParse,
 } from "@molt/integration";
-import type { Dependency, UpdatedDependency } from "@molt/core";
+import type { Update } from "@molt/core/types";
+import * as SemVer from "@std/semver";
 
-export default async function (
-  updated: UpdatedDependency,
-  froms: Dependency[],
+export async function printChangelog(
+  update: Update,
   options: {
     changelog?: true | string[];
   },
 ) {
-  const pkg = fromDependency(updated);
+  const bump = update.lock ?? update.constraint!;
+  // Can't provide a changelog for a non-semver update
+  if (!SemVer.tryParse(bump.to)) {
+    return "";
+  }
+  const froms = bump.from.split(", ");
+  const to = bump.to;
+
+  const pkg = tryParse(update.dep.specifier);
   if (!pkg) {
     // Can't provide a changelog for a non-package dependency
     return;
@@ -25,28 +33,29 @@ export default async function (
   if (!repo) {
     return;
   }
+
   /** A map of dependency names to the created date of the oldest update */
   const dates = new Map<string, number>();
-  await Promise.all(
-    froms.map(async (it) => {
-      dates.set(name, await resolveCreatedDate(pkg, it.version!));
-    }),
-  );
+  await Promise.all(froms.map(async (it) => {
+    dates.set(it, await resolveCreatedDate(pkg, it));
+  }));
   /** The oldest update from which to fetch commit logs */
   const oldest = minWith(
     froms,
-    (a, b) => Math.sign(dates.get(a.name)! - dates.get(b.name)!),
+    (a, b) => Math.sign(dates.get(a)! - dates.get(b)!),
   );
   if (!oldest) {
     // The dependency was newly added in this update
     return;
   }
-  const messages = await compareCommits(
-    repo,
-    oldest.version!,
-    updated.version,
-  );
-  const root = await resolvePackageRoot(repo, pkg, updated.version);
+  const messages: string[] = [];
+  try {
+    // The refs might not exist
+    messages.push(...await compareCommits(repo, oldest, to));
+  } catch {
+    return;
+  }
+  const root = await resolvePackageRoot(repo, pkg, to);
   if (!root) {
     // The package seems to be generated dynamically on publish
     return;
@@ -59,7 +68,7 @@ export default async function (
   });
   for (const [type, records] of Object.entries(changelog)) {
     for (const record of records) {
-      console.log(` ${type}: ${record.text}`);
+      console.log(`    ${type}: ${record.text}`);
     }
   }
 }

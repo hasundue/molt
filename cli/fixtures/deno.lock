@@ -1,0 +1,55 @@
+{
+  "version": "3",
+  "packages": {
+    "specifiers": {
+      "jsr:@luca/flag@^1.0.0": "jsr:@luca/flag@1.0.0",
+      "npm:@conventional-commits/parser@^0.3.0": "npm:@conventional-commits/parser@0.3.0"
+    },
+    "jsr": {
+      "@luca/flag@1.0.0": {
+        "integrity": "1c76cf54839a86d0929a619c61bd65bb73d7d8a4e31788e48c720dbc46c5d546"
+      }
+    },
+    "npm": {
+      "@conventional-commits/parser@0.3.0": {
+        "integrity": "sha512-d4zk0gf9hQAILHE1pXWuIuqM/OBsvcOxcUgGZN4PQkIXQWvjbFOkoSv6HztKFEqfZEY95fe85XqBWLWqWtaW6g==",
+        "dependencies": {
+          "unist-util-visit": "unist-util-visit@2.0.3",
+          "unist-util-visit-parents": "unist-util-visit-parents@3.1.1"
+        }
+      },
+      "@types/unist@2.0.10": {
+        "integrity": "sha512-IfYcSBWE3hLpBg8+X2SEa8LVkJdJEkT2Ese2aaLs3ptGdVtABxndrMaxuFlQ1qdFf9Q5rDvDpxI3WwgvKFAsQA==",
+        "dependencies": {}
+      },
+      "unist-util-is@4.1.0": {
+        "integrity": "sha512-ZOQSsnce92GrxSqlnEEseX0gi7GH9zTJZ0p9dtu87WRb/37mMPO2Ilx1s/t9vBHrFhbgweUwb+t7cIn5dxPhZg==",
+        "dependencies": {}
+      },
+      "unist-util-visit-parents@3.1.1": {
+        "integrity": "sha512-1KROIZWo6bcMrZEwiH2UrXDyalAa0uqzWCxCJj6lPOvTve2WkfgCytoDTPaMnodXh1WrXOq0haVYHj99ynJlsg==",
+        "dependencies": {
+          "@types/unist": "@types/unist@2.0.10",
+          "unist-util-is": "unist-util-is@4.1.0"
+        }
+      },
+      "unist-util-visit@2.0.3": {
+        "integrity": "sha512-iJ4/RczbJMkD0712mGktuGpm/U4By4FfDonL7N/9tATGIF4imikjOuagyMY53tnZq3NP6BcmlrHhEKAfGWjh7Q==",
+        "dependencies": {
+          "@types/unist": "@types/unist@2.0.10",
+          "unist-util-is": "unist-util-is@4.1.0",
+          "unist-util-visit-parents": "unist-util-visit-parents@3.1.1"
+        }
+      }
+    }
+  },
+  "remote": {
+    "https://deno.land/std@0.222.0/bytes/copy.ts": "f29c03168853720dfe82eaa57793d0b9e3543ebfe5306684182f0f1e3bfd422a"
+  },
+  "workspace": {
+    "dependencies": [
+      "jsr:@luca/flag@^1.0.0",
+      "npm:@conventional-commits/parser@^0.3.0"
+    ]
+  }
+}
