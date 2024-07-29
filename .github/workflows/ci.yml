@@ -6,11 +6,15 @@ on:
       - main
     paths-ignore:
       - '**.md'
+      - '**.yml'
+      - '!.github/workflows/ci.yml'
   pull_request:
     branches:
       - main
     paths-ignore:
       - '**.md'
+      - '**.yml'
+      - '!.github/workflows/ci.yml'
 
 permissions:
   contents: read
