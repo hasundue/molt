@@ -53,6 +53,17 @@ describe("collect", () => {
     ]);
   });
 
+  it("should ignore relative imports in an ES module", async () => {
+    await Deno.writeTextFile(
+      "a.ts",
+      dedent`
+        import { assert } from "./assert.ts";
+      `,
+    );
+    const actual = await collect("a.ts");
+    assertEquals(actual, []);
+  });
+
   it("should collect dependencies from an import map", async () => {
     await Deno.writeTextFile(
       "a.json",
@@ -139,6 +150,21 @@ describe("collect", () => {
         },
       },
     ]);
+  });
+
+  it("should ignore relative imports in an import map", async () => {
+    await Deno.writeTextFile(
+      "a.json",
+      dedent`
+        {
+          "imports": {
+            "assert": "./assert.ts",
+          }
+        }
+      `,
+    );
+    const actual = await collect("a.json");
+    assertEquals(actual, []);
   });
 });
 

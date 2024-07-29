@@ -90,22 +90,28 @@ async function fromImportMap(
 ): Promise<DependencyRef<"import_map">[]> {
   const json = await readImportMapJson(path);
 
-  const refs: DependencyRef<"import_map">[] = Object.entries(json.imports ?? {})
-    .map((
-      [key, value],
-    ) => ({
+  const refs: DependencyRef<"import_map">[] = [];
+
+  Object.entries(json.imports ?? {}).forEach(([key, value]) => {
+    const dep = tryParse(value);
+    if (!dep) return;
+    refs.push({
       dependency: parse(value),
       source: { path, kind: "import_map", key },
-    }));
+    });
+  });
 
   Object.entries(json.scopes ?? {}).forEach(([scope, imports]) =>
-    refs.push(
-      ...Object.entries(imports).map(([key, value]) => ({
+    Object.entries(imports).map(([key, value]) => {
+      const dep = tryParse(value);
+      if (!dep) return;
+      refs.push({
         dependency: parse(value),
         source: { path, kind: "import_map", key, scope },
-      } as DependencyRef<"import_map">)),
-    )
+      });
+    })
   );
+
   return refs;
 }
 
