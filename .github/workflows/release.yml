@@ -18,6 +18,30 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Setup actions/cache for Deno
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/deno
+          key: ubuntu-latest-deno-${{ hashFiles('./deno.lock') }}
+          restore-keys: ubuntu-latest-deno
+
+      - name: Setup actions/cache for Cargo
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo
+            ./core/deno_lockfile/target
+          key: ubuntu-latest-cargo-${{ hashFiles('./**/Cargo.lock') }}
+          restore-keys: ubuntu-latest-cargo
+
+      - name: Build core/deno_lockfile
+        run: |
+          cd core/deno_lockfile
+          deno task build
 
       - name: Publish packages to JSR
         run: npx jsr publish
