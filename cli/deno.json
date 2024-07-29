@@ -1,17 +1,17 @@
 {
   "name": "@molt/cli",
-  "version": "0.18.5",
+  "version": "0.19.0-rc.9",
   "exports": {
     ".": "./main.ts"
   },
   "publish": {
     "include": [
       "deno.json",
-      "*.ts",
-      "modules/*.ts"
+      "main.ts",
+      "src/*.ts"
     ],
     "exclude": [
-      "*_test.ts"
+      "**/*_test.ts"
     ]
   }
 }

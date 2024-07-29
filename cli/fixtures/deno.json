@@ -1,0 +1,7 @@
+{
+  "imports": {
+    "std/": "https://deno.land/std@0.222.0/",
+    "@luca/flag": "jsr:@luca/flag@^1.0.0",
+    "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.3.0"
+  }
+}
