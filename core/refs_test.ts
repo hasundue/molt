@@ -64,6 +64,49 @@ describe("collect", () => {
     assertEquals(actual, []);
   });
 
+  it("should pick `@deno-types` dependencies from an ES module", async () => {
+    await Deno.writeTextFile(
+      "a.ts",
+      dedent`
+        // @ts-types="npm:@types/foo@1.2.3"
+        import { foo } from "npm:foo@1.2.3";
+      `,
+    );
+    const actual = await collect("a.ts");
+    assertEquals(actual, [
+      {
+        dependency: {
+          kind: "npm",
+          name: "@types/foo",
+          constraint: "1.2.3",
+        },
+        source: {
+          kind: "esm",
+          path: "a.ts",
+          span: {
+            start: { line: 0, character: 13 },
+            end: { line: 0, character: 35 },
+          },
+        },
+      },
+      {
+        dependency: {
+          kind: "npm",
+          name: "foo",
+          constraint: "1.2.3",
+        },
+        source: {
+          kind: "esm",
+          path: "a.ts",
+          span: {
+            start: { line: 1, character: 20 },
+            end: { line: 1, character: 35 },
+          },
+        },
+      },
+    ]);
+  });
+
   it("should collect dependencies from an import map", async () => {
     await Deno.writeTextFile(
       "a.json",
