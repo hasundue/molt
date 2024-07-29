@@ -21,6 +21,9 @@ jobs:
         with:
           submodules: true
 
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+
       - name: Setup actions/cache for Deno
         uses: actions/cache@v4
         with:
