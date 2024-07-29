@@ -1,7 +1,7 @@
 import { init, parseModule } from "@deno/graph";
 import type { DependencyJson } from "@deno/graph/types";
 import { toUrl } from "@molt/lib/path";
-import { distinct, mapNotNullish } from "@std/collections";
+import { distinct } from "@std/collections";
 import { detect, EOL, format } from "@std/fs/eol";
 import { extname } from "@std/path";
 import { type DependencySpec, parse, stringify, tryParse } from "./specs.ts";
@@ -63,26 +63,27 @@ async function fromEsModule(
 ): Promise<DependencyRef<"esm">[]> {
   await init();
   const mod = await parseModule(toUrl(path), await Deno.readFile(path));
-  return mapNotNullish(
-    mod.dependencies ?? [],
+  return (mod.dependencies ?? []).flatMap(
     (json) => fromDependencyJson(path, json),
-  ).sort(compare);
+  );
 }
 
 function fromDependencyJson(
   path: string | URL,
   json: DependencyJson,
-): DependencyRef<"esm"> | undefined {
-  const dependency = tryParse(json.specifier);
-  if (!dependency) return;
-
-  const { span } = json.code ?? json.type ?? {};
-  if (span && json.assertionType !== "json") {
-    return {
-      dependency,
-      source: { path, kind: "esm", span },
-    };
+): DependencyRef<"esm">[] {
+  const refs: DependencyRef<"esm">[] = [];
+  for (const dep of [json.code, json.type]) {
+    if (!dep) continue;
+    const { span, specifier } = dep;
+    if (span && specifier) {
+      const dependency = tryParse(specifier);
+      if (dependency) {
+        refs.push({ dependency, source: { path, kind: "esm", span } });
+      }
+    }
   }
+  return refs;
 }
 
 async function fromImportMap(
