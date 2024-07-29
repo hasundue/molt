@@ -2,11 +2,8 @@ import { assertEquals } from "@std/assert";
 import { describe, it } from "@std/testing/bdd";
 import { parse } from "./specs.ts";
 import { get } from "./updates.ts";
-import { MOLT_VERSION } from "./internal.ts";
 
 describe("get", () => {
-  const latest = MOLT_VERSION;
-
   it("should get a released update to deno.land/std", async () => {
     const dep = parse("https://deno.land/std@0.220.0/bytes/copy.ts");
     assertEquals(await get(dep), {
@@ -34,40 +31,36 @@ describe("get", () => {
   });
 
   it("should get an update to a fixed jsr dep", async () => {
-    const dep = parse("jsr:@molt/core@0.18.0");
+    const dep = parse("jsr:@luca/flag@1.0.0");
     assertEquals(await get(dep), {
-      released: "0.18.5",
-      latest,
+      constrainted: "1.0.0",
+      released: "1.0.1",
     });
   });
 
-  it("should get an update to a jsr dep", async () => {
-    const dep = parse("jsr:@molt/core@^0.18.0");
+  it("should get an update to a ranged jsr dep", async () => {
+    const dep = parse("jsr:@luca/flag@^1.0.0");
     assertEquals(await get(dep), {
-      constrainted: "0.18.5",
-      latest,
+      constrainted: "1.0.1",
     });
   });
 
   it("should get a constrainted update to an outdated locked jsr dep", async () => {
     const dep = {
-      ...parse("jsr:@molt/core@^0.18.0"),
-      locked: "0.18.2",
+      ...parse("jsr:@luca/flag@^1.0.0"),
+      locked: "1.0.0",
     };
     assertEquals(await get(dep), {
-      constrainted: "0.18.5",
-      latest,
+      constrainted: "1.0.1",
     });
   });
 
   it("should not get a released update to a jsr dep locked to the latest", async () => {
     const dep = {
-      ...parse("jsr:@molt/core@^0.18.0"),
-      locked: "0.18.5",
+      ...parse("jsr:@luca/flag@^1.0.0"),
+      locked: "1.0.1",
     };
-    assertEquals(await get(dep), {
-      latest,
-    });
+    assertEquals(await get(dep), undefined);
   });
 
   it("should get an update to a npm dep", async () => {
