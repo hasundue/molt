@@ -69,6 +69,10 @@ Molt can update to dependencies written in different formats. URL imports,
       ...
 ```
 
+> [!NOTE]\
+> Molt uses a similar versioning strategy as `increase-if-necessary` in
+> `dependabot` to bump version ranges[^1].
+
 ## Packages
 
 ### [@molt/cli]
@@ -129,6 +133,11 @@ Molt is inspired by prior works such as
 - [updater](https://github.com/deaddeno/updater)
 
 and of full respect to the authors.
+
+<!-- Footnotes -->
+
+[^1]: See
+[Dependabot's versioning strategy](https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file#versioning-strategy).
 
 <!-- Links -->
 
