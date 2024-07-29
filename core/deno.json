@@ -1,18 +1,25 @@
 {
   "name": "@molt/core",
-  "version": "0.18.5",
+  "version": "0.19.0-rc.9",
   "exports": {
-    ".": "./mod.ts"
+    ".": "./mod.ts",
+    "./bumps": "./bumps.ts",
+    "./locks": "./locks.ts",
+    "./maps": "./maps.ts",
+    "./types": "./types.ts",
+    "./refs": "./refs.ts",
+    "./specs": "./specs.ts",
+    "./updates": "./updates.ts"
   },
   "publish": {
     "include": [
       "deno.json",
       "*.ts",
-      "import_map/js"
+      "deno_lockfile/js"
     ],
     "exclude": [
       "*_test.ts",
-      "!import_map/js"
+      "!deno_lockfile/js"
     ]
   }
 }

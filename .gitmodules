@@ -1,3 +1,4 @@
-[submodule "core/import_map"]
-	path = core/import_map
-	url = https://github.com/hasundue/import_map.git
+[submodule "core/deno_lockfile"]
+	path = core/deno_lockfile
+	url = https://github.com/hasundue/deno_lockfile.git
+	branch = wasm
