@@ -1,7 +1,0 @@
-{
-  "imports": {
-    "std/bytes": "https://deno.land/std@0.200.0/bytes/copy.ts",
-    "hono": "npm:hono@^3",
-    "@core/match": "jsr:@core/match@0.1.x"
-  }
-}
