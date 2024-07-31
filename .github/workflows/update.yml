@@ -1,5 +1,5 @@
 name: Update
-run-name: github.event.head_commit.message
+run-name: ${{ github.event.head_commit.message }}
 
 on:
   schedule:
