@@ -248,7 +248,7 @@ async function getJsrDependencies(
 export async function extract(
   lockfile: LockfileJson,
   dependency: DependencySpec,
-): Promise<LockfileJson> {
+): Promise<LockfileJson | undefined> {
   return isRemote(dependency)
     ? await extractRemote(lockfile, dependency)
     : extractPackage(lockfile, dependency as DependencySpec<"jsr" | "npm">);
@@ -257,7 +257,7 @@ export async function extract(
 async function extractRemote(
   lock: LockfileJson,
   dep: DependencySpec<"http" | "https">,
-): Promise<LockfileJson> {
+): Promise<LockfileJson | undefined> {
   const reqs = Object.keys(lock.remote).filter((req) =>
     req.startsWith(stringify(dep))
   );
@@ -265,6 +265,7 @@ async function extractRemote(
     const graph = await createGraph(req);
     return graph.modules.map((mod) => mod.specifier);
   }))).flat();
+  if (!deps.length) return;
   return {
     version: VERSION,
     remote: filterValues(
@@ -277,11 +278,12 @@ async function extractRemote(
 function extractPackage(
   lock: LockfileJson,
   dep: DependencySpec<"jsr" | "npm">,
-): LockfileJson {
+): LockfileJson | undefined {
   const name = stringify(dep, "kind", "name", "constraint");
   const lockfile = parseFromJson("", lock);
   lockfile.setWorkspaceConfig({ dependencies: [name] });
   const json = lockfile.toJson();
+  if (!json.packages) return;
   json.remote = {};
   return json;
 }

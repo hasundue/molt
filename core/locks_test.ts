@@ -246,6 +246,12 @@ describe("extract", () => {
   beforeEach(() => fs.mock());
   afterEach(() => fs.dispose());
 
+  it("should return undefined for an unlocked package", async () => {
+    const dep = parse("jsr:@std/testing@^0.222.0");
+    const lock = await extract(LOCKFILE, dep);
+    assertEquals(lock, undefined);
+  });
+
   it("should extract the partial lock for a jsr package from a lockfile", async () => {
     const dep = parse("jsr:@std/assert@^0.222.0");
     const lock = await extract(LOCKFILE, dep);

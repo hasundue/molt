@@ -130,4 +130,48 @@ describe("core", () => {
       lock: "deno.lock",
     });
   });
+
+  it("should handle an non-locked dependency", async () => {
+    await Deno.writeTextFile(
+      "deno.json",
+      dedent`
+        {
+          "imports": {
+            "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.3.0",
+            "@luca/flag": "jsr:@luca/flag@^1.0.0"
+          }
+        }
+      `,
+    );
+    const deps = await collect({ config: "deno.json", lock: "deno.lock" });
+    assertEquals(deps.length, 2);
+    const [dep] = deps;
+    const update = await dep.check();
+    assertExists(update);
+    assertEquals(update.dep.name, "@conventional-commits/parser");
+    await update.write();
+    assertEquals(await Deno.readTextFile("mod.ts"), MOD_TS);
+    assertEquals(
+      await Deno.readTextFile("deno.json"),
+      dedent`
+        {
+          "imports": {
+            "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.4.0",
+            "@luca/flag": "jsr:@luca/flag@^1.0.0"
+          }
+        }
+      `,
+    );
+    assertEquals(await Deno.readTextFile("deno.lock"), DENO_LOCK);
+    await update.commit();
+    assertSpyCallArg(git, 0, 1, {
+      args: [
+        "commit",
+        "-m",
+        "bump @conventional-commits/parser to ^0.4.0",
+        "deno.json",
+      ],
+      lock: undefined,
+    });
+  });
 });
