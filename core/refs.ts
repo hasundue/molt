@@ -2,7 +2,7 @@ import { init, parseModule } from "@deno/graph";
 import type { DependencyJson } from "@deno/graph/types";
 import { toUrl } from "@molt/lib/path";
 import { distinct } from "@std/collections";
-import { detect, EOL, format } from "@std/fs/eol";
+import { detect, EOL } from "@std/fs/eol";
 import { extname } from "@std/path";
 import { type DependencySpec, parse, stringify, tryParse } from "./specs.ts";
 import { parseImportMapJson, readImportMapJson } from "./maps.ts";
@@ -157,6 +157,8 @@ function rewriteEsModule(
   return lines.join(eol);
 }
 
+// This implementation is not quite efficient nor 100% robust, but we don't
+// have a good way to deal with JSONC within the Deno ecosystem yet.
 function rewriteImportMap(
   ref: DependencyRef<"import_map">,
   updated: DependencySpec,
@@ -164,14 +166,21 @@ function rewriteImportMap(
 ) {
   const src = ref.source;
   const json = parseImportMapJson(content);
-  if (src.scope) {
-    json.scopes![src.scope][src.key] = stringify(updated);
-  } else {
-    json.imports![src.key] = stringify(updated);
-  }
-  const str = JSON.stringify(json, null, 2);
+
+  const key = src.scope
+    ? json.scopes![src.scope][src.key]
+    : json.imports![src.key];
+
   const eol = detect(content) ?? EOL;
-  return format(str, eol) + eol;
+  const lines = content.split(eol);
+
+  const outdated = stringify(ref.dependency);
+  const index = lines.findIndex(
+    (line) => line.includes(key) && line.includes(outdated),
+  );
+  lines[index] = lines[index].replace(outdated, stringify(updated));
+
+  return lines.join(eol);
 }
 
 /** Options for committing the updated dependency. */
