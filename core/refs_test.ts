@@ -242,11 +242,12 @@ describe("rewrite", () => {
     );
   });
 
-  it("should rewrite dependencies in an import map", async () => {
+  it("should rewrite dependencies in deno.jsonc", async () => {
     await Deno.writeTextFile(
       "a.json",
       dedent`
         {
+          // dependencies
           "imports": {
             "@std/assert": "jsr:@std/assert@^0.222.0",
             "@std/testing/bdd": "jsr:@std/testing@^0.222.0/bdd"
@@ -260,6 +261,7 @@ describe("rewrite", () => {
       await Deno.readTextFile("a.json"),
       dedent`
         {
+          // dependencies
           "imports": {
             "@std/assert": "jsr:@std/assert@0.224.0",
             "@std/testing/bdd": "jsr:@std/testing@^0.222.0/bdd"
@@ -272,6 +274,7 @@ describe("rewrite", () => {
       await Deno.readTextFile("a.json"),
       dedent`
         {
+          // dependencies
           "imports": {
             "@std/assert": "jsr:@std/assert@0.224.0",
             "@std/testing/bdd": "jsr:@std/testing@0.224.0/bdd"
