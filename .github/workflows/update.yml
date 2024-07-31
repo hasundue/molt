@@ -1,4 +1,5 @@
-name: update
+name: Update
+run-name: github.event.head_commit.message
 
 on:
   schedule:
@@ -11,6 +12,7 @@ permissions:
 
 jobs:
   update:
+    name: Update
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
