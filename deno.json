@@ -1,5 +1,6 @@
 {
   "tasks": {
+    "bump": "deno run -A ./_tools/bump.ts",
     "cache": "deno task -q ls | xargs deno cache",
     "check": "deno task -q ls | xargs deno check",
     "ls": "ls ./lib/*.ts ./core/*.ts ./integration/*.ts ./cli/*.ts ./cli/src/*.ts",
