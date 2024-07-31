@@ -84,7 +84,7 @@ class LockContext {
 
   get merged(): LockfileJson {
     return this.reqs.map((req) =>
-      this.created.get(req) ?? this.extracted.get(req)!
+      this.created.get(req) ?? this.extracted.get(req) ?? {} as LockfileJson
       // @ts-ignore allow passing concrete types to deepMerge
     ).reduce((prev, curr) => deepMerge(prev, curr), Lock.empty);
   }
@@ -159,7 +159,7 @@ export async function collect(
     const lockfile = Lock.parse(await Deno.readTextFile(options.lock!));
     for (const req of reqs) {
       const lock = await Lock.extract(lockfile, parse(req));
-      locks.extracted.set(req, lock);
+      if (lock) locks.extracted.set(req, lock);
     }
   }
   const ctx = new Context(reqs, refs, locks);
@@ -217,11 +217,11 @@ class Update implements UpdateI {
         const bumped = bump.constraint
           ? { ...dep, constraint: bump.constraint }
           : dep;
-
-        const locked = this.#ctx.locks.extracted.get(req)!;
-        const lock = await Lock.create(bumped, bump.lock, locked);
-        this.#ctx.locks.created.set(req, lock);
-
+        const locked = this.#ctx.locks.extracted.get(req);
+        if (locked) {
+          const lock = await Lock.create(bumped, bump.lock, locked);
+          this.#ctx.locks.created.set(req, lock);
+        }
         await Deno.writeTextFile(
           this.#ctx.locks.source,
           Lock.format(this.#ctx.locks.merged),
