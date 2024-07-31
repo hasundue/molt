@@ -1,5 +1,4 @@
 name: Release
-run-name: ${{ github.event.head_commit.message }}
 
 on:
   push:
@@ -8,6 +7,11 @@ on:
     paths:
       - '**/deno.json'
   workflow_dispatch:
+
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch'
+  && 'manual release'
+  || github.event.head_commit.message }}
 
 defaults:
   run:

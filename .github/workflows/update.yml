@@ -1,10 +1,14 @@
 name: Update
-run-name: ${{ github.event.head_commit.message }}
 
 on:
   schedule:
     - cron: '0 23 * * *'
   workflow_dispatch:
+
+run-name: >-
+  ${{ github.event_name == 'workflow_dispatch'
+  && 'manual update'
+  || 'scheduled update' }}
 
 permissions:
   contents: write
