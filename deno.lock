@@ -14,7 +14,7 @@
       "jsr:@core/unknownutil@^3.18.1": "jsr:@core/unknownutil@3.18.1",
       "jsr:@david/dax@^0.41.0": "jsr:@david/dax@0.41.0",
       "jsr:@david/which@^0.4.1": "jsr:@david/which@0.4.1",
-      "jsr:@deno/graph@^0.80.0": "jsr:@deno/graph@0.80.1",
+      "jsr:@deno/graph@^0.81.0": "jsr:@deno/graph@0.81.0",
       "jsr:@luca/flag@1.0.0": "jsr:@luca/flag@1.0.0",
       "jsr:@std/assert@1.0.0-rc.2": "jsr:@std/assert@1.0.0-rc.2",
       "jsr:@std/assert@^0.221.0": "jsr:@std/assert@0.221.0",
@@ -132,8 +132,8 @@
       "@david/which@0.4.1": {
         "integrity": "896a682b111f92ab866cc70c5b4afab2f5899d2f9bde31ed00203b9c250f225e"
       },
-      "@deno/graph@0.80.1": {
-        "integrity": "a7aca57c5f91ce41e01b788a1dad591734df7f0d2310cf072800cdc57986df23"
+      "@deno/graph@0.81.0": {
+        "integrity": "2e2c3c9b5569bc759c132727a7d372e6d5c4dc792f8ba15c1a99c1226d6d0a56"
       },
       "@luca/flag@1.0.0": {
         "integrity": "1c76cf54839a86d0929a619c61bd65bb73d7d8a4e31788e48c720dbc46c5d546"
@@ -507,7 +507,7 @@
       "jsr:@core/match@^0.3.1",
       "jsr:@core/unknownutil@^3.18.1",
       "jsr:@david/dax@^0.41.0",
-      "jsr:@deno/graph@^0.80.0",
+      "jsr:@deno/graph@^0.81.0",
       "jsr:@molt/core@^0.19.0",
       "jsr:@molt/integration@^0.19.0",
       "jsr:@molt/lib@^0.19.0",
