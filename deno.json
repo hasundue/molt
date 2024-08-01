@@ -11,7 +11,7 @@
     "update:commit": "deno task -q run --commit --prefix 'chore:' --pre-commit=check,test:unit"
   },
   "imports": {
-    "@chiezo/amber": "jsr:@chiezo/amber@^0.0.8",
+    "@chiezo/amber": "jsr:@chiezo/amber@^0.0.9",
     "@cliffy/ansi": "jsr:@cliffy/ansi@1.0.0-rc.5",
     "@cliffy/command": "jsr:@cliffy/command@1.0.0-rc.5",
     "@cliffy/table": "jsr:@cliffy/table@1.0.0-rc.5",

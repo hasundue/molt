@@ -2,7 +2,7 @@
   "version": "3",
   "packages": {
     "specifiers": {
-      "jsr:@chiezo/amber@^0.0.8": "jsr:@chiezo/amber@0.0.8",
+      "jsr:@chiezo/amber@^0.0.9": "jsr:@chiezo/amber@0.0.9",
       "jsr:@cliffy/ansi@1.0.0-rc.5": "jsr:@cliffy/ansi@1.0.0-rc.5",
       "jsr:@cliffy/command@1.0.0-rc.5": "jsr:@cliffy/command@1.0.0-rc.5",
       "jsr:@cliffy/flags@1.0.0-rc.5": "jsr:@cliffy/flags@1.0.0-rc.5",
@@ -62,8 +62,8 @@
       "npm:ts-toolbelt@9.6.0": "npm:ts-toolbelt@9.6.0"
     },
     "jsr": {
-      "@chiezo/amber@0.0.8": {
-        "integrity": "91d1ed7e5e262cc444b612c2a074b6c378115ceae4953e70a600ee3b6696e7d1",
+      "@chiezo/amber@0.0.9": {
+        "integrity": "611ab261be9cde6571929acd9c5605b554a95c1d8b34550b40b8341c5260ead8",
         "dependencies": [
           "jsr:@std/collections@^1.0.0",
           "jsr:@std/path@^1.0.0",
@@ -500,7 +500,7 @@
   "remote": {},
   "workspace": {
     "dependencies": [
-      "jsr:@chiezo/amber@^0.0.8",
+      "jsr:@chiezo/amber@^0.0.9",
       "jsr:@cliffy/ansi@1.0.0-rc.5",
       "jsr:@cliffy/command@1.0.0-rc.5",
       "jsr:@cliffy/table@1.0.0-rc.5",
