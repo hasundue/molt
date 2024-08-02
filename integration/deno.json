@@ -1,6 +1,6 @@
 {
   "name": "@molt/integration",
-  "version": "0.19.0",
+  "version": "0.19.3",
   "exports": {
     ".": "./mod.ts",
     "./commits": "./commits.ts",
