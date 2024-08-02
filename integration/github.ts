@@ -27,6 +27,16 @@ export async function compareCommits(
   return data.commits.map((it) => it.commit.message);
 }
 
+export async function getTags(
+  repo: Repository<"github">,
+): Promise<string[]> {
+  const { data } = await octokit.repos.listTags({
+    owner: repo.owner,
+    repo: repo.name,
+  });
+  return data.map((it) => it.name);
+}
+
 type GitHubContent = {
   path?: string;
   type?: "blob" | "tree";

@@ -1,6 +1,6 @@
-import { assertEquals } from "@std/assert";
+import { assertArrayIncludes, assertEquals } from "@std/assert";
 import "@std/dotenv/load";
-import { compareCommits, resolvePackageRoot } from "./github.ts";
+import { compareCommits, getTags, resolvePackageRoot } from "./github.ts";
 import { parse } from "./packages.ts";
 import type { Repository } from "./repository.ts";
 
@@ -24,6 +24,18 @@ Deno.test("compareCommits", async () => {
       "build(deps): bump deno.land/std from 0.219.1 to 0.220.1",
     ],
   );
+});
+
+Deno.test("getTags", async () => {
+  const repo = {
+    host: "github",
+    owner: "hasundue",
+    name: "molt",
+  } satisfies Repository;
+  assertArrayIncludes(await getTags(repo), [
+    "0.18.5",
+    "0.19.0",
+  ]);
 });
 
 Deno.test("resolvePackageRoot", async () => {
