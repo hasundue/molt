@@ -1,5 +1,5 @@
 import * as fs from "@chiezo/amber/fs";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertRejects } from "@std/assert";
 import { afterEach, beforeEach, describe, it } from "@std/testing/bdd";
 import { parse } from "./specs.ts";
 import { create, extract, type LockfileJson, query } from "./locks.ts";
@@ -50,11 +50,23 @@ describe("create", () => {
   beforeEach(() => fs.mock());
   afterEach(() => fs.dispose());
 
+  it("should throw an error for an unsupported lockfile version", async () => {
+    await assertRejects(
+      async () => {
+        await create(parse("jsr:@std/testing@^0.222.0"), "0.222.0", {
+          version: "4",
+        } as LockfileJson);
+      },
+      Error,
+      "Unsupported lockfile version: 4",
+    );
+  });
+
   it("should create a partial lock for a package with a patch update", async () => {
     const lock = await create(
       parse("jsr:@std/assert@^0.222.0"),
       "0.222.1",
-      {} as LockfileJson,
+      { version: "3" } as LockfileJson,
     );
     assertEquals(lock, {
       version: "3",
@@ -86,7 +98,7 @@ describe("create", () => {
     const lock = await create(
       parse("jsr:@std/assert@^0.226.0"),
       "0.226.0",
-      {} as LockfileJson,
+      { version: "3" } as LockfileJson,
     );
     assertEquals(lock, {
       version: "3",
@@ -116,7 +128,7 @@ describe("create", () => {
     const lock = await create(
       parse("jsr:@core/match@^0.2.0"),
       "0.2.5",
-      {} as LockfileJson,
+      { version: "3" } as LockfileJson,
     );
     assertEquals(lock, {
       version: "3",
@@ -149,7 +161,7 @@ describe("create", () => {
     const lock = await create(
       parse("npm:@conventional-commits/parser@^0.4.0"),
       "0.4.1",
-      {} as LockfileJson,
+      { version: "3" } as LockfileJson,
     );
     assertEquals(lock, {
       version: "3",
@@ -245,6 +257,19 @@ describe("create", () => {
 describe("extract", () => {
   beforeEach(() => fs.mock());
   afterEach(() => fs.dispose());
+
+  it("should throw an error for an unsupported lockfile version", async () => {
+    await assertRejects(
+      async () => {
+        await extract(
+          { version: "4" } as LockfileJson,
+          parse("jsr:@std/testing@^0.222.0"),
+        );
+      },
+      Error,
+      "Unsupported lockfile version: 4",
+    );
+  });
 
   it("should return undefined for an unlocked package", async () => {
     const dep = parse("jsr:@std/testing@^0.222.0");

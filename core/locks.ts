@@ -35,23 +35,30 @@ export const empty: LockfileJson = {
  *
  * @param dependency The dependency to create the lock for.
  * @param target The target version to update the dependency to.
+ * @param original The original lockfile to create the partial lock from.
+ *
+ * @returns The `LockfileJson` object representing the partial lock.
+ * @throws If the version of the original lockfile is not supported.
  */
 export function create(
   dependency: DependencySpec,
   target: string,
-  extracted: LockfileJson,
+  original: LockfileJson,
 ): Promise<LockfileJson> {
+  if (original.version !== VERSION) {
+    throw new Error(`Unsupported lockfile version: ${original.version}`);
+  }
   return isRemote(dependency)
-    ? createRemoteLock(dependency, extracted)
+    ? createRemoteLock(dependency, original)
     : createPackageLock(dependency as DependencySpec<"jsr" | "npm">, target);
 }
 
 async function createRemoteLock(
   dep: DependencySpec<"http" | "https">,
-  extracted: LockfileJson,
+  original: LockfileJson,
 ): Promise<LockfileJson> {
   const { kind, name, constraint, path } = dep;
-  const reqs = Object.keys(extracted.remote).filter((req) =>
+  const reqs = Object.keys(original.remote).filter((req) =>
     [kind, name, path ?? ""].every((part) => req.includes(part))
   );
   const lockfile = parseFromJson("", empty);
@@ -238,6 +245,7 @@ async function getJsrDependencies(
  * @param lockfile The `Lockfile` object to extract the partial lock for the dependency from.
  * @param dependency The dependency to extract the partial lock for.
  * @returns The `LockfileJson` object representing the partial lock.
+ * @throws If the lockfile version is not supported.
  *
  * @example
  * ```ts
@@ -249,6 +257,9 @@ export async function extract(
   lockfile: LockfileJson,
   dependency: DependencySpec,
 ): Promise<LockfileJson | undefined> {
+  if (lockfile.version !== VERSION) {
+    throw new Error(`Unsupported lockfile version: ${lockfile.version}`);
+  }
   return isRemote(dependency)
     ? await extractRemote(lockfile, dependency)
     : extractPackage(lockfile, dependency as DependencySpec<"jsr" | "npm">);
