@@ -35,9 +35,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1 (^0.3.0 → ^0.4.0)
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
     assertEquals(
@@ -54,9 +54,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1 (^0.3.0 → ^0.4.0)
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
     assertEquals(
@@ -74,9 +74,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1 (^0.3.0 → ^0.4.0)
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
     assertEquals(
@@ -96,9 +96,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1 (^0.3.0 → ^0.4.0)
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });
@@ -108,8 +108,8 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser ^0.3.0 →  ^0.4.0
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser ^0.3.0 → ^0.4.0
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });
@@ -119,7 +119,7 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @luca/flag 1.0.0 →  1.0.1
+        📦 @luca/flag 1.0.0 → 1.0.1
       `,
     );
   });
@@ -129,8 +129,8 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1 (^0.3.0 →  ^0.4.0)
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1 (^0.3.0 → ^0.4.0)
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });
@@ -140,9 +140,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });
@@ -152,9 +152,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });
@@ -164,9 +164,9 @@ describe("CLI", () => {
     assertEquals(
       stdout,
       dedent`
-        📦 @conventional-commits/parser 0.3.0 →  0.4.1
-        📦 @luca/flag 1.0.0 →  1.0.1
-        📦 deno.land/std 0.222.0 →  0.224.0
+        📦 @conventional-commits/parser 0.3.0 → 0.4.1
+        📦 @luca/flag 1.0.0 → 1.0.1
+        📦 deno.land/std 0.222.0 → 0.224.0
       `,
     );
   });

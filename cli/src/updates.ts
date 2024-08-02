@@ -13,7 +13,7 @@ export function print(update: Update) {
     : lock;
 
   if (versions) {
-    output += yellow(` ${versions.from} →  ${versions.to}`);
+    output += yellow(` ${versions.from} → ${versions.to}`);
   }
 
   const ranges = constraint && !SemVer.tryParse(constraint.to)
@@ -23,7 +23,7 @@ export function print(update: Update) {
   if (ranges) {
     output += " ";
     if (versions) output += cyan("(");
-    output += cyan(`${ranges.from} →  ${ranges.to}`);
+    output += cyan(`${ranges.from} → ${ranges.to}`);
     if (versions) output += cyan(")");
   }
 
