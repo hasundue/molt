@@ -1,5 +1,3 @@
-# @molt/cli
-
 ## Installation (optional)
 
 The molt CLI can be installed globally with the following command, for example:
@@ -32,20 +30,20 @@ Description:
 
 Options:
 
-  -h, --help                - Show this help.                                                            
-  -v, --version             - Print version info.                                                        
-  -w, --write               - Write changes to the local files.                     (Conflicts: --commit)
-  -c, --commit              - Commit changes to the local git repository.           (Conflicts: --write) 
-  --changelog    [types]    - Print a curated changelog for each update.                                 
-  --config       <file>     - Specify the Deno configuration file.                                       
-  --dry-run                 - See what would happen without actually doing it.                           
-  --ignore       <pattern>  - Specify dependencies to ignore.                                            
-  --only         <pattern>  - Specify dependencies to check.                                             
-  --lock         <file>     - Specify the lock file.                                                     
-  --no-config               - Disable automatic loading of the configuration file.                       
-  --no-lock                 - Disable automatic loading of the lock file.                                
-  --pre-commit   <tasks>    - Run tasks before each commit                          (Depends: --commit)  
-  --prefix       <prefix>   - Prefix for commit messages                            (Depends: --commit)  
+  -h, --help                - Show this help.                                                               
+  -v, --version             - Print version info.                                                           
+  -w, --write               - Write changes to the local files.                        (Conflicts: --commit)
+  -c, --commit              - Commit changes to the local git repository.              (Conflicts: --write) 
+  --changelog    [types]    - Print commits for each update. (requires --unstable-kv)                       
+  --config       <file>     - Specify the Deno configuration file.                                          
+  --dry-run                 - See what would happen without actually doing it.                              
+  --ignore       <pattern>  - Specify dependencies to ignore.                                               
+  --only         <pattern>  - Specify dependencies to check.                                                
+  --lock         <file>     - Specify the lock file.                                                        
+  --no-config               - Disable automatic loading of the configuration file.                          
+  --no-lock                 - Disable automatic loading of the lock file.                                   
+  --pre-commit   <tasks>    - Run tasks before each commit                             (Depends: --commit)  
+  --prefix       <prefix>   - Prefix for commit messages                               (Depends: --commit)  
   --referrer                - Print files that import the dependency.
 ```
 
