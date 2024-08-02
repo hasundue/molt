@@ -49,6 +49,10 @@ export async function printChangelog(
     return;
   }
   const messages = await compareCommits(repo, oldest, to);
+  if (!messages.length) {
+    // Couldn't find tags for the versions
+    return;
+  }
   const root = await resolvePackageRoot(repo, pkg, to);
   if (!root) {
     // The package seems to be generated dynamically on publish
