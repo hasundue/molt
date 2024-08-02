@@ -3,6 +3,8 @@
 [![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
+![demo](https://github.com/user-attachments/assets/119c6a86-8f14-4b0b-81ee-a747bbbe4d3f)
+
 > [!WARNING]\
 > The project is still under active development. The API is not stable yet and
 > may change frequently.
