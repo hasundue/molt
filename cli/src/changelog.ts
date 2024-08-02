@@ -48,13 +48,7 @@ export async function printChangelog(
     // The dependency was newly added in this update
     return;
   }
-  const messages: string[] = [];
-  try {
-    // The refs might not exist
-    messages.push(...await compareCommits(repo, oldest, to));
-  } catch {
-    return;
-  }
+  const messages = await compareCommits(repo, oldest, to);
   const root = await resolvePackageRoot(repo, pkg, to);
   if (!root) {
     // The package seems to be generated dynamically on publish

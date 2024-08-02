@@ -49,6 +49,10 @@ describe("CLI", () => {
     );
   });
 
+  it("should not throw with `--changelog`", async () => {
+    await molt("--changelog");
+  });
+
   it("should update `deno.json` with `--write`", async () => {
     const { stderr, stdout } = await molt("--write");
     assertEquals(
