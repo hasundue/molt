@@ -1,3 +1,4 @@
+import { VERSION } from "@molt/core/locks";
 import { exists } from "@std/fs";
 import { parse } from "@std/jsonc";
 
@@ -16,10 +17,19 @@ async function hasImports(config: string): Promise<boolean> {
   return jsonc !== null && typeof jsonc === "object" && "imports" in jsonc;
 }
 
-export async function findLock() {
-  if (await exists("deno.lock")) {
-    return "deno.lock";
+export async function findLock(path?: string) {
+  path ??= await exists("deno.lock") ? "deno.lock" : undefined;
+  if (!path) {
+    return;
   }
+  const { version } = JSON.parse(await Deno.readTextFile(path));
+  if (version !== VERSION) {
+    console.warn(
+      `Unsupported lockfile version: '${version}'. Please update the lock file manually.`,
+    );
+    return;
+  }
+  return path;
 }
 
 export async function findSource() {

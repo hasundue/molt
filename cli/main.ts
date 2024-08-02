@@ -52,7 +52,7 @@ main.action(async function (options, ...source) {
 
   const lock = options.lock === false
     ? undefined
-    : options.lock ?? await findLock();
+    : await findLock(options.lock);
 
   source = source.length ? source : config ? [] : await findSource();
 

@@ -118,6 +118,25 @@ describe("CLI", () => {
     );
   });
 
+  it("should ignore an unsupported version of lockfile with a warning", async () => {
+    const { stdout, stderr } = await molt("--lock deno.lock.future");
+    assertEquals(
+      stdout,
+      dedent`
+        📦 @conventional-commits/parser ^0.3.0 → ^0.4.0
+        📦 deno.land/std 0.222.0 → 0.224.0
+      `,
+    );
+    assertEquals(
+      stderr,
+      dedent`
+        Unsupported lockfile version: '4'. Please update the lock file manually.
+        Collecting dependencies
+        Fetching updates
+      `,
+    );
+  });
+
   it("should filter dependencies with `--only`", async () => {
     const { stdout } = await molt("--only flag");
     assertEquals(
