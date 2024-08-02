@@ -20,7 +20,7 @@ const main = new Command()
   })
   .option(
     "--changelog=[types:string[]]",
-    "Print a curated changelog for each update.",
+    "Print commits for each update. (requires --unstable-kv)",
   )
   .option("--config <file:string>", "Specify the Deno configuration file.")
   .option("--dry-run", "See what would happen without actually doing it.")
