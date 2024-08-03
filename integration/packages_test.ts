@@ -4,9 +4,11 @@ import {
   is,
   type Package,
   parse,
+  resolvePackageRoot,
   stringify,
   tryParse,
 } from "./packages.ts";
+import type { Repository } from "./repository.ts";
 
 Deno.test("parse", () => {
   assertEquals(
@@ -91,4 +93,20 @@ Deno.test("fromDependency - deno.land", () => {
     path: "/fs/mod.ts",
   });
   assertEquals(result, undefined);
+});
+
+Deno.test("resolvePackageRoot - @core/unknownutil", async () => {
+  const repo: Repository = {
+    host: "github",
+    owner: "jsr-core",
+    name: "unknownutil",
+  };
+  assertEquals(
+    await resolvePackageRoot(
+      repo,
+      parse("jsr:@core/unknownutil"),
+      "4.0.0",
+    ),
+    ".",
+  );
 });

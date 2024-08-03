@@ -1,4 +1,4 @@
-import type { Repository } from "./repository.ts";
+import { getTags, type Repository } from "./repository.ts";
 import * as github from "./github.ts";
 import { equals, parse } from "@std/semver";
 
@@ -30,7 +30,7 @@ export async function compareCommits(
   //
   // Otherwise, fetch the commits from the Git hosting platform
   //
-  const tags = await _getTags(repo);
+  const tags = await getTags(repo);
   // Tags and versions not necessarily include the "v" prefix consistently
   const base = tags.find((it) => equals(parse(it), parse(from)));
   const head = tags.find((it) => equals(parse(it), parse(to)));
@@ -43,15 +43,6 @@ export async function compareCommits(
     commits,
   );
   return commits;
-}
-
-async function _getTags(repo: Repository): Promise<string[]> {
-  switch (repo.host) {
-    case "github":
-      return await github.getTags(repo);
-    default:
-      throw new Error(`Unsupported Git hosting platform: ${repo.host}`);
-  }
 }
 
 async function _compareCommits(

@@ -1,5 +1,6 @@
 import { ensure, is } from "@core/unknownutil";
 import { type Package, stringify } from "./packages.ts";
+import * as github from "./github.ts";
 
 /**
  * A git repository on a hosting platform.
@@ -13,6 +14,15 @@ export interface Repository<
 }
 
 export type KnownGitHostingPlatform = "github";
+
+export async function getTags(repo: Repository): Promise<string[]> {
+  switch (repo.host) {
+    case "github":
+      return await github.getTags(repo);
+    default:
+      throw new Error(`Unsupported Git hosting platform: ${repo.host}`);
+  }
+}
 
 /**
  * Resolve the repository of the given package

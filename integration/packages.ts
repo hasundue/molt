@@ -1,8 +1,9 @@
 import { match, placeholder as _ } from "@core/match";
 import type { DependencySpec } from "@molt/core/specs";
 import * as Spec from "@molt/core/specs";
-import type { Repository } from "./repository.ts";
+import { getTags, type Repository } from "./repository.ts";
 import * as github from "./github.ts";
+import { equals, parse as SemVer } from "@std/semver";
 
 /**
  * A known package registry.
@@ -136,14 +137,19 @@ export function fromDependency(
   return tryParse(Spec.stringify(dependency, "kind", "name"));
 }
 
-export function resolvePackageRoot(
+export async function resolvePackageRoot(
   repo: Repository,
   pkg: Package,
-  ref?: string,
+  version?: string,
 ): Promise<string | undefined> {
+  const tags = await getTags(repo);
+  const ref = version
+    ? tags.find((it) => equals(SemVer(it), SemVer(version)))
+    : undefined;
   switch (repo.host) {
-    case "github":
+    case "github": {
       return github.resolvePackageRoot(repo, pkg, ref);
+    }
     default:
       throw new Error(`Unsupported hosting platform: ${repo.host}`);
   }
