@@ -40,3 +40,25 @@ Deno.test("compareCommits - non existing tags", async () => {
     [],
   );
 });
+
+Deno.test("compareCommits - inconsistently prefixed tags", async () => {
+  assertEquals(
+    await compareCommits(
+      {
+        host: "github",
+        owner: "jsr-core",
+        name: "unknownutil",
+      },
+      "3.18.0",
+      "3.18.1",
+    ),
+    [
+      ":memo: Fix NPM README",
+      "Merge pull request #78 from jsr-core/fix-npm\n\n:memo: Fix NPM README",
+      ":coffee: Refine deno tasks",
+      ":memo: Add deprecation warning",
+      "Merge pull request #83 from jsr-core/deprecate\n" +
+      "\n" + ":memo: Add deprecation warning message",
+    ],
+  );
+});
