@@ -21,3 +21,5 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: hasundue/molt-action@v1-rc
+        with:
+          token: ${{ secrets.PAT_UPDATE }}
