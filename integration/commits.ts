@@ -37,7 +37,7 @@ export async function compareCommits(
   if (!base || !head) {
     return [];
   }
-  const commits = await _compareCommits(repo, from, to);
+  const commits = await _compareCommits(repo, base, head);
   await kv.set(
     ["commits", repo.owner, repo.name, from, to],
     commits,
