@@ -108,9 +108,6 @@ General-purpose utilities developed for Molt, but may be used independently.
 
 ## Integration
 
-Implementing integrations with other platforms is out of the scope of this
-repository, but the following are available as independent projects:
-
 ### [molt-action](https://github.com/hasundue/molt-action)
 
 A GitHub Action to create pull requests for dependency updates.
