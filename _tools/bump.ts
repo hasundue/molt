@@ -1,27 +1,31 @@
 import { associateWith, maxWith } from "@std/collections";
 import { compare, format, increment, parse, ReleaseType } from "@std/semver";
 
-type PackageName = "core" | "cli" | "integration" | "lib";
+const MEMBERS = ["core", "cli", "integration", "lib"] as const;
+type Member = typeof MEMBERS[number];
 
 type Config = {
   version: string;
 };
 
-const [type, ...pkgs] = Deno.args as [ReleaseType, ...PackageName[]];
+const [type, ...targets] = Deno.args as [ReleaseType, ...Member[]];
 
-const jsons = associateWith(
-  pkgs,
+const JSONS = associateWith(
+  MEMBERS,
   (pkg) => JSON.parse(Deno.readTextFileSync(`./${pkg}/deno.json`)) as Config,
 );
 
-const vers = Object.values(jsons).map((json) => json.version).map(parse);
+const vers = Object.values(JSONS).map((json) => json.version).map(parse);
 const max = maxWith(vers, compare)!;
 const bumped = format(increment(max, type));
 
-for (const [pkg, json] of Object.entries(jsons)) {
+for (const [member, json] of Object.entries(JSONS)) {
+  if (!targets.includes(member as Member)) {
+    continue;
+  }
   json.version = bumped;
   await Deno.writeTextFile(
-    `./${pkg}/deno.json`,
+    `./${member}/deno.json`,
     JSON.stringify(json, null, 2) + "\n",
   );
 }
@@ -31,7 +35,7 @@ await new Deno.Command("git", {
     "commit",
     "-m",
     `chore: release ${bumped}`,
-    ...pkgs.map((it) => `${it}/deno.json`),
+    ...targets.map((it) => `${it}/deno.json`),
   ],
   stdout: "inherit",
   stderr: "inherit",
