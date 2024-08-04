@@ -1,5 +1,6 @@
 # 🦕 Molt
 
+[![JSR](https://jsr.io/badges/@molt)](https://jsr.io/badges/@molt)
 [![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
@@ -75,23 +76,44 @@ Molt can update to dependencies written in different formats. URL imports,
 > Molt uses a similar versioning strategy as `increase-if-necessary` in
 > `dependabot` to bump version ranges[^1].
 
-## Packages
+## Packages and documentation
 
 ### [@molt/cli]
 
-A CLI to check updates to dependencies in Deno modules or a configuration file.
+[![JSR](https://jsr.io/badges/@molt/cli)](https://jsr.io/@molt/cli)
+[![JSR](https://jsr.io/badges/@molt/cli/score)](https://jsr.io/@molt/cli/score)
+
+A CLI to update dependencies, supposed to be the entry point for most users.
 
 ### [@molt/core]
+
+[![JSR](https://jsr.io/badges/@molt/core)](https://jsr.io/@molt/core)
+[![JSR](https://jsr.io/badges/@molt/core/score)](https://jsr.io/@molt/core/score)
 
 Deno modules to collect and manipulate dependencies and updates.
 
 ### [@molt/integration]
 
+[![JSR](https://jsr.io/badges/@molt/integration)](https://jsr.io/@molt/integration)
+[![JSR](https://jsr.io/badges/@molt/integration/score)](https://jsr.io/@molt/integration/score)
+
 Modules to integrate Molt with thrid-party platforms.
 
 ### [@molt/lib]
 
+[![JSR](https://jsr.io/badges/@molt/lib)](https://jsr.io/@molt/lib)
+[![JSR](https://jsr.io/badges/@molt/lib/score)](https://jsr.io/@molt/lib/score)
+
 General-purpose utilities developed for Molt, but may be used independently.
+
+## Integration
+
+Implementing integrations with other platforms is out of the scope of this
+repository, but the following are available as independent projects:
+
+### [molt-action](https://github.com/hasundue/molt-action)
+
+A GitHub Action to create pull requests for dependency updates.
 
 ## Compatibility with registries
 
@@ -126,15 +148,13 @@ The following registries are not compatible with Molt:
 - [raw.githubusercontent.com](https://github.com)
 - [x.nest.land](https://x.nest.land)
 
-## References
+## Related projects
 
-Molt is inspired by prior works such as
+Molt is inspired by other projects like
 
 - [deno-udd](https://github.com/hayd/deno-udd)
 - [dmm](https://github.com/drashland/dmm)
 - [updater](https://github.com/deaddeno/updater)
-
-and of full respect to the authors.
 
 <!-- Footnotes -->
 
