@@ -23,7 +23,7 @@ describe("get", () => {
     });
   });
 
-  it("should get an update to a http dep with a v-lead semver", async () => {
+  it("should get an update to a http dep with a v-prefixed semver", async () => {
     const dep = parse("https://deno.land/x/flash@v0.8.0");
     assertEquals(await get(dep), {
       released: "v0.8.1",
@@ -61,6 +61,11 @@ describe("get", () => {
       locked: "1.0.1",
     };
     assertEquals(await get(dep), undefined);
+  });
+
+  it("should not throw on a jsr dep with a `yanked = false` version", async () => {
+    const dep = parse("jsr:@denosaurs/emoji@~0.3.0");
+    await get(dep);
   });
 
   it("should get an update to a npm dep", async () => {
