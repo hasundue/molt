@@ -1,6 +1,6 @@
 {
   "name": "@molt/core",
-  "version": "0.19.3",
+  "version": "0.19.6",
   "exports": {
     ".": "./mod.ts",
     "./bumps": "./bumps.ts",
