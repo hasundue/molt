@@ -140,7 +140,7 @@ async function getJsrVersions(dep: DependencyState<"jsr">): Promise<string[]> {
   assertOk(res);
   const isJsrPackageMeta = is.ObjectOf({
     versions: is.RecordOf(
-      is.ObjectOf({ yanked: is.OptionalOf(is.LiteralOf(true)) }),
+      is.ObjectOf({ yanked: is.OptionalOf(is.Boolean) }),
       is.String,
     ),
   });
