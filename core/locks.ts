@@ -1,4 +1,4 @@
-import { ensure, is } from "@core/unknownutil";
+import { as, ensure, is } from "@core/unknownutil";
 import { createGraph } from "@deno/graph";
 import { filterValues, pick } from "@std/collections";
 import * as SemVer from "@std/semver";
@@ -197,7 +197,7 @@ async function getNpmPackageInfo(
       dist: is.ObjectOf({
         integrity: is.String,
       }),
-      dependencies: is.OptionalOf(is.RecordOf(is.String, is.String)),
+      dependencies: as.Optional(is.RecordOf(is.String, is.String)),
     }),
   );
   const dependencies: [name: string, version: string][] = [];

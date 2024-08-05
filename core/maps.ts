@@ -1,5 +1,5 @@
 import * as Jsonc from "@std/jsonc";
-import { ensure, is } from "@core/unknownutil";
+import { as, ensure, is } from "@core/unknownutil";
 
 export interface ImportMapJson {
   imports?: Record<string, string>;
@@ -15,8 +15,8 @@ export function parseImportMapJson(
   return ensure(
     Jsonc.parse(src),
     is.ObjectOf({
-      imports: is.OptionalOf(is.RecordOf(is.String)),
-      scopes: is.OptionalOf(is.RecordOf(is.RecordOf(is.String))),
+      imports: as.Optional(is.RecordOf(is.String)),
+      scopes: as.Optional(is.RecordOf(is.RecordOf(is.String))),
     }),
   );
 }

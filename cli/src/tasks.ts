@@ -1,4 +1,4 @@
-import { ensure, is } from "@core/unknownutil";
+import { as, ensure, is } from "@core/unknownutil";
 import { colors } from "@cliffy/ansi/colors";
 import $ from "@david/dax";
 import { associateWith, mapEntries } from "@std/collections";
@@ -19,7 +19,7 @@ async function getTasks(config?: string): Promise<TaskRecord> {
   }
   const json = ensure(
     parseJsonc(await Deno.readTextFile(config)),
-    is.ObjectOf({ tasks: is.OptionalOf(is.RecordOf(is.String, is.String)) }),
+    is.ObjectOf({ tasks: as.Optional(is.RecordOf(is.String, is.String)) }),
   );
   return {
     ...tasks,

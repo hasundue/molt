@@ -1,4 +1,4 @@
-import { ensure, is } from "@core/unknownutil";
+import { as, ensure, is } from "@core/unknownutil";
 import { filterValues, mapNotNullish, maxWith } from "@std/collections";
 import * as SemVer from "@std/semver";
 import {
@@ -140,7 +140,7 @@ async function getJsrVersions(dep: DependencyState<"jsr">): Promise<string[]> {
   assertOk(res);
   const isJsrPackageMeta = is.ObjectOf({
     versions: is.RecordOf(
-      is.ObjectOf({ yanked: is.OptionalOf(is.Boolean) }),
+      is.ObjectOf({ yanked: as.Optional(is.Boolean) }),
       is.String,
     ),
   });
