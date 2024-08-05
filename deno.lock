@@ -32,6 +32,7 @@
       "jsr:@std/fmt@^0.221.0": "jsr:@std/fmt@0.221.0",
       "jsr:@std/fmt@^0.225.0": "jsr:@std/fmt@0.225.6",
       "jsr:@std/fmt@^0.225.4": "jsr:@std/fmt@0.225.6",
+      "jsr:@std/fmt@^1.0.0": "jsr:@std/fmt@1.0.0",
       "jsr:@std/fmt@~0.225.4": "jsr:@std/fmt@0.225.6",
       "jsr:@std/fs@0.221.0": "jsr:@std/fs@0.221.0",
       "jsr:@std/fs@^1.0.0": "jsr:@std/fs@1.0.0",
@@ -198,6 +199,9 @@
       },
       "@std/fmt@0.225.6": {
         "integrity": "aba6aea27f66813cecfd9484e074a9e9845782ab0685c030e453a8a70b37afc8"
+      },
+      "@std/fmt@1.0.0": {
+        "integrity": "8a95c9fdbb61559418ccbc0f536080cf43341655e1444f9d375a66886ceaaa3d"
       },
       "@std/fs@0.221.0": {
         "integrity": "028044450299de8ed5a716ade4e6d524399f035513b85913794f4e81f07da286",
@@ -513,7 +517,7 @@
       "jsr:@std/assert@^1.0.0",
       "jsr:@std/collections@^1.0.1",
       "jsr:@std/dotenv@^0.225.0",
-      "jsr:@std/fmt@^0.225.0",
+      "jsr:@std/fmt@^1.0.0",
       "jsr:@std/fs@^1.0.0",
       "jsr:@std/jsonc@^1.0.0",
       "jsr:@std/path@^1.0.0",
