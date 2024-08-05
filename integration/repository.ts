@@ -1,4 +1,4 @@
-import { ensure, is } from "@core/unknownutil";
+import { as, ensure, is } from "@core/unknownutil";
 import { type Package, stringify } from "./packages.ts";
 import * as github from "./github.ts";
 
@@ -115,7 +115,7 @@ export async function resolveCreatedDate(
 }
 
 const isJsrPackageDetails = is.ObjectOf({
-  githubRepository: is.OptionalOf(is.ObjectOf({
+  githubRepository: as.Optional(is.ObjectOf({
     owner: is.String,
     name: is.String,
   })),

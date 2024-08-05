@@ -17,7 +17,7 @@
     "@cliffy/table": "jsr:@cliffy/table@1.0.0-rc.5",
     "@conventional-commits/parser": "npm:@conventional-commits/parser@^0.4.1",
     "@core/match": "jsr:@core/match@^0.3.1",
-    "@core/unknownutil": "jsr:@core/unknownutil@^3.18.1",
+    "@core/unknownutil": "jsr:@core/unknownutil@^4.0.0",
     "@david/dax": "jsr:@david/dax@^0.41.0",
     "@deno/graph": "jsr:@deno/graph@^0.81.0",
     "@molt/core": "jsr:@molt/core@^0.19.0",

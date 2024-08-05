@@ -1,9 +1,9 @@
 import { dirname } from "@std/path";
 import { parse as parseJsonc } from "@std/jsonc";
 import { match, placeholder as _ } from "@core/match";
-import { isString } from "@core/unknownutil";
+import { is } from "@core/unknownutil";
 import { Octokit } from "@octokit/rest";
-import { is, type Package } from "./packages.ts";
+import { is as isPackage, type Package } from "./packages.ts";
 import type { Repository } from "./repository.ts";
 
 const octokit = new Octokit({
@@ -86,10 +86,10 @@ async function resolveJsrPackageRoot(
       file_sha: config.sha,
     });
     const json = match(
-      { name: _("name", isString) },
+      { name: _("name", is.String) },
       parseJsonc(atob(data.content)),
     );
-    if (json && is(`jsr:${json.name}`, pkg)) {
+    if (json && isPackage(`jsr:${json.name}`, pkg)) {
       return dirname(config.path);
     }
   }

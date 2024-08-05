@@ -10,8 +10,7 @@
       "jsr:@cliffy/table@1.0.0-rc.5": "jsr:@cliffy/table@1.0.0-rc.5",
       "jsr:@core/match@^0.3.1": "jsr:@core/match@0.3.1",
       "jsr:@core/unknownutil@3.18.0": "jsr:@core/unknownutil@3.18.0",
-      "jsr:@core/unknownutil@^3.18.0": "jsr:@core/unknownutil@3.18.1",
-      "jsr:@core/unknownutil@^3.18.1": "jsr:@core/unknownutil@3.18.1",
+      "jsr:@core/unknownutil@^4.0.0": "jsr:@core/unknownutil@4.0.1",
       "jsr:@david/dax@^0.41.0": "jsr:@david/dax@0.41.0",
       "jsr:@david/which@^0.4.1": "jsr:@david/which@0.4.1",
       "jsr:@deno/graph@^0.81.0": "jsr:@deno/graph@0.81.0",
@@ -115,8 +114,8 @@
       "@core/unknownutil@3.18.0": {
         "integrity": "bff7ab4a2f554bbade301127519523b0d3baa4273ecbed51287133ac00a48738"
       },
-      "@core/unknownutil@3.18.1": {
-        "integrity": "6aaa108b623ff971d062dd345da7ca03b97f61ae3d29c8677bff14fec11f0d76"
+      "@core/unknownutil@4.0.1": {
+        "integrity": "5e08141ea8284d064bc4ee8c70aab42825355fb1399eaeb6140936f5f763f42d"
       },
       "@david/dax@0.41.0": {
         "integrity": "9e1ecf66a0415962cc8ad3ba4e3fa93ce0f1a1cc797dd95c36fdfb6977dc7fc8",
@@ -505,7 +504,7 @@
       "jsr:@cliffy/command@1.0.0-rc.5",
       "jsr:@cliffy/table@1.0.0-rc.5",
       "jsr:@core/match@^0.3.1",
-      "jsr:@core/unknownutil@^3.18.1",
+      "jsr:@core/unknownutil@^4.0.0",
       "jsr:@david/dax@^0.41.0",
       "jsr:@deno/graph@^0.81.0",
       "jsr:@molt/core@^0.19.0",
