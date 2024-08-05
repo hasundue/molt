@@ -50,7 +50,7 @@
       "jsr:@std/path@^0.221.0": "jsr:@std/path@0.221.0",
       "jsr:@std/path@^1.0.0": "jsr:@std/path@1.0.2",
       "jsr:@std/path@^1.0.2": "jsr:@std/path@1.0.2",
-      "jsr:@std/semver@^0.224.3": "jsr:@std/semver@0.224.3",
+      "jsr:@std/semver@^1.0.0": "jsr:@std/semver@1.0.1",
       "jsr:@std/streams@0.221.0": "jsr:@std/streams@0.221.0",
       "jsr:@std/streams@^1.0.0": "jsr:@std/streams@1.0.0",
       "jsr:@std/testing@^0.225.0": "jsr:@std/testing@0.225.3",
@@ -262,8 +262,8 @@
       "@std/path@1.0.2": {
         "integrity": "a452174603f8c620bd278a380c596437a9eef50c891c64b85812f735245d9ec7"
       },
-      "@std/semver@0.224.3": {
-        "integrity": "7bb34b5ad46de2c0c73de0ca3e30081ef64b4361f66abd57c84ff1011c6a1233"
+      "@std/semver@1.0.1": {
+        "integrity": "f0c9b41b70e27e8cdfe9252b486c55a727d66ead72625e0fa1aae75f45ca15e1"
       },
       "@std/streams@0.221.0": {
         "integrity": "47f2f74634b47449277c0ee79fe878da4424b66bd8975c032e3afdca88986e61",
@@ -527,7 +527,7 @@
       "jsr:@std/fs@^1.0.0",
       "jsr:@std/jsonc@^1.0.0",
       "jsr:@std/path@^1.0.0",
-      "jsr:@std/semver@^0.224.3",
+      "jsr:@std/semver@^1.0.0",
       "jsr:@std/streams@^1.0.0",
       "jsr:@std/testing@^0.225.0",
       "npm:@conventional-commits/parser@^0.4.1",

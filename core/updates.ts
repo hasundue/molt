@@ -82,11 +82,11 @@ async function getPackageUpdate(
   const versions = await getVersions(dep);
   const semvers = mapNotNullish(versions, SemVer.tryParse);
 
-  const locked = SemVer.tryParse(dep.locked);
+  const locked = dep.locked ? SemVer.tryParse(dep.locked) : undefined;
   const range = SemVer.parseRange(dep.constraint);
 
   const constrainted = SemVer.maxSatisfying(
-    semvers.filter((it) => SemVer.greaterThan(it, locked ?? SemVer.MIN)),
+    locked ? semvers.filter((it) => SemVer.greaterThan(it, locked)) : semvers,
     range,
   );
 
