@@ -17,7 +17,7 @@
       "jsr:@luca/flag@1.0.0": "jsr:@luca/flag@1.0.0",
       "jsr:@std/assert@1.0.0-rc.2": "jsr:@std/assert@1.0.0-rc.2",
       "jsr:@std/assert@^0.221.0": "jsr:@std/assert@0.221.0",
-      "jsr:@std/assert@^1.0.0": "jsr:@std/assert@1.0.1",
+      "jsr:@std/assert@^1.0.0": "jsr:@std/assert@1.0.2",
       "jsr:@std/async@^1.0.0-rc.2": "jsr:@std/async@1.0.1",
       "jsr:@std/bytes@^0.221.0": "jsr:@std/bytes@0.221.0",
       "jsr:@std/bytes@^1.0.0-rc.3": "jsr:@std/bytes@1.0.2",
@@ -163,8 +163,8 @@
           "jsr:@std/internal@^1.0.0"
         ]
       },
-      "@std/assert@1.0.1": {
-        "integrity": "13590ef8e5854f59e4ad252fd987e83239a1bf1f16cb9c69c1d123ebb807a75b",
+      "@std/assert@1.0.2": {
+        "integrity": "ccacec332958126deaceb5c63ff8b4eaf9f5ed0eac9feccf124110435e59e49c",
         "dependencies": [
           "jsr:@std/internal@^1.0.1"
         ]
