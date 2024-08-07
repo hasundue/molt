@@ -2,6 +2,7 @@ import { Command } from "@cliffy/command";
 import $ from "@david/dax";
 import { collect } from "@molt/core";
 import type { Update } from "@molt/core/types";
+import { partition } from "@std/collections";
 
 import { printChangelog } from "./src/changelog.ts";
 import { findConfig, findLock, findSource } from "./src/files.ts";
@@ -45,16 +46,24 @@ async function version() {
   console.log(configs.version);
 }
 
-main.action(async function (options, ...source) {
+main.action(async function (options, ...args) {
+  const [jsons, modules] = partition(
+    args,
+    (it) => it.match(/\.jsonc?$/) !== null,
+  );
+  if (jsons.length > 1) {
+    $.logError("Multiple configuration files found:", jsons.join(", "));
+    Deno.exit(1);
+  }
   const config = options.config === false
     ? undefined
-    : options.config ?? await findConfig();
+    : options.config ?? jsons[0] ?? await findConfig();
 
   const lock = options.lock === false
     ? undefined
     : await findLock(options.lock);
 
-  source = source.length ? source : config ? [] : await findSource();
+  const source = modules.length ? modules : config ? [] : await findSource();
 
   if (options.dryRun) {
     const paths = [config, lock, ...source].filter((it) => it != null);
