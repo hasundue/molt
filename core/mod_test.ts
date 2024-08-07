@@ -9,6 +9,11 @@ const MOD_TS = dedent`
 import "jsr:@luca/flag@1.0.0";
 `;
 
+const MOD_TS_DUPLICATED = dedent`
+import "jsr:@luca/flag@1.0.0";
+import "jsr:@luca/flag@1.0.1";
+`;
+
 const DENO_JSON = dedent`
 {
   "imports": {
@@ -70,6 +75,39 @@ describe("core", () => {
       await Deno.readTextFile("mod.ts"),
       `import "jsr:@luca/flag@1.0.1";`,
     );
+    await update.commit();
+    assertSpyCallArg(git, 0, 1, {
+      args: [
+        "commit",
+        "-m",
+        "bump @luca/flag from 1.0.0 to 1.0.1",
+        "mod.ts",
+      ],
+      lock: undefined,
+    });
+  });
+
+  it("should handle a duplicated dependency in a module", async () => {
+    await Deno.writeTextFile("mod.ts", MOD_TS_DUPLICATED);
+    const deps = await collect({ source: ["mod.ts"] });
+    assertEquals(deps.length, 1);
+    const [dep] = deps;
+    assertEquals(dep.refs.length, 1);
+    assertEquals(dep.refs[0], "mod.ts");
+    const update = await dep.check();
+    assertExists(update);
+    assertEquals(update.dep.name, "@luca/flag");
+    assertEquals(update.constraint?.from, "1.0.0");
+    await update.write();
+    assertEquals(
+      await Deno.readTextFile("mod.ts"),
+      dedent`
+        import "jsr:@luca/flag@1.0.1";
+        import "jsr:@luca/flag@1.0.1";
+    `,
+    );
+    assertEquals(await Deno.readTextFile("deno.json"), DENO_JSON);
+    assertEquals(await Deno.readTextFile("deno.lock"), DENO_LOCK);
     await update.commit();
     assertSpyCallArg(git, 0, 1, {
       args: [

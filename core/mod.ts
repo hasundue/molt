@@ -6,6 +6,7 @@ import {
   mapNotNullish,
   mapValues,
 } from "@std/collections";
+import { parseRange, rangeIntersects } from "@std/semver";
 import { get as getBump } from "./bumps.ts";
 import * as Lock from "./locks.ts";
 import * as Ref from "./refs.ts";
@@ -182,22 +183,33 @@ class Update implements UpdateI {
     const reqs = context.reqs[dep.specifier];
     const deps = reqs.map((req) => context.states[req]);
 
-    const constrainted = distinct(deps.map((dep) => dep.constraint));
-    const locked = distinct(mapNotNullish(deps, (dep) => dep.locked));
-
-    const constraint = distinct(
+    const constraints = distinct(
       mapNotNullish(bumps, (bump) => bump.constraint),
     );
-    assert(constraint.length <= 1);
+    assert(
+      constraints.length <= 1,
+      `multiple bump targets for ${dep.specifier}`,
+    );
+    const constraint = constraints.at(0);
 
-    const lock = distinct(mapNotNullish(bumps, (bump) => bump.lock));
-    assert(lock.length <= 1);
+    const locks = distinct(mapNotNullish(bumps, (bump) => bump.lock));
+    assert(locks.length <= 1, `multiple lock targets for ${dep.specifier}`);
+    const lock = locks.at(0);
 
-    if (constraint.length) {
-      this.constraint = { from: constrainted.join(", "), to: constraint[0] };
+    const constrainted = distinct(deps.map((dep) => dep.constraint))
+      .filter((it) =>
+        !constraint || !rangeIntersects(parseRange(constraint), parseRange(it))
+      );
+    const locked = distinct(mapNotNullish(deps, (dep) => dep.locked))
+      .filter((it) =>
+        !lock || !rangeIntersects(parseRange(lock), parseRange(it))
+      );
+
+    if (constraint) {
+      this.constraint = { from: constrainted.join(", "), to: constraint };
     }
-    if (lock.length) {
-      this.lock = { from: locked.join(", "), to: lock[0] };
+    if (lock) {
+      this.lock = { from: locked.join(", "), to: lock };
     }
     this.#ctx = context;
   }
