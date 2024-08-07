@@ -73,6 +73,26 @@ describe("CLI", () => {
     );
   });
 
+  it("should handle explicitly-specified `deno.json` with `--write`", async () => {
+    const { stderr } = await molt("deno.json --write");
+    assertEquals(
+      stderr,
+      dedent`
+        Collecting dependencies
+        Fetching updates
+        Writing changes
+      `,
+    );
+  });
+
+  it("should error on multiple configuration files", async () => {
+    const { stderr } = await molt("deno.json deno.jsonc");
+    assertEquals(
+      stderr,
+      "Multiple configuration files found: deno.json, deno.jsonc",
+    );
+  });
+
   it("should commit updates with `--commit`", async () => {
     const { stderr, stdout } = await molt("--commit --prefix chore:");
     assertEquals(
