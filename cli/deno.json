@@ -1,6 +1,6 @@
 {
   "name": "@molt/cli",
-  "version": "0.19.7",
+  "version": "0.19.8",
   "exports": {
     ".": "./main.ts"
   },
