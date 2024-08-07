@@ -110,10 +110,12 @@ class Dependency implements DependencyI {
   }
 
   get refs(): string[] {
-    return this.#ctx.reqs[this.specifier]
-      .flatMap((req) => this.#ctx.refs[req])
-      .map((ref) => ref.source.path)
-      .map((it) => it instanceof URL ? it.pathname : it);
+    return distinct(
+      this.#ctx.reqs[this.specifier]
+        .flatMap((req) => this.#ctx.refs[req])
+        .map((ref) => ref.source.path)
+        .map((it) => it instanceof URL ? it.pathname : it),
+    );
   }
 
   async check(): Promise<Update | undefined> {
