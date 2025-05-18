@@ -4,11 +4,11 @@
 [![CI](https://github.com/hasundue/molt/actions/workflows/ci.yml/badge.svg)](https://github.com/hasundue/molt/actions/workflows/ci.yml)
 [![codecov](https://codecov.io/github/hasundue/molt/graph/badge.svg?token=NhpMdDRNxy)](https://codecov.io/github/hasundue/molt)
 
-![demo](https://github.com/user-attachments/assets/119c6a86-8f14-4b0b-81ee-a747bbbe4d3f)
+> [!IMPORTANT]
+> Now Deno has a built-in command to update dependencies (`deno outdated --update`) as of v2.1.\
+> It is recommended to use that instead, if you manage your dependencies in `deno.json(c)`.
 
-> [!WARNING]\
-> The project is still under active development. The API is not stable yet and
-> may change frequently.
+![demo](https://github.com/user-attachments/assets/119c6a86-8f14-4b0b-81ee-a747bbbe4d3f)
 
 Molt is a project to provide Deno modules and a CLI to manage dependencies in
 Deno projects. Inspired by [udd], but built from scratch with different design
