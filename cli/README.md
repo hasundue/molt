@@ -3,8 +3,7 @@
 The molt CLI can be installed globally with the following command, for example:
 
 ```sh
-deno install --global --allow-env --allow-read --allow-write --allow-net --allow-run=git,deno\
---name molt jsr:@molt/cli
+deno install --global -R -W -E -N --allow-run=git,deno -n molt jsr:@molt/cli
 ```
 
 Alternatively, you may prefer to run the remote script directly through
